@@ -4,7 +4,8 @@ import { demoRequests, type DemoRequest, type InsertDemoRequest } from "@shared/
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUserByProviderId(provider: string, providerId: string): Promise<User | undefined>;
+  createUser(user: Partial<User>): Promise<User>;
   createDemoRequest(demoRequest: InsertDemoRequest): Promise<DemoRequest>;
 }
 
@@ -29,9 +30,23 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async getUserByProviderId(provider: string, providerId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.provider === provider && user.providerId === providerId,
+    );
+  }
+
+  async createUser(userData: Partial<User>): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      id,
+      username: userData.username!,
+      password: userData.password || null,
+      email: userData.email!,
+      name: userData.name!,
+      provider: userData.provider || "local",
+      providerId: userData.providerId || null,
+    };
     this.users.set(id, user);
     return user;
   }

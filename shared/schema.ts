@@ -5,7 +5,11 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),  // Optional for OAuth users
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  provider: text("provider").notNull().default("local"),
+  providerId: text("provider_id"),
 });
 
 export const demoRequests = pgTable("demo_requests", {
@@ -20,6 +24,8 @@ export const demoRequests = pgTable("demo_requests", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  email: true,
+  name: true,
 });
 
 export const insertDemoRequestSchema = createInsertSchema(demoRequests).pick({
