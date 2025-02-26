@@ -5,10 +5,10 @@ export default function Nav() {
   return (
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-sm z-50 border-b">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <Link href="/">
-          <a className="text-2xl font-bold text-primary">MSM</a>
+        <Link href="/" className="text-2xl font-bold text-primary">
+          MSM
         </Link>
-        
+
         <div className="hidden md:flex items-center space-x-8">
           <a href="#features" className="text-sm font-medium hover:text-primary">Features</a>
           <a href="#pricing" className="text-sm font-medium hover:text-primary">Pricing</a>
