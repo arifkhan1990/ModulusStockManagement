@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export default function Nav() {
+  const [, setLocation] = useLocation();
+
   return (
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-sm z-50 border-b">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -16,8 +18,12 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button variant="outline">Sign In</Button>
-          <Button>Get Started</Button>
+          <Button variant="outline" onClick={() => setLocation("/auth")}>
+            Sign In
+          </Button>
+          <Button onClick={() => setLocation("/auth")}>
+            Get Started
+          </Button>
         </div>
       </div>
     </nav>
