@@ -1,0 +1,35 @@
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at a
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:337:18
+    at div
+    at div
+    at div
+    at footer
+    at Footer
+    at main
+    at Home
+    at Route (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:323:16)
+    at Switch (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:379:17)
+    at Router
+    at QueryClientProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a7486667:2805:3)
+    at App
+at a
+at a
+at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:337:18
+at div
+at div
+at div
+at footer
+at Footer
+at main
+at Home
+at Route (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:323:16)
+at Switch (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=a7486667:379:17)
+at Router
+at QueryClientProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=a7486667:2805:3)
+at App
+at t.value (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
