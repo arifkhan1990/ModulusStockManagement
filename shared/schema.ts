@@ -1,4 +1,4 @@
-import { pgTable, text, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   provider: text("provider").notNull().default("local"),
   providerId: text("provider_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const demoRequests = pgTable("demo_requests", {
@@ -19,6 +21,7 @@ export const demoRequests = pgTable("demo_requests", {
   companyName: text("company_name").notNull(),
   companySize: text("company_size").notNull(),
   message: text("message"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

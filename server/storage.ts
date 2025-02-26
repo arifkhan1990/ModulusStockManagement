@@ -1,5 +1,7 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import { demoRequests, type DemoRequest, type InsertDemoRequest } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -9,54 +11,48 @@ export interface IStorage {
   createDemoRequest(demoRequest: InsertDemoRequest): Promise<DemoRequest>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private demoRequests: Map<number, DemoRequest>;
-  private currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.demoRequests = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async getUserByProviderId(provider: string, providerId: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.provider === provider && user.providerId === providerId,
-    );
-  }
-
-  async createUser(userData: Partial<User>): Promise<User> {
-    const id = this.currentId++;
-    const user: User = {
-      id,
-      username: userData.username!,
-      password: userData.password || null,
-      email: userData.email!,
-      name: userData.name!,
-      provider: userData.provider || "local",
-      providerId: userData.providerId || null,
-    };
-    this.users.set(id, user);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
 
-  async createDemoRequest(insertDemoRequest: InsertDemoRequest): Promise<DemoRequest> {
-    const id = this.currentId++;
-    const demoRequest: DemoRequest = { ...insertDemoRequest, id };
-    this.demoRequests.set(id, demoRequest);
-    return demoRequest;
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async getUserByProviderId(provider: string, providerId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.provider, provider))
+      .where(eq(users.providerId, providerId));
+    return user;
+  }
+
+  async createUser(userData: Partial<User>): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        username: userData.username!,
+        password: userData.password || null,
+        email: userData.email!,
+        name: userData.name!,
+        provider: userData.provider || "local",
+        providerId: userData.providerId || null,
+      })
+      .returning();
+    return user;
+  }
+
+  async createDemoRequest(demoRequest: InsertDemoRequest): Promise<DemoRequest> {
+    const [result] = await db
+      .insert(demoRequests)
+      .values(demoRequest)
+      .returning();
+    return result;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
