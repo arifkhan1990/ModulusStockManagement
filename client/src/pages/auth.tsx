@@ -74,7 +74,8 @@ export default function AuthPage() {
     },
   });
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
     window.location.href = "/api/auth/google";
   };
 
@@ -90,7 +91,7 @@ export default function AuthPage() {
               type="button"
               variant="outline"
               className="w-full mb-6"
-              onClick={handleGoogleLogin}
+              onClick={() => window.location.href = "/api/auth/google"}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
