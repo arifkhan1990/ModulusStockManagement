@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,7 +64,7 @@ export function StockTransferForm() {
   const { data: locations = [] } = useQuery({
     queryKey: ["locations"],
     queryFn: async () => {
-      const response = await apiRequest("/api/locations");
+      const response = await apiRequest("GET", "/api/locations");
       return response.json();
     },
   });
