@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -35,25 +34,31 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 
+interface Product {
+  id: number;
+  name: string;
+}
+
 export default function StockMovementsPage() {
   const [productFilter, setProductFilter] = useState("");
-  
+
   const { data: movements = [] } = useQuery({
     queryKey: ["stock-movements", productFilter],
     queryFn: async () => {
-      const url = productFilter 
-        ? `/api/stock-movements?productId=${productFilter}` 
+      const url = productFilter
+        ? `/api/stock-movements?productId=${productFilter}`
         : "/api/stock-movements";
-      const response = await apiRequest(url);
+      const response = await apiRequest("GET", url);
       return response.json();
     },
   });
 
-  const { data: products = [] } = useQuery({
+  // Get products for dropdown
+  const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: async () => {
-      const response = await apiRequest("/api/products");
-      return response.json();
+      const res = await apiRequest("GET", "/api/products");
+      return res.json();
     },
   });
 
@@ -73,7 +78,7 @@ export default function StockMovementsPage() {
           <TabsTrigger value="new">New Movement</TabsTrigger>
           <TabsTrigger value="movements">Movement History</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="new" className="space-y-4">
           <Card>
             <CardHeader>
@@ -87,7 +92,7 @@ export default function StockMovementsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="movements" className="space-y-4">
           <Card>
             <CardHeader>
@@ -114,17 +119,17 @@ export default function StockMovementsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                
+
                 {productFilter && (
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     onClick={() => setProductFilter("")}
                   >
                     Clear
                   </Button>
                 )}
               </div>
-              
+
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -152,21 +157,31 @@ export default function StockMovementsPage() {
                             {format(new Date(movement.createdAt), "MMM d, yyyy")}
                           </TableCell>
                           <TableCell>
-                            <span className={`capitalize ${
-                              movement.type === 'adjustment' ? 'text-amber-600' : 'text-green-600'
-                            }`}>
+                            <span
+                              className={`capitalize ${
+                                movement.type === "adjustment"
+                                  ? "text-amber-600"
+                                  : "text-green-600"
+                              }`}
+                            >
                               {movement.type}
                             </span>
                           </TableCell>
-                          <TableCell>{movement.product?.name || movement.productId}</TableCell>
                           <TableCell>
-                            {movement.fromLocation?.name || movement.fromLocationId || 'N/A'}
+                            {movement.product?.name || movement.productId}
                           </TableCell>
                           <TableCell>
-                            {movement.toLocation?.name || movement.toLocationId || 'N/A'}
+                            {movement.fromLocation?.name ||
+                              movement.fromLocationId ||
+                              "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            {movement.toLocation?.name ||
+                              movement.toLocationId ||
+                              "N/A"}
                           </TableCell>
                           <TableCell>{movement.quantity}</TableCell>
-                          <TableCell>{movement.reference || 'N/A'}</TableCell>
+                          <TableCell>{movement.reference || "N/A"}</TableCell>
                         </TableRow>
                       ))
                     )}
