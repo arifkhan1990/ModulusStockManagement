@@ -1,0 +1,51 @@
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:52:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:33:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:52:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:33:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=5fc4f478:109:15
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-navigation-menu.js?v=5fc4f478:731:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-navigation-menu.js?v=5fc4f478:409:13
+    at a
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=5fc4f478:337:18
+    at li
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at Provider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JJS7DLG7.js?v=5fc4f478:38:15)
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-navigation-menu.js?v=5fc4f478:282:13
+    at ul
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:52:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:33:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:52:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:33:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=5fc4f478:98:15
+    at Provider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=5fc4f478:28:15)
+    at CollectionProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=5fc4f478:89:13)
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-navigation-menu.js?v=5fc4f478:722:13
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:52:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-DKHUMOWT.js?v=5fc4f478:33:11
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OKX5DAGM.js?v=5fc4f478:98:15
+    at div
+    at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=5fc4f478:41:13
+    at…
+Warning: Cannot update a component (&#x60;ForwardRef&#x60;) while rendering a different component (&#x60;ProtectedRoute&#x60;). To locate the bad setState() call inside &#x60;ProtectedRoute&#x60;, follow the stack trace as described in https://reactjs.org/link/setstate-in-render
+    at ProtectedRoute (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/src/components/protected-route.tsx:21:34)
+    at Switch (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=5fc4f478:379:17)
+    at Router
+    at AuthProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/src/hooks/use-auth.tsx:28:32)
+    at QueryClientProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=5fc4f478:2805:3)
+    at App
+at ProtectedRoute (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/src/components/protected-route.tsx:21:34)
+at Switch (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=5fc4f478:379:17)
+at Router
+at AuthProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/src/hooks/use-auth.tsx:28:32)
+at QueryClientProvider (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=5fc4f478:2805:3)
+at App
+at t.value (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://b6678cc8-868e-4781-af5c-c8647fe69291-00-1q935vidb8780.kirk.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
