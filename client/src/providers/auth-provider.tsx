@@ -1,11 +1,15 @@
-
-import React, { ReactNode } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { useToast } from '@/components/ui/use-toast';
-import { apiRequest } from '@/lib/api';
-import { User } from '@/types';
-import { AuthContext, AuthContextType, LoginData, InsertUser } from '@/contexts/AuthContext';
+import React, { ReactNode } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/api";
+import { User } from "@/types";
+import {
+  AuthContext,
+  AuthContextType,
+  LoginData,
+  InsertUser,
+} from "@/contexts/AuthContext";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -35,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Success",
         description: "Successfully logged in!",
       });
-      setLocation('/dashboard'); // Redirect to dashboard
+      setLocation("/dashboard"); // Redirect to dashboard
     },
     onError: (error: Error) => {
       toast({
@@ -77,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Success",
         description: "Logged out successfully",
       });
-      setLocation('/');
+      setLocation("/");
     },
     onError: (error: Error) => {
       toast({
