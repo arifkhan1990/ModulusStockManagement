@@ -1,13 +1,5 @@
-import { Link, useLocation } from "wouter";
-import { cn } from "@/lib/utils";
-
-import React from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
-import { LayoutGrid, Package, Warehouse, Users, TrendingUp, Settings, ArrowRightLeft, Store, LogOut } from "lucide-react";
-
+import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
   Package,
@@ -22,10 +14,81 @@ import {
   Truck,
   MoveHorizontal,
 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from 'react';
+import { useAuth } from "@/hooks/use-auth";
 
+// Define sidebar items
+const sidebarItems = [
+  {
+    href: "/dashboard",
+    icon: LayoutGrid,
+    label: "Dashboard",
+  },
+  {
+    href: "/dashboard/products",
+    icon: Package,
+    label: "Products",
+  },
+  {
+    href: "/dashboard/locations",
+    icon: Warehouse,
+    label: "Locations",
+  },
+  {
+    href: "/dashboard/stock-movements",
+    icon: ArrowRightLeft,
+    label: "Stock Movements",
+  },
+];
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [location] = useLocation();
+  const { logout } = useAuth();
+
+  return (
+    <div className="flex h-screen bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white shadow-sm">
+        <div className="flex flex-col h-full">
+          <div className="p-4 border-b">
+            <h2 className="text-xl font-semibold">Stock Manager</h2>
+          </div>
+          <nav className="p-4 flex-grow">
+            <ul className="space-y-2">
+              {sidebarItems.map((item) => (
+                <li key={item.href}>
+                  <Button
+                    variant={location === item.href ? "secondary" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = item.href}
+                  >
+                    {item.icon && <item.icon className="w-5 h-5 mr-2" />}
+                    {item.label}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="p-4 border-t mt-auto">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => logout()}
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Logout
+            </Button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="flex-1 overflow-auto p-6">
+        {children}
+      </main>
+    </div>
+  );
+}
 
 // Custom component to handle navigation items
 const NavItem = ({ href, icon: Icon, children, isActive }) => {
@@ -44,67 +107,6 @@ const NavItem = ({ href, icon: Icon, children, isActive }) => {
     </li>
   );
 };
-
-const sidebarItems = [
-  { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
-  { icon: Package, label: "Products", href: "/dashboard/products" },
-  { icon: Warehouse, label: "Inventory", href: "/dashboard/inventory" },
-  { icon: Users, label: "Suppliers", href: "/dashboard/suppliers" },
-  { icon: TrendingUp, label: "Reports", href: "/dashboard/reports" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
-  { icon: ArrowRightLeft, label: "Stock Movements", href: "/dashboard/stock-movements" },
-  { icon: Store, label: "Locations", href: "/dashboard/locations" },
-];
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
-  const { logout } = useAuth();
-
-  return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r">
-        <div className="h-16 flex items-center px-6 border-b">
-          <Link href="/" className="text-2xl font-bold text-primary">
-            MSM
-          </Link>
-        </div>
-        <nav className="p-4">
-          <ul className="space-y-2">
-            {sidebarItems.map((item) => (
-              <li key={item.href} className={`rounded-md ${location === item.href ? 'bg-primary/10' : ''}`}>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start px-3 py-2"
-                  onClick={() => window.location.href = item.href}
-                >
-                  {item.icon && <item.icon className="w-5 h-5 mr-2" />}
-                  {item.label}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="absolute bottom-4 w-64 px-4">
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={() => logout()}
-          >
-            <LogOut className="w-5 h-5 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="h-16 bg-white border-b" /> {/* Header spacer */}
-        {children}
-      </main>
-    </div>
-  );
-}
 
 
 // Placeholder components - Replace with your actual implementation
