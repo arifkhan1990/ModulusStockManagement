@@ -25,46 +25,16 @@ type AuthContextType = {
   registerMutation: UseMutationResult<User, Error, InsertUser>;
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+import { AuthContext } from '@/contexts/AuthContext';
+import { ReactNode } from 'react';
+import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query';
+import { useToast } from '@/components/ui/use-toast';
+import { useLocation } from 'wouter';
+import { apiRequest } from '@/lib/api';
+import { LoginData, InsertUser } from '@/contexts/AuthContext';
+import { User } from '@/types';
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
-
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery<User>({
-    queryKey: ["/api/user"],
-    retry: 1,
-    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
-    refetchOnWindowFocus: true, // Refetch when window gets focus
-    refetchOnMount: true, // Refetch when component mounts
-  });
-
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return res.json();
-    },
-    onSuccess: (user) => {
-      queryClient.setQueryData(["/api/user"], user);
-      toast({
-        title: "Success",
-        description: "Successfully logged in!",
-      });
-      setLocation('/dashboard'); // Redirect to dashboard
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+// This component has been moved to auth-provider.tsx, so we're only keeping the hook part here
 
   const registerMutation = useMutation({
     mutationFn: async (data: InsertUser) => {
@@ -107,24 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading,
-        error,
-        loginMutation,
-        logoutMutation,
-        registerMutation,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
+  import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
-import { User } from '@/types';
 
 export function useAuth() {
   const context = useContext(AuthContext);
