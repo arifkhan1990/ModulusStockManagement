@@ -15,6 +15,9 @@ import Navbar from "@/components/navbar"; // Assuming the Navbar component is in
 import Loading from "@/components/ui/loading";
 import { useEffect } from "react";
 
+// Import the new loading layout
+import LoadingLayout from "@/components/layouts/loading-layout";
+
 // Create a wrapper component to handle authentication
 function AuthWrapper({ component: Component, ...rest }) {
   const { user, isLoading } = useAuth();
@@ -27,11 +30,7 @@ function AuthWrapper({ component: Component, ...rest }) {
   }, [user, isLoading, setLocation]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loading />
-      </div>
-    );
+    return <LoadingLayout />;
   }
 
   if (!user) {

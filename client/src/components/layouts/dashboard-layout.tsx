@@ -17,15 +17,16 @@ import { Button } from "@/components/ui/button";
 const NavItem = ({ href, icon: Icon, children, isActive }) => {
   return (
     <li>
-      <Link href={href}>
-        <a className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+      <div 
+        onClick={() => window.location.href = href}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary cursor-pointer",
           isActive ? "bg-secondary" : "hover:bg-secondary"
-        )}>
-          <Icon className="h-5 w-5" />
-          <span>{children}</span>
-        </a>
-      </Link>
+        )}
+      >
+        <Icon className="h-5 w-5" />
+        <span>{children}</span>
+      </div>
     </li>
   );
 };
