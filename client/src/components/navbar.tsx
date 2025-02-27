@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Link } from "wouter";
 import { LogOut } from "lucide-react";
@@ -14,7 +13,7 @@ import {
 } from "./ui/navigation-menu";
 import { useAuth } from "../hooks/use-auth";
 
-export function Navbar() {
+export default function Navbar() {
   const { user, logout } = useAuth();
 
   return (
