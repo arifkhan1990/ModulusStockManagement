@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -50,13 +51,19 @@ export default function AuthPage() {
       return res.json();
     },
     onSuccess: (data) => {
+      // Update the query cache with the user data
+      queryClient.setQueryData(["/api/user"], data);
+      
       toast({
         title: "Success",
         description: isLogin
-          ? "Successfullty logged in!"
+          ? "Successfully logged in!"
           : "Account created successfully!",
       });
-      setLocation("/dashboard"); // Redirect to dashboard
+      // Force navigation after a slight delay to ensure state updates
+      setTimeout(() => {
+        setLocation("/dashboard");
+      }, 100);
     },
     onError: (error: Error) => {
       toast({
