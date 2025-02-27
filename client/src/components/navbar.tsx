@@ -27,11 +27,11 @@ export default function Navbar() {
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link href="/">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink asChild>
+                <Link href="/" className={navigationMenuTriggerStyle()}>
                   Home
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Features</NavigationMenuTrigger>
@@ -39,39 +39,35 @@ export default function Navbar() {
                 <div className="grid gap-3 p-4 w-[400px]">
                   <div className="font-medium">Stock Management</div>
                   <div className="grid grid-cols-2 gap-3">
-                    <Link href="/features/inventory">
-                      <span className="block p-3 space-y-1 rounded-md hover:bg-accent">
-                        <div className="font-medium">Inventory Tracking</div>
-                        <div className="text-sm text-muted-foreground">
-                          Real-time inventory monitoring
-                        </div>
-                      </span>
+                    <Link href="/features/inventory" className="block p-3 space-y-1 rounded-md hover:bg-accent">
+                      <div className="font-medium">Inventory Tracking</div>
+                      <div className="text-sm text-muted-foreground">
+                        Real-time inventory monitoring
+                      </div>
                     </Link>
-                    <Link href="/features/analytics">
-                      <span className="block p-3 space-y-1 rounded-md hover:bg-accent">
-                        <div className="font-medium">Analytics</div>
-                        <div className="text-sm text-muted-foreground">
-                          Advanced reporting and insights
-                        </div>
-                      </span>
+                    <Link href="/features/analytics" className="block p-3 space-y-1 rounded-md hover:bg-accent">
+                      <div className="font-medium">Analytics</div>
+                      <div className="text-sm text-muted-foreground">
+                        Advanced reporting and insights
+                      </div>
                     </Link>
                   </div>
                 </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/pricing">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink asChild>
+                <Link href="/pricing" className={navigationMenuTriggerStyle()}>
                   Pricing
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/contact">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink asChild>
+                <Link href="/contact" className={navigationMenuTriggerStyle()}>
                   Contact
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>

@@ -111,9 +111,9 @@ export default function StockMovementsPage() {
                     <SelectValue placeholder="Filter by product" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Products</SelectItem>
+                    <SelectItem key="all" value="all">All Products</SelectItem>
                     {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id.toString()}>
+                      <SelectItem key={product.id} value={String(product.id)}>
                         {product.name}
                       </SelectItem>
                     ))}
