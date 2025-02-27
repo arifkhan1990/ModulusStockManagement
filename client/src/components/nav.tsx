@@ -18,10 +18,21 @@ export default function Nav() {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => setLocation("/auth")}>
+          <Button 
+            variant="outline" 
+            onClick={(e) => {
+              e.preventDefault();
+              setLocation("/auth");
+            }}
+          >
             Sign In
           </Button>
-          <Button onClick={() => setLocation("/auth")}>
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              setLocation("/auth");
+            }}
+          >
             Get Started
           </Button>
         </div>

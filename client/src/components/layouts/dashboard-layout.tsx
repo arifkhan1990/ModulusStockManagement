@@ -8,10 +8,16 @@ import {
   TrendingUp,
   Settings,
   LogOut,
-  ArrowRightLeft
+  ArrowRightLeft,
+  BarChart3,
+  Store,
+  Truck,
+  MoveHorizontal,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+
 
 // Custom component to handle navigation items
 const NavItem = ({ href, icon: Icon, children, isActive }) => {
@@ -39,6 +45,7 @@ const sidebarItems = [
   { icon: TrendingUp, label: "Reports", href: "/dashboard/reports" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
   { icon: ArrowRightLeft, label: "Stock Movements", href: "/dashboard/stock-movements" },
+  { icon: Store, label: "Locations", href: "/dashboard/locations" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -56,26 +63,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <nav className="p-4">
           <ul className="space-y-2">
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <li key={item.href}>
-                  <Link href={item.href}>
-                    <a
-                      className={cn(
-                        "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
-                        location === item.href
-                          ? "bg-primary/10 text-primary"
-                          : "hover:bg-gray-100"
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
-                    </a>
-                  </Link>
-                </li>
-              );
-            })}
+            {sidebarItems.map((item) => (
+              <NavItem key={item.href} href={item.href} icon={item.icon} isActive={location === item.href}>
+                {item.label}
+              </NavItem>
+            ))}
           </ul>
         </nav>
         <div className="absolute bottom-4 w-64 px-4">
@@ -98,3 +90,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+
+
+// Placeholder components - Replace with your actual implementation
+const Dashboard = () => <div>Dashboard Content</div>;
+const Products = () => <div>Products Content</div>;
+const Inventory = () => <div>Inventory Content</div>;
+const Suppliers = () => <div>Suppliers Content</div>;
+const Reports = () => <div>Reports Content</div>;
+const Settings = () => <div>Settings Content</div>;
+const StockMovements = () => <div>Stock Movements Content</div>;
+const Locations = () => <div>Locations Content</div>;
+
+
+// Example Route Configuration (adapt to your routing library)
+const routes = [
+  { path: '/dashboard', component: Dashboard },
+  { path: '/dashboard/products', component: Products },
+  { path: '/dashboard/inventory', component: Inventory },
+  { path: '/dashboard/suppliers', component: Suppliers },
+  { path: '/dashboard/reports', component: Reports },
+  { path: '/dashboard/settings', component: Settings },
+  { path: '/dashboard/stock-movements', component: StockMovements },
+  { path: '/dashboard/locations', component: Locations },
+];
+
+
+//Example App.tsx (Adapt this to your actual routing setup)
+function App() {
+    const [location] = useLocation();
+
+  const renderRoute = () => {
+    const currentRoute = routes.find(route => location.startsWith(route.path));
+    return currentRoute ? <currentRoute.component /> : <div>404 Not Found</div>;
+  };
+    return (
+    <DashboardLayout>
+      {renderRoute()}
+    </DashboardLayout>
+  );
+}
+
+export default App;

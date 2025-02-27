@@ -8,17 +8,18 @@ import Auth from "@/pages/auth";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProductsPage from "@/pages/dashboard/products";
 import StockMovementsPage from "@/pages/dashboard/stock-movements";
+import LocationsPage from "@/pages/dashboard/locations"; // Added LocationsPage import
+import Dashboard from "@/pages/dashboard"; // Added Dashboard import
+// Added imports for new pages (assuming these exist or will be created)
+import Products from "@/pages/products";
+import Stock from "@/pages/stock";
 
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
-// Added Navbar component import
-import Navbar from "@/components/navbar"; // Assuming the Navbar component is in this location
+import Navbar from "@/components/navbar";
 import Loading from "@/components/ui/loading";
 import { useEffect } from "react";
-
-// Import the new loading layout
 import LoadingLayout from "@/components/layouts/loading-layout";
 
-// Create a wrapper component to handle authentication
 function AuthWrapper({ component: Component, ...rest }) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -34,7 +35,7 @@ function AuthWrapper({ component: Component, ...rest }) {
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   return <Component {...rest} />;
@@ -45,17 +46,34 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth" component={Auth} />
-      <Route path="/dashboard">
+      <Route path="/dashboard" exact>
         {(params) => (
-          <AuthWrapper component={DashboardLayout} params={params} />
+          <AuthWrapper component={Dashboard} params={params} />
         )}
       </Route>
       <Route path="/dashboard/products">
-        {(params) => <AuthWrapper component={ProductsPage} params={params} />}
+        {(params) => (
+          <AuthWrapper component={ProductsPage} params={params} />
+        )}
       </Route>
       <Route path="/dashboard/stock-movements">
         {(params) => (
           <AuthWrapper component={StockMovementsPage} params={params} />
+        )}
+      </Route>
+      <Route path="/dashboard/locations"> {/* Added route for LocationsPage */}
+        {(params) => (
+          <AuthWrapper component={LocationsPage} params={params} />
+        )}
+      </Route>
+      <Route path="/products"> {/* Added route for Products */}
+        {(params) => (
+          <AuthWrapper component={Products} params={params} />
+        )}
+      </Route>
+      <Route path="/stock"> {/* Added route for Stock */}
+        {(params) => (
+          <AuthWrapper component={Stock} params={params} />
         )}
       </Route>
       <Route component={NotFound} />
@@ -67,7 +85,6 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* Added Navbar component */}
         <Navbar />
         <Router />
         <Toaster />
