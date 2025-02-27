@@ -1,13 +1,15 @@
+
 import React, { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Route } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import Loading from "@/components/ui/loading";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  path: string;
+  component: React.ComponentType<any>;
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ path, component: Component }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -25,5 +27,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return null; // Will redirect in the useEffect
   }
 
-  return <>{children}</>;
+  return <Route path={path} component={Component} />;
 }
