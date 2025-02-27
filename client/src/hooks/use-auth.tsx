@@ -9,6 +9,7 @@ import {
 import { type User, type InsertUser } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from 'next/router'; // Assuming Next.js router, adjust as needed
 
 type LoginData = {
   username: string;
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter(); // Add router here
 
   const {
     data: user,
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Success",
         description: "Successfully logged in!",
       });
+      router.push('/dashboard'); // Redirect to dashboard
     },
     onError: (error: Error) => {
       toast({

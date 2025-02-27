@@ -45,12 +45,12 @@ export default function AuthPage() {
       const res = await apiRequest("POST", endpoint, data);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Success",
         description: isLogin ? "Successfully logged in!" : "Account created successfully!",
       });
-      setLocation("/");
+      setLocation("/dashboard"); // Redirect to dashboard
     },
     onError: (error: Error) => {
       toast({
