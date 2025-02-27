@@ -1,16 +1,13 @@
-import { createContext, ReactNode, useContext } from "react";
+// use-auth.tsx
+import { createContext, useContext } from "react";
 import {
-  useQuery,
   useMutation,
   UseMutationResult,
-  QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
 import { type User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
-
 import { AuthContext } from "@/contexts/AuthContext";
 
 type LoginData = {
@@ -29,7 +26,8 @@ type AuthContextType = {
 
 import { InsertUser } from "@/contexts/AuthContext";
 
-// This component has been moved to auth-provider.tsx, so we're only keeping the hook part here
+const queryClient = useQueryClient();
+const toast = useToast();
 
 const registerMutation = useMutation({
   mutationFn: async (data: InsertUser) => {
@@ -94,4 +92,59 @@ export function useAuth() {
   };
 }
 
-export { AuthProvider } from "@/providers/auth-provider";
+
+// auth-provider.tsx
+import React, { createContext, ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+import { AuthContext } from "@/contexts/AuthContext";
+import { useLoginMutation, useLogoutMutation, useRegisterMutation } from "@/hooks/use-auth";
+
+
+type AuthContextType = {
+  user: any | null; // Replace 'any' with the actual User type
+  isLoading: boolean;
+  error: Error | null;
+  login: any; //Replace 'any' with the actual type
+  logout: any; //Replace 'any' with the actual type
+  register: any; //Replace 'any' with the actual type
+  isLoggingIn: boolean;
+  isLoggingOut: boolean;
+  isRegistering: boolean;
+};
+
+const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  const [location, setLocation] = useLocation();
+  const { data: user, isLoading, error } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: () => apiRequest("GET", "/api/user").then((res) => res.json()),
+    enabled: true, // Always enabled
+  });
+
+  const loginMutation = useLoginMutation();
+  const logoutMutation = useLogoutMutation();
+  const registerMutation = useRegisterMutation();
+
+  const contextValue: AuthContextType = {
+    user,
+    isLoading,
+    error,
+    login: loginMutation.mutate,
+    logout: logoutMutation.mutate,
+    register: registerMutation.mutate,
+    isLoggingIn: loginMutation.isPending,
+    isLoggingOut: logoutMutation.isPending,
+    isRegistering: registerMutation.isPending,
+  };
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export { AuthProvider };
