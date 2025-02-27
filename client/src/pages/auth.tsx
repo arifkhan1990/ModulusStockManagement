@@ -27,9 +27,13 @@ export default function AuthPage() {
   const form = useForm<InsertUser>({
     resolver: zodResolver(
       insertUserSchema.extend({
-        name: isLogin ? insertUserSchema.shape.name.optional() : insertUserSchema.shape.name,
-        email: isLogin ? insertUserSchema.shape.email.optional() : insertUserSchema.shape.email,
-      })
+        name: isLogin
+          ? insertUserSchema.shape.name.optional()
+          : insertUserSchema.shape.name,
+        email: isLogin
+          ? insertUserSchema.shape.email.optional()
+          : insertUserSchema.shape.email,
+      }),
     ),
     defaultValues: {
       username: "",
@@ -48,7 +52,9 @@ export default function AuthPage() {
     onSuccess: (data) => {
       toast({
         title: "Success",
-        description: isLogin ? "Successfully logged in!" : "Account created successfully!",
+        description: isLogin
+          ? "Successfullty logged in!"
+          : "Account created successfully!",
       });
       setLocation("/dashboard"); // Redirect to dashboard
     },
@@ -104,7 +110,9 @@ export default function AuthPage() {
 
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((data) => authMutation.mutate(data))}
+                onSubmit={form.handleSubmit((data) =>
+                  authMutation.mutate(data),
+                )}
                 className="space-y-6"
               >
                 <FormField
@@ -144,7 +152,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input type="email" {...field} value={field.value || ""} />
+                            <Input
+                              type="email"
+                              {...field}
+                              value={field.value || ""}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -160,7 +172,11 @@ export default function AuthPage() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} value={field.value || ""} />
+                        <Input
+                          type="password"
+                          {...field}
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -175,8 +191,8 @@ export default function AuthPage() {
                   {authMutation.isPending
                     ? "Processing..."
                     : isLogin
-                    ? "Sign In"
-                    : "Create Account"}
+                      ? "Sign In"
+                      : "Create Account"}
                 </Button>
 
                 <Button
