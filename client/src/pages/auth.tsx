@@ -91,7 +91,10 @@ export default function AuthPage() {
               type="button"
               variant="outline"
               className="w-full mb-6"
-              onClick={() => window.location.href = "/api/auth/google"}
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = "/api/auth/google";
+              }}
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -118,9 +121,10 @@ export default function AuthPage() {
 
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((data) =>
-                  authMutation.mutate(data),
-                )}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  form.handleSubmit((data) => authMutation.mutate(data))(e);
+                }}
                 className="space-y-6"
               >
                 <FormField
