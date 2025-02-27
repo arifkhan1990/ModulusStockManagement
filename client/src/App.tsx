@@ -9,6 +9,9 @@ import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProductsPage from "@/pages/dashboard/products";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
+// Added Navbar component import
+import Navbar from "@/components/navbar"; // Assuming the Navbar component is in this location
+
 
 function Router() {
   return (
@@ -26,6 +29,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider queryClient={queryClient}>
+        {/* Added Navbar component */}
+        <Navbar />
         <Router />
         <Toaster />
       </AuthProvider>
