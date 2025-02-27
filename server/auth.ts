@@ -94,7 +94,11 @@ export function setupAuth(app: Express) {
     );
   }
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    // Use _id which is the MongoDB document ID
+    done(null, user._id ? user._id.toString() : user.id);
+  });
+  
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
