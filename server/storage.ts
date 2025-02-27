@@ -206,7 +206,17 @@ export class DatabaseStorage implements IStorage {
 
   async getStockMovements(productId: number): Promise<StockMovement[]> {
     return await db
-      .select()
+      .select({
+        id: stockMovements.id,
+        productId: stockMovements.productId,
+        fromLocationId: stockMovements.fromLocationId,
+        toLocationId: stockMovements.toLocationId,
+        quantity: stockMovements.quantity,
+        type: stockMovements.type,
+        reference: stockMovements.reference,
+        createdBy: stockMovements.createdBy,
+        createdAt: stockMovements.createdAt
+      })
       .from(stockMovements)
       .where(eq(stockMovements.productId, productId))
       .orderBy(desc(stockMovements.createdAt));
@@ -214,7 +224,17 @@ export class DatabaseStorage implements IStorage {
   
   async getAllStockMovements(): Promise<StockMovement[]> {
     return await db
-      .select()
+      .select({
+        id: stockMovements.id,
+        productId: stockMovements.productId,
+        fromLocationId: stockMovements.fromLocationId,
+        toLocationId: stockMovements.toLocationId,
+        quantity: stockMovements.quantity,
+        type: stockMovements.type,
+        reference: stockMovements.reference,
+        createdBy: stockMovements.createdBy,
+        createdAt: stockMovements.createdAt
+      })
       .from(stockMovements)
       .orderBy(desc(stockMovements.createdAt));
   }
