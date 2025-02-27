@@ -45,7 +45,7 @@ export default function StockMovementsPage() {
   const { data: movements = [] } = useQuery({
     queryKey: ["stock-movements", productFilter],
     queryFn: async () => {
-      const url = productFilter
+      const url = productFilter && productFilter !== 'all'
         ? `/api/stock-movements?productId=${productFilter}`
         : "/api/stock-movements";
       const response = await apiRequest("GET", url);
@@ -111,7 +111,7 @@ export default function StockMovementsPage() {
                     <SelectValue placeholder="Filter by product" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Products</SelectItem>
+                    <SelectItem value="all">All Products</SelectItem>
                     {products.map((product) => (
                       <SelectItem key={product.id} value={product.id.toString()}>
                         {product.name}
@@ -120,10 +120,10 @@ export default function StockMovementsPage() {
                   </SelectContent>
                 </Select>
 
-                {productFilter && (
+                {productFilter && productFilter !== 'all' && (
                   <Button
                     variant="ghost"
-                    onClick={() => setProductFilter("")}
+                    onClick={() => setProductFilter("all")}
                   >
                     Clear
                   </Button>
