@@ -14,18 +14,22 @@ export default function ProtectedRoute({ path, component: Component }: Protected
   const [, setLocation] = useLocation();
 
   useEffect(() => {
+    // Only redirect if not loading and no user is found
     if (!isLoading && !user) {
       setLocation("/auth");
     }
   }, [user, isLoading, setLocation]);
 
+  // Show loading while checking authentication
   if (isLoading) {
-    return <Loading />;
+    return <div className="flex items-center justify-center h-screen"><Loading /></div>;
   }
 
+  // Don't render anything if not authenticated (will redirect in useEffect)
   if (!user) {
-    return null; // Will redirect in the useEffect
+    return null;
   }
 
+  // User is authenticated, render the component
   return <Route path={path} component={Component} />;
 }

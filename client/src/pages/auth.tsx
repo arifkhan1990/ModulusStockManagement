@@ -194,6 +194,11 @@ export default function AuthPage() {
                       ? "Sign In"
                       : "Create Account"}
                 </Button>
+                {authMutation.isError && (
+                  <p className="text-sm text-red-500 mt-2">
+                    {authMutation.error?.message || "Authentication failed. Please try again."}
+                  </p>
+                )}
 
                 <Button
                   type="button"

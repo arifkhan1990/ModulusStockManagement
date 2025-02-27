@@ -38,7 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
   } = useQuery<User>({
     queryKey: ["/api/user"],
-    retry: false,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // Keep data fresh for 5 minutes
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchOnMount: true, // Refetch when component mounts
   });
 
   const loginMutation = useMutation({
@@ -125,5 +128,18 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+  
+  // Add simplified utility methods
+  const { user, isLoading, loginMutation, logoutMutation, registerMutation } = context;
+  
+  return {
+    ...context,
+    isAuthenticated: !!user,
+    login: loginMutation.mutate,
+    logout: () => logoutMutation.mutate(),
+    register: registerMutation.mutate,
+    isLoggingIn: loginMutation.isPending,
+    isLoggingOut: logoutMutation.isPending,
+    isRegistering: registerMutation.isPending,
+  };
 }
