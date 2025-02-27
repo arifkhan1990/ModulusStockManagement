@@ -11,14 +11,7 @@ import {
   insertStockMovementSchema,
 } from "@shared/schema";
 import { ZodError } from "zod";
-
-// Middleware to ensure user is authenticated
-function requireAuth(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  next();
-}
+import { requireAuth } from "./middleware/auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
