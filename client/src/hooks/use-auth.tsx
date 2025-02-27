@@ -123,7 +123,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
 import { User } from '@/types';
 
