@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { Link } from "wouter";
 import { LogOut } from "lucide-react";
@@ -20,7 +21,7 @@ export default function Navbar() {
     <div className="border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
         <Link href="/">
-          <a className="text-2xl font-bold text-primary mr-6">MSM</a>
+          <span className="text-2xl font-bold text-primary mr-6">MSM</span>
         </Link>
 
         <NavigationMenu className="hidden md:flex">
@@ -39,20 +40,20 @@ export default function Navbar() {
                   <div className="font-medium">Stock Management</div>
                   <div className="grid grid-cols-2 gap-3">
                     <Link href="/features/inventory">
-                      <a className="block p-3 space-y-1 rounded-md hover:bg-accent">
+                      <span className="block p-3 space-y-1 rounded-md hover:bg-accent">
                         <div className="font-medium">Inventory Tracking</div>
                         <div className="text-sm text-muted-foreground">
                           Real-time inventory monitoring
                         </div>
-                      </a>
+                      </span>
                     </Link>
                     <Link href="/features/analytics">
-                      <a className="block p-3 space-y-1 rounded-md hover:bg-accent">
+                      <span className="block p-3 space-y-1 rounded-md hover:bg-accent">
                         <div className="font-medium">Analytics</div>
                         <div className="text-sm text-muted-foreground">
                           Advanced reporting and insights
                         </div>
-                      </a>
+                      </span>
                     </Link>
                   </div>
                 </div>
