@@ -8,13 +8,13 @@ import Auth from "@/pages/auth";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProductsPage from "@/pages/dashboard/products";
 import StockMovementsPage from "@/pages/dashboard/stock-movements";
-import LocationsPage from "@/pages/dashboard/locations"; // Added LocationsPage import
-import Dashboard from "@/pages/dashboard"; // Added Dashboard import
-// Added imports for new pages (assuming these exist or will be created)
+import LocationsPage from "@/pages/dashboard/locations";
+import Dashboard from "@/pages/dashboard";
 import Products from "@/pages/products";
 import Stock from "@/pages/stock";
 
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { AuthProvider } from "@/providers/auth-provider"; // Fixed import
+import { useAuth } from "@/hooks/use-auth"; // Fixed import
 import Navbar from "@/components/navbar";
 import Loading from "@/components/ui/loading";
 import { useEffect } from "react";
@@ -47,34 +47,24 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/auth" component={Auth} />
       <Route path="/dashboard" exact>
-        {(params) => (
-          <AuthWrapper component={Dashboard} params={params} />
-        )}
+        {(params) => <AuthWrapper component={Dashboard} params={params} />}
       </Route>
       <Route path="/dashboard/products">
-        {(params) => (
-          <AuthWrapper component={ProductsPage} params={params} />
-        )}
+        {(params) => <AuthWrapper component={ProductsPage} params={params} />}
       </Route>
       <Route path="/dashboard/stock-movements">
         {(params) => (
           <AuthWrapper component={StockMovementsPage} params={params} />
         )}
       </Route>
-      <Route path="/dashboard/locations"> {/* Added route for LocationsPage */}
-        {(params) => (
-          <AuthWrapper component={LocationsPage} params={params} />
-        )}
+      <Route path="/dashboard/locations">
+        {(params) => <AuthWrapper component={LocationsPage} params={params} />}
       </Route>
-      <Route path="/products"> {/* Added route for Products */}
-        {(params) => (
-          <AuthWrapper component={Products} params={params} />
-        )}
+      <Route path="/products">
+        {(params) => <AuthWrapper component={Products} params={params} />}
       </Route>
-      <Route path="/stock"> {/* Added route for Stock */}
-        {(params) => (
-          <AuthWrapper component={Stock} params={params} />
-        )}
+      <Route path="/stock">
+        {(params) => <AuthWrapper component={Stock} params={params} />}
       </Route>
       <Route component={NotFound} />
     </Switch>
