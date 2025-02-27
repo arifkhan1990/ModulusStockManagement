@@ -7,6 +7,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import config from "./config";
 
 declare global {
   namespace Express {
@@ -31,11 +32,11 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: randomBytes(32).toString("hex"),
+    secret: config.session.secret,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: config.session.secureCookies,
       sameSite: "lax",
     },
   };
@@ -62,8 +63,8 @@ export function setupAuth(app: Express) {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        clientID: config.auth.googleClientId!,
+        clientSecret: config.auth.googleClientSecret!,
         callbackURL: "/api/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
