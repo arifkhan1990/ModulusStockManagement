@@ -1,5 +1,9 @@
 
 import { randomBytes } from 'crypto';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Environment type
 type Environment = 'development' | 'production' | 'test';
