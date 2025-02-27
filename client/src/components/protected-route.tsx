@@ -5,14 +5,9 @@ import Loading from "@/components/ui/loading";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  path: string;
 }
 
-export default function ProtectedRoute({
-  children,
-  path,
-  component;,
-}: ProtectedRouteProps) {
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
