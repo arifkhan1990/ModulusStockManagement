@@ -123,15 +123,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+import { useContext } from 'react';
+import { AuthContext, AuthContextType } from '@/contexts/AuthContext';
+import { User } from '@/types';
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
+
   // Add simplified utility methods
   const { user, isLoading, loginMutation, logoutMutation, registerMutation } = context;
-  
+
   return {
     ...context,
     isAuthenticated: !!user,
@@ -143,3 +147,5 @@ export function useAuth() {
     isRegistering: registerMutation.isPending,
   };
 }
+
+export { AuthProvider } from '@/providers/auth-provider';
