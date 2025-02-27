@@ -211,6 +211,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(stockMovements.productId, productId))
       .orderBy(desc(stockMovements.createdAt));
   }
+  
+  async getAllStockMovements(): Promise<StockMovement[]> {
+    return await db
+      .select()
+      .from(stockMovements)
+      .orderBy(desc(stockMovements.createdAt));
+  }
+  
+  async createInventory(inventoryData: InsertInventory): Promise<Inventory> {
+    const [inv] = await db
+      .insert(inventory)
+      .values({
+        ...inventoryData,
+        lastUpdated: new Date()
+      })
+      .returning();
+    return inv;
+  }
 }
 
 export const storage = new DatabaseStorage();

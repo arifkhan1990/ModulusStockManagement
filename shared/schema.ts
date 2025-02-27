@@ -79,6 +79,7 @@ export const stockMovements = pgTable("stock_movements", {
   quantity: integer("quantity").notNull(),
   type: text("type").notNull(), // 'transfer', 'receipt', 'sale', 'adjustment'
   reference: text("reference"),
+  reason: text("reason"), // For adjustment: 'damage', 'return', 'correction', 'other'
   createdBy: integer("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -137,6 +138,7 @@ export const insertStockMovementSchema = createInsertSchema(stockMovements).pick
   quantity: true,
   type: true,
   reference: true,
+  reason: true,
   createdBy: true,
 });
 

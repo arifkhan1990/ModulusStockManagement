@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Settings,
   LogOut,
+  ArrowRightLeft
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ const sidebarItems = [
   { icon: Users, label: "Suppliers", href: "/dashboard/suppliers" },
   { icon: TrendingUp, label: "Reports", href: "/dashboard/reports" },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: ArrowRightLeft, label: "Stock Movements", href: "/dashboard/stock-movements" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

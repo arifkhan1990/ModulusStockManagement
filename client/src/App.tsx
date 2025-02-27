@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Auth from "@/pages/auth";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import ProductsPage from "@/pages/dashboard/products";
+import StockMovementsPage from "@/pages/dashboard/stock-movements";
 import { ProtectedRoute } from "@/components/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 // Added Navbar component import
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/auth" component={Auth} />
       <ProtectedRoute path="/dashboard" component={DashboardLayout} />
       <ProtectedRoute path="/dashboard/products" component={ProductsPage} />
+      <ProtectedRoute path="/dashboard/stock-movements" component={StockMovementsPage} />
       <Route component={NotFound} />
     </Switch>
   );
