@@ -13,6 +13,23 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 
+// Custom component to handle navigation items
+const NavItem = ({ href, icon: Icon, children, isActive }) => {
+  return (
+    <li>
+      <Link href={href}>
+        <a className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
+          isActive ? "bg-secondary" : "hover:bg-secondary"
+        )}>
+          <Icon className="h-5 w-5" />
+          <span>{children}</span>
+        </a>
+      </Link>
+    </li>
+  );
+};
+
 const sidebarItems = [
   { icon: LayoutGrid, label: "Dashboard", href: "/dashboard" },
   { icon: Package, label: "Products", href: "/dashboard/products" },
