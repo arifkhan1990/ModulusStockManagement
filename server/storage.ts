@@ -1,254 +1,335 @@
-import { 
-  users, type User, type InsertUser,
-  demoRequests, type DemoRequest, type InsertDemoRequest,
-  locations, type Location, type InsertLocation,
-  suppliers, type Supplier, type InsertSupplier,
-  products, type Product, type InsertProduct,
-  inventory, type Inventory, type InsertInventory,
-  stockMovements, type StockMovement, type InsertStockMovement,
-} from "@shared/schema";
+
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import * as schema from "@shared/schema";
+import mongoose from "mongoose";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
 
-export interface IStorage {
-  // User management
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByProviderId(provider: string, providerId: string): Promise<User | undefined>;
-  createUser(user: Partial<User>): Promise<User>;
+const scryptAsync = promisify(scrypt);
 
-  // Demo requests
-  createDemoRequest(demoRequest: InsertDemoRequest): Promise<DemoRequest>;
-
-  // Location management
-  getLocation(id: number): Promise<Location | undefined>;
-  getLocations(): Promise<Location[]>;
-  createLocation(location: InsertLocation): Promise<Location>;
-  updateLocation(id: number, location: Partial<Location>): Promise<Location>;
-
-  // Supplier management
-  getSupplier(id: number): Promise<Supplier | undefined>;
-  getSuppliers(): Promise<Supplier[]>;
-  createSupplier(supplier: InsertSupplier): Promise<Supplier>;
-  updateSupplier(id: number, supplier: Partial<Supplier>): Promise<Supplier>;
-
-  // Product management
-  getProduct(id: number): Promise<Product | undefined>;
-  getProducts(): Promise<Product[]>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, product: Partial<Product>): Promise<Product>;
-
-  // Inventory management
-  getInventory(productId: number, locationId: number): Promise<Inventory | undefined>;
-  getInventoryByLocation(locationId: number): Promise<Inventory[]>;
-  updateInventory(id: number, inventory: Partial<Inventory>): Promise<Inventory>;
-
-  // Stock movement
-  createStockMovement(movement: InsertStockMovement): Promise<StockMovement>;
-  getStockMovements(productId: number): Promise<StockMovement[]>;
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
 }
 
-export class DatabaseStorage implements IStorage {
-  // Existing user methods
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+class Storage {
+  // User methods
+  async createUser(userData: Partial<schema.InsertUser> & { password?: string }) {
+    try {
+      const user = new db.models.User(userData);
+      await user.save();
+      return user.toObject();
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw error;
+    }
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+  async getUser(id: string) {
+    try {
+      const user = await db.models.User.findById(id);
+      return user ? user.toObject() : null;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      throw error;
+    }
   }
 
-  async getUserByProviderId(provider: string, providerId: string): Promise<User | undefined> {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.provider, provider))
-      .where(eq(users.providerId, providerId));
-    return user;
+  async getUserByUsername(username: string) {
+    try {
+      const user = await db.models.User.findOne({ username });
+      return user ? user.toObject() : null;
+    } catch (error) {
+      console.error("Error getting user by username:", error);
+      throw error;
+    }
   }
 
-  async createUser(userData: Partial<User>): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values({
-        username: userData.username!,
-        password: userData.password || null,
-        email: userData.email!,
-        name: userData.name!,
-        provider: userData.provider || "local",
-        providerId: userData.providerId || null,
-      })
-      .returning();
-    return user;
+  async getUserByProviderId(provider: string, providerId: string) {
+    try {
+      const user = await db.models.User.findOne({ provider, providerId });
+      return user ? user.toObject() : null;
+    } catch (error) {
+      console.error("Error getting user by provider ID:", error);
+      throw error;
+    }
   }
 
-  // Demo request method
-  async createDemoRequest(demoRequest: InsertDemoRequest): Promise<DemoRequest> {
-    const [result] = await db
-      .insert(demoRequests)
-      .values(demoRequest)
-      .returning();
-    return result;
+  // Demo Request methods
+  async createDemoRequest(data: schema.InsertDemoRequest) {
+    try {
+      const demoRequest = new db.models.DemoRequest(data);
+      await demoRequest.save();
+      return demoRequest.toObject();
+    } catch (error) {
+      console.error("Error creating demo request:", error);
+      throw error;
+    }
   }
 
   // Location methods
-  async getLocation(id: number): Promise<Location | undefined> {
-    const [location] = await db.select().from(locations).where(eq(locations.id, id));
-    return location;
+  async createLocation(data: schema.InsertLocation) {
+    try {
+      const location = new db.models.Location(data);
+      await location.save();
+      return location.toObject();
+    } catch (error) {
+      console.error("Error creating location:", error);
+      throw error;
+    }
   }
 
-  async getLocations(): Promise<Location[]> {
-    return await db.select().from(locations).where(eq(locations.isActive, true));
+  async getLocations() {
+    try {
+      const locations = await db.models.Location.find({ isActive: true });
+      return locations.map(location => location.toObject());
+    } catch (error) {
+      console.error("Error getting locations:", error);
+      throw error;
+    }
   }
 
-  async createLocation(locationData: InsertLocation): Promise<Location> {
-    const [location] = await db.insert(locations).values(locationData).returning();
-    return location;
+  async getLocation(id: string) {
+    try {
+      const location = await db.models.Location.findById(id);
+      return location ? location.toObject() : null;
+    } catch (error) {
+      console.error("Error getting location:", error);
+      throw error;
+    }
   }
 
-  async updateLocation(id: number, locationData: Partial<Location>): Promise<Location> {
-    const [location] = await db
-      .update(locations)
-      .set({ ...locationData, updatedAt: new Date() })
-      .where(eq(locations.id, id))
-      .returning();
-    return location;
+  async updateLocation(id: string, data: Partial<schema.InsertLocation>) {
+    try {
+      const location = await db.models.Location.findByIdAndUpdate(
+        id,
+        { ...data, updatedAt: new Date() },
+        { new: true }
+      );
+      return location ? location.toObject() : null;
+    } catch (error) {
+      console.error("Error updating location:", error);
+      throw error;
+    }
+  }
+
+  async deleteLocation(id: string) {
+    try {
+      const location = await db.models.Location.findByIdAndUpdate(
+        id,
+        { isActive: false, updatedAt: new Date() },
+        { new: true }
+      );
+      return location ? location.toObject() : null;
+    } catch (error) {
+      console.error("Error deleting location:", error);
+      throw error;
+    }
   }
 
   // Supplier methods
-  async getSupplier(id: number): Promise<Supplier | undefined> {
-    const [supplier] = await db.select().from(suppliers).where(eq(suppliers.id, id));
-    return supplier;
+  async createSupplier(data: schema.InsertSupplier) {
+    try {
+      const supplier = new db.models.Supplier(data);
+      await supplier.save();
+      return supplier.toObject();
+    } catch (error) {
+      console.error("Error creating supplier:", error);
+      throw error;
+    }
   }
 
-  async getSuppliers(): Promise<Supplier[]> {
-    return await db.select().from(suppliers).where(eq(suppliers.isActive, true));
+  async getSuppliers() {
+    try {
+      const suppliers = await db.models.Supplier.find({ isActive: true });
+      return suppliers.map(supplier => supplier.toObject());
+    } catch (error) {
+      console.error("Error getting suppliers:", error);
+      throw error;
+    }
   }
 
-  async createSupplier(supplierData: InsertSupplier): Promise<Supplier> {
-    const [supplier] = await db.insert(suppliers).values(supplierData).returning();
-    return supplier;
+  async getSupplier(id: string) {
+    try {
+      const supplier = await db.models.Supplier.findById(id);
+      return supplier ? supplier.toObject() : null;
+    } catch (error) {
+      console.error("Error getting supplier:", error);
+      throw error;
+    }
   }
 
-  async updateSupplier(id: number, supplierData: Partial<Supplier>): Promise<Supplier> {
-    const [supplier] = await db
-      .update(suppliers)
-      .set({ ...supplierData, updatedAt: new Date() })
-      .where(eq(suppliers.id, id))
-      .returning();
-    return supplier;
+  async updateSupplier(id: string, data: Partial<schema.InsertSupplier>) {
+    try {
+      const supplier = await db.models.Supplier.findByIdAndUpdate(
+        id,
+        { ...data, updatedAt: new Date() },
+        { new: true }
+      );
+      return supplier ? supplier.toObject() : null;
+    } catch (error) {
+      console.error("Error updating supplier:", error);
+      throw error;
+    }
+  }
+
+  async deleteSupplier(id: string) {
+    try {
+      const supplier = await db.models.Supplier.findByIdAndUpdate(
+        id,
+        { isActive: false, updatedAt: new Date() },
+        { new: true }
+      );
+      return supplier ? supplier.toObject() : null;
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      throw error;
+    }
   }
 
   // Product methods
-  async getProduct(id: number): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product;
+  async createProduct(data: schema.InsertProduct) {
+    try {
+      const product = new db.models.Product(data);
+      await product.save();
+      return product.toObject();
+    } catch (error) {
+      console.error("Error creating product:", error);
+      throw error;
+    }
   }
 
-  async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
+  async getProducts() {
+    try {
+      const products = await db.models.Product.find().populate('supplierId');
+      return products.map(product => product.toObject());
+    } catch (error) {
+      console.error("Error getting products:", error);
+      throw error;
+    }
   }
 
-  async createProduct(productData: InsertProduct): Promise<Product> {
-    const [product] = await db.insert(products).values(productData).returning();
-    return product;
+  async getProduct(id: string) {
+    try {
+      const product = await db.models.Product.findById(id).populate('supplierId');
+      return product ? product.toObject() : null;
+    } catch (error) {
+      console.error("Error getting product:", error);
+      throw error;
+    }
   }
 
-  async updateProduct(id: number, productData: Partial<Product>): Promise<Product> {
-    const [product] = await db
-      .update(products)
-      .set({ ...productData, updatedAt: new Date() })
-      .where(eq(products.id, id))
-      .returning();
-    return product;
+  async updateProduct(id: string, data: Partial<schema.InsertProduct>) {
+    try {
+      const product = await db.models.Product.findByIdAndUpdate(
+        id,
+        { ...data, updatedAt: new Date() },
+        { new: true }
+      ).populate('supplierId');
+      return product ? product.toObject() : null;
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw error;
+    }
+  }
+
+  async deleteProduct(id: string) {
+    try {
+      const product = await db.models.Product.findByIdAndDelete(id);
+      return product ? product.toObject() : null;
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      throw error;
+    }
   }
 
   // Inventory methods
-  async getInventory(productId: number, locationId: number): Promise<Inventory | undefined> {
-    const [inv] = await db
-      .select()
-      .from(inventory)
-      .where(
-        and(
-          eq(inventory.productId, productId),
-          eq(inventory.locationId, locationId)
-        )
+  async createInventory(data: schema.InsertInventory) {
+    try {
+      const inventory = new db.models.Inventory(data);
+      await inventory.save();
+      return inventory.toObject();
+    } catch (error) {
+      console.error("Error creating inventory:", error);
+      throw error;
+    }
+  }
+
+  async getInventory(productId: string, locationId: string) {
+    try {
+      const inventory = await db.models.Inventory.findOne({
+        productId: new mongoose.Types.ObjectId(productId),
+        locationId: new mongoose.Types.ObjectId(locationId)
+      }).populate('productId locationId');
+      return inventory ? inventory.toObject() : null;
+    } catch (error) {
+      console.error("Error getting inventory:", error);
+      throw error;
+    }
+  }
+
+  async getInventoryByLocation(locationId: string) {
+    try {
+      const inventory = await db.models.Inventory.find({
+        locationId: new mongoose.Types.ObjectId(locationId)
+      }).populate('productId locationId');
+      return inventory.map(item => item.toObject());
+    } catch (error) {
+      console.error("Error getting inventory by location:", error);
+      throw error;
+    }
+  }
+
+  async updateInventory(id: string, data: Partial<schema.InsertInventory>) {
+    try {
+      const inventory = await db.models.Inventory.findByIdAndUpdate(
+        id,
+        { ...data, lastUpdated: new Date() },
+        { new: true }
       );
-    return inv;
+      return inventory ? inventory.toObject() : null;
+    } catch (error) {
+      console.error("Error updating inventory:", error);
+      throw error;
+    }
   }
 
-  async getInventoryByLocation(locationId: number): Promise<Inventory[]> {
-    return await db
-      .select()
-      .from(inventory)
-      .where(eq(inventory.locationId, locationId));
+  // Stock Movement methods
+  async createStockMovement(data: schema.InsertStockMovement) {
+    try {
+      const stockMovement = new db.models.StockMovement(data);
+      await stockMovement.save();
+      return stockMovement.toObject();
+    } catch (error) {
+      console.error("Error creating stock movement:", error);
+      throw error;
+    }
   }
 
-  async updateInventory(id: number, inventoryData: Partial<Inventory>): Promise<Inventory> {
-    const [inv] = await db
-      .update(inventory)
-      .set({ ...inventoryData, lastUpdated: new Date() })
-      .where(eq(inventory.id, id))
-      .returning();
-    return inv;
+  async getStockMovements(productId: string) {
+    try {
+      const stockMovements = await db.models.StockMovement.find({
+        productId: new mongoose.Types.ObjectId(productId)
+      }).populate('productId fromLocationId toLocationId createdBy');
+      return stockMovements.map(movement => movement.toObject());
+    } catch (error) {
+      console.error("Error getting stock movements:", error);
+      throw error;
+    }
   }
 
-  // Stock movement methods
-  async createStockMovement(movementData: InsertStockMovement): Promise<StockMovement> {
-    const [movement] = await db
-      .insert(stockMovements)
-      .values(movementData)
-      .returning();
-    return movement;
-  }
-
-  async getStockMovements(productId: number): Promise<StockMovement[]> {
-    return await db
-      .select({
-        id: stockMovements.id,
-        productId: stockMovements.productId,
-        fromLocationId: stockMovements.fromLocationId,
-        toLocationId: stockMovements.toLocationId,
-        quantity: stockMovements.quantity,
-        type: stockMovements.type,
-        reference: stockMovements.reference,
-        createdBy: stockMovements.createdBy,
-        createdAt: stockMovements.createdAt
-      })
-      .from(stockMovements)
-      .where(eq(stockMovements.productId, productId))
-      .orderBy(desc(stockMovements.createdAt));
-  }
-  
-  async getAllStockMovements(): Promise<StockMovement[]> {
-    return await db
-      .select({
-        id: stockMovements.id,
-        productId: stockMovements.productId,
-        fromLocationId: stockMovements.fromLocationId,
-        toLocationId: stockMovements.toLocationId,
-        quantity: stockMovements.quantity,
-        type: stockMovements.type,
-        reference: stockMovements.reference,
-        createdBy: stockMovements.createdBy,
-        createdAt: stockMovements.createdAt
-      })
-      .from(stockMovements)
-      .orderBy(desc(stockMovements.createdAt));
-  }
-  
-  async createInventory(inventoryData: InsertInventory): Promise<Inventory> {
-    const [inv] = await db
-      .insert(inventory)
-      .values({
-        ...inventoryData,
-        lastUpdated: new Date()
-      })
-      .returning();
-    return inv;
+  async getAllStockMovements() {
+    try {
+      const stockMovements = await db.models.StockMovement.find()
+        .populate('productId fromLocationId toLocationId createdBy')
+        .sort({ createdAt: -1 });
+      return stockMovements.map(movement => movement.toObject());
+    } catch (error) {
+      console.error("Error getting all stock movements:", error);
+      throw error;
+    }
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new Storage();

@@ -46,7 +46,7 @@ const config: Config = {
     secureCookies: getNodeEnv() === 'production',
   },
   database: {
-    url: process.env.DATABASE_URL || '',
+    url: process.env.MONGODB_URI || 'mongodb://localhost:27017/modulus-stock',
   },
   auth: {
     googleClientId: process.env.GOOGLE_CLIENT_ID,

@@ -1,17 +1,31 @@
 
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
-import ws from "ws";
+import mongoose from 'mongoose';
 import * as schema from "@shared/schema";
 import config from "./config";
 
-neonConfig.webSocketConstructor = ws;
-
-if (!config.database.url) {
-  throw new Error("DATABASE_URL env var is not set");
+export async function initDatabase() {
+  try {
+    if (!config.database.url) {
+      throw new Error("DATABASE_URL env var is not set");
+    }
+    
+    await mongoose.connect(config.database.url);
+    console.log("Connected to MongoDB successfully");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    throw error;
+  }
 }
 
-// Create a proper Neon HTTP connection for Drizzle
-const sql = neon(config.database.url);
-export const db = drizzle(sql, { schema });
+export const db = {
+  mongoose,
+  models: {
+    User: schema.User,
+    DemoRequest: schema.DemoRequest,
+    Location: schema.Location,
+    Supplier: schema.Supplier,
+    Product: schema.Product,
+    Inventory: schema.Inventory,
+    StockMovement: schema.StockMovement
+  }
+};

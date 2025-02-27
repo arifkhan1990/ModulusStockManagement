@@ -1,3 +1,4 @@
+
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -12,6 +13,7 @@ import {
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { requireAuth } from "./middleware/auth";
+import mongoose from "mongoose";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -45,6 +47,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/locations/:id", requireAuth, async (req, res) => {
+    try {
+      const location = await storage.getLocation(req.params.id);
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      res.json(location);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch location" });
+    }
+  });
+
   app.post("/api/locations", requireAuth, async (req, res) => {
     try {
       const location = insertLocationSchema.parse(req.body);
@@ -59,6 +73,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/locations/:id", requireAuth, async (req, res) => {
+    try {
+      const locationData = insertLocationSchema.partial().parse(req.body);
+      const result = await storage.updateLocation(req.params.id, locationData);
+      if (!result) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      res.json(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        res.status(400).json({ message: "Invalid location data", errors: err.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update location" });
+      }
+    }
+  });
+
+  app.delete("/api/locations/:id", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.deleteLocation(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      res.json({ message: "Location deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete location" });
+    }
+  });
+
   // Supplier routes
   app.get("/api/suppliers", requireAuth, async (req, res) => {
     try {
@@ -66,6 +109,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(suppliers);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch suppliers" });
+    }
+  });
+
+  app.get("/api/suppliers/:id", requireAuth, async (req, res) => {
+    try {
+      const supplier = await storage.getSupplier(req.params.id);
+      if (!supplier) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      res.json(supplier);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch supplier" });
     }
   });
 
@@ -83,6 +138,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/suppliers/:id", requireAuth, async (req, res) => {
+    try {
+      const supplierData = insertSupplierSchema.partial().parse(req.body);
+      const result = await storage.updateSupplier(req.params.id, supplierData);
+      if (!result) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      res.json(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        res.status(400).json({ message: "Invalid supplier data", errors: err.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update supplier" });
+      }
+    }
+  });
+
+  app.delete("/api/suppliers/:id", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.deleteSupplier(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Supplier not found" });
+      }
+      res.json({ message: "Supplier deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete supplier" });
+    }
+  });
+
   // Product routes
   app.get("/api/products", requireAuth, async (req, res) => {
     try {
@@ -90,6 +174,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(products);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  app.get("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const product = await storage.getProduct(req.params.id);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(product);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch product" });
     }
   });
 
@@ -107,14 +203,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const productData = insertProductSchema.partial().parse(req.body);
+      const result = await storage.updateProduct(req.params.id, productData);
+      if (!result) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        res.status(400).json({ message: "Invalid product data", errors: err.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update product" });
+      }
+    }
+  });
+
+  app.delete("/api/products/:id", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.deleteProduct(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json({ message: "Product deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
   // Inventory routes
   app.get("/api/inventory/:locationId", requireAuth, async (req, res) => {
     try {
-      const locationId = parseInt(req.params.locationId);
+      const locationId = req.params.locationId;
       const inventory = await storage.getInventoryByLocation(locationId);
       res.json(inventory);
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch inventory" });
+    }
+  });
+
+  app.post("/api/inventory", requireAuth, async (req, res) => {
+    try {
+      const inventoryData = insertInventorySchema.parse(req.body);
+      const result = await storage.createInventory(inventoryData);
+      res.json(result);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        res.status(400).json({ message: "Invalid inventory data", errors: err.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create inventory" });
+      }
     }
   });
 
@@ -125,7 +264,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (movementData.type === 'adjustment') {
         // For adjustments, we don't need a toLocationId
-        movementData.toLocationId = null;
+        movementData.toLocationId = undefined;
       }
       
       const movement = insertStockMovementSchema.parse(movementData);
@@ -156,7 +295,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all stock movements or filter by product
   app.get("/api/stock-movements", requireAuth, async (req, res) => {
     try {
-      const productId = req.query.productId ? parseInt(req.query.productId as string) : undefined;
+      const productId = req.query.productId ? String(req.query.productId) : undefined;
       const movements = productId
         ? await storage.getStockMovements(productId)
         : await storage.getAllStockMovements();

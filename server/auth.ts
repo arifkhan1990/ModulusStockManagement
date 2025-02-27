@@ -1,3 +1,4 @@
+
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -6,12 +7,12 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { IUser } from "@shared/schema";
 import config from "./config";
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends IUser {}
   }
 }
 
@@ -37,6 +38,7 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     cookie: {
       secure: config.session.secureCookies,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: "lax",
     },
   };
@@ -90,7 +92,7 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser(async (id: number, done) => {
+  passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
       done(null, user);
@@ -104,6 +106,11 @@ export function setupAuth(app: Express) {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
         return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const existingEmail = await storage.getUserByUsername(req.body.email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
       }
 
       const user = await storage.createUser({

@@ -1,14 +1,7 @@
-import { defineConfig } from "drizzle-kit";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL, ensure the database is provisioned");
-}
+// This file is kept for compatibility but not used with MongoDB
+// The mongoose configuration is now in server/db.ts
 
-export default defineConfig({
-  out: "./migrations",
-  schema: "./shared/schema.ts",
-  dialect: "postgresql",
-  dbCredentials: {
-    url: process.env.DATABASE_URL,
-  },
-});
+export default {
+  // This is a placeholder config that is not used with MongoDB
+};

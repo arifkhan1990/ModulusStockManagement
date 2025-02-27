@@ -1,164 +1,254 @@
-import { pgTable, text, serial, timestamp, integer, decimal, boolean, foreignKey } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password"),  // Optional for OAuth users
-  email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  provider: text("provider").notNull().default("local"),
-  providerId: text("provider_id"),
-  role: text("role").notNull().default("user"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+import mongoose, { Schema, Document } from 'mongoose';
+import { z } from 'zod';
+
+// MongoDB connection
+export const connectToDatabase = async (uri: string) => {
+  try {
+    await mongoose.connect(uri);
+    console.log('Connected to MongoDB');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+};
+
+// Zod schemas for validation
+export const insertUserSchema = z.object({
+  username: z.string(),
+  password: z.string().optional(),
+  email: z.string().email(),
+  name: z.string(),
+  provider: z.string().default('local'),
+  providerId: z.string().optional(),
+  role: z.string().default('user'),
 });
 
-export const demoRequests = pgTable("demo_requests", {
-  id: serial("id").primaryKey(),
-  fullName: text("full_name").notNull(),
-  email: text("email").notNull(),
-  companyName: text("company_name").notNull(),
-  companySize: text("company_size").notNull(),
-  message: text("message"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertDemoRequestSchema = z.object({
+  fullName: z.string(),
+  email: z.string().email(),
+  companyName: z.string(),
+  companySize: z.string(),
+  message: z.string().optional(),
 });
 
-export const locations = pgTable("locations", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  type: text("type").notNull(), // 'warehouse' or 'store'
-  address: text("address").notNull(),
-  contactNumber: text("contact_number"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertLocationSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  address: z.string(),
+  contactNumber: z.string().optional(),
+  isActive: z.boolean().default(true),
 });
 
-export const suppliers = pgTable("suppliers", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  contactNumber: text("contact_number"),
-  address: text("address"),
-  rating: decimal("rating"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertSupplierSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  contactNumber: z.string().optional(),
+  address: z.string().optional(),
+  rating: z.number().optional(),
+  isActive: z.boolean().default(true),
 });
 
-export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
-  sku: text("sku").notNull().unique(),
-  name: text("name").notNull(),
-  description: text("description"),
-  category: text("category").notNull(),
-  unitPrice: decimal("unit_price").notNull(),
-  reorderPoint: integer("reorder_point").notNull(),
-  supplierId: integer("supplier_id").references(() => suppliers.id),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertProductSchema = z.object({
+  sku: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  category: z.string(),
+  unitPrice: z.number(),
+  reorderPoint: z.number(),
+  supplierId: z.string().optional(),
 });
 
-export const inventory = pgTable("inventory", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id),
-  locationId: integer("location_id").references(() => locations.id),
-  quantity: integer("quantity").notNull(),
-  batchNumber: text("batch_number"),
-  expiryDate: timestamp("expiry_date"),
-  lastUpdated: timestamp("last_updated").defaultNow(),
+export const insertInventorySchema = z.object({
+  productId: z.string(),
+  locationId: z.string(),
+  quantity: z.number(),
+  batchNumber: z.string().optional(),
+  expiryDate: z.date().optional(),
 });
 
-export const stockMovements = pgTable("stock_movements", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id),
-  fromLocationId: integer("from_location_id").references(() => locations.id),
-  toLocationId: integer("to_location_id").references(() => locations.id),
-  quantity: integer("quantity").notNull(),
-  type: text("type").notNull(), // 'transfer', 'receipt', 'sale', 'adjustment'
-  reference: text("reference"),
-  reason: text("reason"), // For adjustment: 'damage', 'return', 'correction', 'other'
-  createdBy: integer("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertStockMovementSchema = z.object({
+  productId: z.string(),
+  fromLocationId: z.string(),
+  toLocationId: z.string().optional(),
+  quantity: z.number(),
+  type: z.string(),
+  reference: z.string().optional(),
+  reason: z.string().optional(),
+  createdBy: z.string(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  name: true,
+// MongoDB Schemas and Models
+// User Schema
+export interface IUser extends Document {
+  username: string;
+  password?: string;
+  email: string;
+  name: string;
+  provider: string;
+  providerId?: string;
+  role: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const UserSchema = new Schema<IUser>({
+  username: { type: String, required: true, unique: true },
+  password: { type: String },
+  email: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  provider: { type: String, required: true, default: 'local' },
+  providerId: { type: String },
+  role: { type: String, required: true, default: 'user' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export const insertDemoRequestSchema = createInsertSchema(demoRequests).pick({
-  fullName: true,
-  email: true,
-  companyName: true,
-  companySize: true,
-  message: true,
+// Demo Request Schema
+export interface IDemoRequest extends Document {
+  fullName: string;
+  email: string;
+  companyName: string;
+  companySize: string;
+  message?: string;
+  createdAt: Date;
+}
+
+const DemoRequestSchema = new Schema<IDemoRequest>({
+  fullName: { type: String, required: true },
+  email: { type: String, required: true },
+  companyName: { type: String, required: true },
+  companySize: { type: String, required: true },
+  message: { type: String },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export const insertLocationSchema = createInsertSchema(locations).pick({
-  name: true,
-  type: true,
-  address: true,
-  contactNumber: true,
+// Location Schema
+export interface ILocation extends Document {
+  name: string;
+  type: string;
+  address: string;
+  contactNumber?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const LocationSchema = new Schema<ILocation>({
+  name: { type: String, required: true },
+  type: { type: String, required: true },
+  address: { type: String, required: true },
+  contactNumber: { type: String },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export const insertSupplierSchema = createInsertSchema(suppliers).pick({
-  name: true,
-  email: true,
-  contactNumber: true,
-  address: true,
+// Supplier Schema
+export interface ISupplier extends Document {
+  name: string;
+  email: string;
+  contactNumber?: string;
+  address?: string;
+  rating?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const SupplierSchema = new Schema<ISupplier>({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  contactNumber: { type: String },
+  address: { type: String },
+  rating: { type: Number },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export const insertProductSchema = createInsertSchema(products).pick({
-  sku: true,
-  name: true,
-  description: true,
-  category: true,
-  unitPrice: true,
-  reorderPoint: true,
-  supplierId: true,
+// Product Schema
+export interface IProduct extends Document {
+  sku: string;
+  name: string;
+  description?: string;
+  category: string;
+  unitPrice: number;
+  reorderPoint: number;
+  supplierId?: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ProductSchema = new Schema<IProduct>({
+  sku: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  category: { type: String, required: true },
+  unitPrice: { type: Number, required: true },
+  reorderPoint: { type: Number, required: true },
+  supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export const insertInventorySchema = createInsertSchema(inventory).pick({
-  productId: true,
-  locationId: true,
-  quantity: true,
-  batchNumber: true,
-  expiryDate: true,
+// Inventory Schema
+export interface IInventory extends Document {
+  productId: Schema.Types.ObjectId;
+  locationId: Schema.Types.ObjectId;
+  quantity: number;
+  batchNumber?: string;
+  expiryDate?: Date;
+  lastUpdated: Date;
+}
+
+const InventorySchema = new Schema<IInventory>({
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  quantity: { type: Number, required: true },
+  batchNumber: { type: String },
+  expiryDate: { type: Date },
+  lastUpdated: { type: Date, default: Date.now },
 });
 
-export const insertStockMovementSchema = createInsertSchema(stockMovements).pick({
-  productId: true,
-  fromLocationId: true,
-  toLocationId: true,
-  quantity: true,
-  type: true,
-  reference: true,
-  reason: true,
-  createdBy: true,
+// Stock Movement Schema
+export interface IStockMovement extends Document {
+  productId: Schema.Types.ObjectId;
+  fromLocationId: Schema.Types.ObjectId;
+  toLocationId?: Schema.Types.ObjectId;
+  quantity: number;
+  type: string;
+  reference?: string;
+  reason?: string;
+  createdBy: Schema.Types.ObjectId;
+  createdAt: Date;
+}
+
+const StockMovementSchema = new Schema<IStockMovement>({
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  fromLocationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  toLocationId: { type: Schema.Types.ObjectId, ref: 'Location' },
+  quantity: { type: Number, required: true },
+  type: { type: String, required: true },
+  reference: { type: String },
+  reason: { type: String },
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  createdAt: { type: Date, default: Date.now },
 });
+
+// Create and export models
+export const User = mongoose.model<IUser>('User', UserSchema);
+export const DemoRequest = mongoose.model<IDemoRequest>('DemoRequest', DemoRequestSchema);
+export const Location = mongoose.model<ILocation>('Location', LocationSchema);
+export const Supplier = mongoose.model<ISupplier>('Supplier', SupplierSchema);
+export const Product = mongoose.model<IProduct>('Product', ProductSchema);
+export const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
+export const StockMovement = mongoose.model<IStockMovement>('StockMovement', StockMovementSchema);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-
 export type InsertDemoRequest = z.infer<typeof insertDemoRequestSchema>;
-export type DemoRequest = typeof demoRequests.$inferSelect;
-
 export type InsertLocation = z.infer<typeof insertLocationSchema>;
-export type Location = typeof locations.$inferSelect;
-
 export type InsertSupplier = z.infer<typeof insertSupplierSchema>;
-export type Supplier = typeof suppliers.$inferSelect;
-
 export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Product = typeof products.$inferSelect;
-
 export type InsertInventory = z.infer<typeof insertInventorySchema>;
-export type Inventory = typeof inventory.$inferSelect;
-
 export type InsertStockMovement = z.infer<typeof insertStockMovementSchema>;
-export type StockMovement = typeof stockMovements.$inferSelect;
