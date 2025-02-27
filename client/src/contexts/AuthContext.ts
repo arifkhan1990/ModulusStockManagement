@@ -1,26 +1,29 @@
 
-import { createContext } from 'react';
-import { User } from '@/types';
-import { UseMutationResult } from '@tanstack/react-query';
+import { createContext } from "react";
+import { type User } from "@shared/schema";
 
 export type LoginData = {
-  email: string;
+  username: string;
   password: string;
 };
 
 export type InsertUser = {
+  username: string;
   email: string;
   password: string;
-  name?: string;
+  name: string;
 };
 
 export type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<User, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<User, Error, InsertUser>;
+  login: (data: LoginData) => void;
+  logout: () => void;
+  register: (data: InsertUser) => void;
+  isLoggingIn: boolean;
+  isLoggingOut: boolean;
+  isRegistering: boolean;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);

@@ -1,7 +1,15 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { queryClient } from "@/lib/queryClient";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useAuth } from "@/hooks/use-auth";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,71 +21,45 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema, type InsertUser } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
+
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const registerSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  name: z.string().min(1, "Full name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const { login, register, isLoggingIn, isRegistering, error: authError } = useAuth();
 
-  const form = useForm<InsertUser>({
-    resolver: zodResolver(
-      insertUserSchema.extend({
-        name: isLogin
-          ? insertUserSchema.shape.name.optional()
-          : insertUserSchema.shape.name,
-        email: isLogin
-          ? insertUserSchema.shape.email.optional()
-          : insertUserSchema.shape.email,
-      }),
-    ),
+  const form = useForm({
+    resolver: zodResolver(isLogin ? loginSchema : registerSchema),
     defaultValues: {
       username: "",
-      password: "",
       name: "",
       email: "",
+      password: "",
     },
   });
 
-  const authMutation = useMutation({
-    mutationFn: async (data: InsertUser) => {
-      const endpoint = isLogin ? "/api/login" : "/api/register";
-      const res = await apiRequest("POST", endpoint, data);
-      return res.json();
-    },
-    onSuccess: (data) => {
-      // Update the query cache with the user data
-      queryClient.setQueryData(["/api/user"], data);
-      
-      toast({
-        title: "Success",
-        description: isLogin
-          ? "Successfully logged in!"
-          : "Account created successfully!",
-      });
-      // Force navigation after a slight delay to ensure state updates
-      setTimeout(() => {
-        setLocation("/dashboard");
-      }, 100);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleGoogleLogin = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.location.href = "/api/auth/google";
+  const onSubmit = (data: any) => {
+    if (isLogin) {
+      login(data);
+    } else {
+      register(data);
+    }
   };
+
+  const isPending = isLoggingIn || isRegistering;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -111,7 +93,7 @@ export default function AuthPage() {
                 />
                 <path
                   fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.46 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
               Continue with Google
@@ -121,10 +103,7 @@ export default function AuthPage() {
 
             <Form {...form}>
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  form.handleSubmit((data) => authMutation.mutate(data))(e);
-                }}
+                onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
                 <FormField
@@ -198,20 +177,19 @@ export default function AuthPage() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={authMutation.isPending}
+                  disabled={isPending}
                 >
-                  {authMutation.isPending
+                  {isPending
                     ? "Processing..."
                     : isLogin
                       ? "Sign In"
                       : "Create Account"}
                 </Button>
-                {authMutation.isError && (
+                {authError && (
                   <p className="text-sm text-red-500 mt-2">
-                    {authMutation.error?.message || "Authentication failed. Please try again."}
+                    {authError?.message || "Authentication failed. Please try again."}
                   </p>
                 )}
-
                 <Button
                   type="button"
                   variant="link"
