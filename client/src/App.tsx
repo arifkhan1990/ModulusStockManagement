@@ -28,7 +28,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider queryClient={queryClient}>
+      <AuthProvider>
         {/* Added Navbar component */}
         <Navbar />
         <Router />
