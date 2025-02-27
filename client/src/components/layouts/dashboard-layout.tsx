@@ -1,5 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
+
+import React from "react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { LayoutGrid, Package, Warehouse, Users, TrendingUp, Settings, ArrowRightLeft, Store, LogOut } from "lucide-react";
+
 import {
   LayoutGrid,
   Package,
@@ -50,7 +58,7 @@ const sidebarItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const { logoutMutation } = useAuth();
+  const { logout } = useAuth();
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -64,9 +72,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="p-4">
           <ul className="space-y-2">
             {sidebarItems.map((item) => (
-              <NavItem key={item.href} href={item.href} icon={item.icon} isActive={location === item.href}>
-                {item.label}
-              </NavItem>
+              <li key={item.href} className={`rounded-md ${location === item.href ? 'bg-primary/10' : ''}`}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2"
+                  onClick={() => window.location.href = item.href}
+                >
+                  {item.icon && <item.icon className="w-5 h-5 mr-2" />}
+                  {item.label}
+                </Button>
+              </li>
             ))}
           </ul>
         </nav>
@@ -74,7 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => logoutMutation.mutate()}
+            onClick={() => logout()}
           >
             <LogOut className="w-5 h-5 mr-2" />
             Logout
