@@ -1,73 +1,80 @@
-
 import { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
-import { AppError } from '../utils/error';
+import AppError from '../utils/appError';
+import mongoose from 'mongoose';
 
-const createSchema = Joi.object({
-  name: Joi.string().required().trim().min(2).max(100),
-  key: Joi.string().required().trim().regex(/^[a-z0-9_]+$/).message('Key must contain only lowercase letters, numbers, and underscores'),
-  description: Joi.string().required().trim().min(10).max(500),
-  price: Joi.object({
-    monthly: Joi.number().required().min(0),
-    yearly: Joi.number().required().min(0),
-    currency: Joi.string().default('USD')
-  }).required(),
-  limits: Joi.object({
-    users: Joi.number().required().min(1),
-    storage: Joi.number().required().min(1),
-    productsLimit: Joi.number().required().min(1),
-    locationsLimit: Joi.number().required().min(1),
-    customersLimit: Joi.number().required().min(1),
-    apiRequestsPerDay: Joi.number().required().min(1)
-  }).required(),
-  features: Joi.array().items(Joi.string()).default([]),
-  isActive: Joi.boolean().default(true),
-  order: Joi.number().default(0)
-});
+const validateCreate = (req: Request, res: Response, next: NextFunction) => {
+  const { name, description, price, limits, features } = req.body;
 
-const updateSchema = Joi.object({
-  name: Joi.string().trim().min(2).max(100),
-  key: Joi.string().trim().regex(/^[a-z0-9_]+$/).message('Key must contain only lowercase letters, numbers, and underscores'),
-  description: Joi.string().trim().min(10).max(500),
-  price: Joi.object({
-    monthly: Joi.number().min(0),
-    yearly: Joi.number().min(0),
-    currency: Joi.string()
-  }),
-  limits: Joi.object({
-    users: Joi.number().min(1),
-    storage: Joi.number().min(1),
-    productsLimit: Joi.number().min(1),
-    locationsLimit: Joi.number().min(1),
-    customersLimit: Joi.number().min(1),
-    apiRequestsPerDay: Joi.number().min(1)
-  }),
-  features: Joi.array().items(Joi.string()),
-  isActive: Joi.boolean(),
-  order: Joi.number()
-}).min(1);
-
-export const validateCreate = (req: Request, res: Response, next: NextFunction) => {
-  const { error, value } = createSchema.validate(req.body, { abortEarly: false });
-  
-  if (error) {
-    const errorMessage = error.details.map(detail => detail.message).join(', ');
-    return next(new AppError(errorMessage, 400));
+  // Check required fields
+  if (!name || !description || !price || !limits) {
+    return next(new AppError('Missing required fields', 400));
   }
-  
-  req.body = value;
+
+  // Validate price structure
+  if (!price.monthly || !price.yearly || !price.currency) {
+    return next(new AppError('Price must include monthly, yearly rates and currency', 400));
+  }
+
+  // Validate limits structure
+  if (typeof limits.users === 'undefined' || 
+      typeof limits.storage === 'undefined' || 
+      typeof limits.productsLimit === 'undefined' || 
+      typeof limits.locationsLimit === 'undefined' || 
+      typeof limits.customersLimit === 'undefined' || 
+      typeof limits.apiRequestsPerDay === 'undefined') {
+    return next(new AppError('Limits must include users, storage, and all required limit values', 400));
+  }
+
+  // Validate numeric values
+  if (isNaN(price.monthly) || isNaN(price.yearly) || 
+      isNaN(limits.users) || isNaN(limits.storage) || 
+      isNaN(limits.productsLimit) || isNaN(limits.locationsLimit) || 
+      isNaN(limits.customersLimit) || isNaN(limits.apiRequestsPerDay)) {
+    return next(new AppError('Numeric values are required for price and limits', 400));
+  }
+
+  // Validate features array if provided
+  if (features && !Array.isArray(features)) {
+    return next(new AppError('Features must be an array', 400));
+  }
+
   next();
 };
 
-export const validateUpdate = (req: Request, res: Response, next: NextFunction) => {
-  const { error, value } = updateSchema.validate(req.body, { abortEarly: false });
-  
-  if (error) {
-    const errorMessage = error.details.map(detail => detail.message).join(', ');
-    return next(new AppError(errorMessage, 400));
+const validateUpdate = (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  // Validate MongoDB ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new AppError('Invalid subscription tier ID', 400));
   }
-  
-  req.body = value;
+
+  // If price is provided, validate structure
+  if (req.body.price) {
+    const { price } = req.body;
+    if ((price.monthly && isNaN(price.monthly)) || 
+        (price.yearly && isNaN(price.yearly))) {
+      return next(new AppError('Numeric values are required for price', 400));
+    }
+  }
+
+  // If limits are provided, validate structure
+  if (req.body.limits) {
+    const { limits } = req.body;
+    const numericFields = ['users', 'storage', 'productsLimit', 'locationsLimit', 'customersLimit', 'apiRequestsPerDay'];
+
+    for (const field of numericFields) {
+      if (limits[field] !== undefined && isNaN(limits[field])) {
+        return next(new AppError(`Numeric value required for ${field}`, 400));
+      }
+    }
+  }
+
+  // Validate features array if provided
+  if (req.body.features && !Array.isArray(req.body.features)) {
+    return next(new AppError('Features must be an array', 400));
+  }
+
   next();
 };
 
