@@ -1,5 +1,4 @@
-
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface IFeature extends Document {
   name: string;
@@ -35,18 +34,17 @@ const FeatureSchema = new Schema<IFeature>({
   rolloutPercentage: { type: Number, default: 100, min: 0, max: 100 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-  version: { type: String, default: '1.0.0' },
+  version: { type: String, default: "1.0.0" },
   order: { type: Number, default: 0 },
   icon: { type: String },
-  tags: [{ type: String }]
+  tags: [{ type: String }],
 });
 
 // Indexes
-FeatureSchema.index({ key: 1 }, { unique: true });
 FeatureSchema.index({ category: 1 });
 FeatureSchema.index({ isEnabled: 1 });
 FeatureSchema.index({ subscriptionTiers: 1 });
 
-const Feature = mongoose.model<IFeature>('Feature', FeatureSchema);
+const Feature = mongoose.model<IFeature>("Feature", FeatureSchema);
 
 export default Feature;
