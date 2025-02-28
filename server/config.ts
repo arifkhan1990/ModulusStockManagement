@@ -3,7 +3,11 @@ import 'dotenv/config';
 
 const config = {
   environment: process.env.NODE_ENV || 'development',
-  port: parseInt(process.env.PORT || '3000', 10),
+  isDev: process.env.NODE_ENV !== 'production',
+  server: {
+    port: parseInt(process.env.PORT || '5000', 10),
+    host: '0.0.0.0',
+  },
 
   database: {
     url: process.env.MONGODB_URI || 'mongodb://localhost:27017/stock-management',
