@@ -24,6 +24,11 @@ import customerRoutes from './routes/customer.routes';
 import invoiceRoutes from './routes/invoice.routes';
 import invoiceTemplateRoutes from './routes/invoice-template.routes';
 import adminRoutes from './routes/admin.routes';
+import pageRoutes from './routes/page.routes';
+import supportTicketRoutes from './routes/support-ticket.routes';
+import backupRoutes from './routes/backup.routes';
+import notificationRoutes from './routes/notification.routes';
+import integrationRoutes from './routes/integration.routes';
 import { tenantMiddleware } from './middleware/tenant';
 import { authRateLimit } from './middleware/rate-limit';
 
@@ -67,6 +72,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/invoices', invoiceRoutes);
   app.use('/api/invoice-templates', invoiceTemplateRoutes);
   app.use('/api/admin', adminRoutes);
+  app.use('/api/pages', pageRoutes);
+  app.use('/api/support-tickets', supportTicketRoutes);
+  app.use('/api/backups', backupRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  app.use('/api/integrations', integrationRoutes);
 
   // Legacy routes for backward compatibility
   // These will be migrated to the modular structure over time

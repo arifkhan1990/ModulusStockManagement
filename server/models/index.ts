@@ -20,6 +20,11 @@ import Invoice from './invoice.model';
 import InvoiceTemplate from './invoice-template.model';
 import SystemLog from './system-log.model';
 import FeatureToggle from './feature-toggle.model';
+import Page from './page.model';
+import SupportTicket from './support-ticket.model';
+import Backup from './backup.model';
+import Notification from './notification.model';
+import Integration from './integration.model';
 
 export {
   User,
@@ -43,5 +48,10 @@ export {
   Invoice,
   InvoiceTemplate,
   SystemLog,
-  FeatureToggle
+  FeatureToggle,
+  Page,
+  SupportTicket,
+  Backup,
+  Notification,
+  Integration
 };
