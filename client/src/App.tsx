@@ -149,7 +149,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-export default function App() {
+function App() {
   return (
     <>
       <Suspense fallback={<LoadingFallback />}>
@@ -211,3 +211,5 @@ export default function App() {
     </>
   );
 }
+
+export default App;
