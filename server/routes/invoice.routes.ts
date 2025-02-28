@@ -2,7 +2,7 @@
 import express from 'express';
 import invoiceController from '../controllers/invoice.controller';
 import { requireAuth } from '../middleware/auth';
-import { checkPermission } from '../middleware/rbac';
+import { requirePermission } from '../middleware/rbac';
 
 const router = express.Router();
 
