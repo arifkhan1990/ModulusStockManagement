@@ -1,354 +1,280 @@
-import mongoose from "mongoose";
-import Product from "../models/product.model";
-import Inventory from "../models/inventory.model";
-import { AppError } from "../utils/error";
-import { successResponse } from "../utils/helpers";
+// Import dependencies
+import { Request, Response } from 'express';
+import { Product, Category } from '../models';
 
-// Create a new product
-export const createProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+// Get all products
+export const getProducts = async (req: Request, res: Response) => {
   try {
-    const companyId = req.company._id;
-
-    // Check if SKU already exists for this company
-    const existingProduct = await Product.findOne({
-      companyId,
-      sku: req.body.sku,
-    });
-
-    if (existingProduct) {
-      return next(new AppError("Product with this SKU already exists", 409));
-    }
-
-    // Create the product
-    const product = await Product.create({
-      ...req.body,
-      companyId,
-    });
-
-    // Create inventory records for each location if locations provided
-    if (req.body.locationIds && req.body.locationIds.length > 0) {
-      const bulkInventoryOps = req.body.locationIds.map(
-        (locationId: string) => ({
-          insertOne: {
-            document: {
-              companyId,
-              productId: product._id,
-              locationId,
-              quantity: 0,
-              reservedQuantity: 0,
-              availableQuantity: 0,
-            },
-          },
-        }),
-      );
-
-      await Inventory.bulkWrite(bulkInventoryOps);
-    }
-
-    res
-      .status(201)
-      .json(successResponse("Product created successfully", product));
+    const products = await Product.find();
+    res.json(products);
   } catch (error) {
-    next(error);
+    console.error('Error fetching products:', error);
+    res.status(500).json({ message: 'Failed to fetch products' });
   }
 };
 
-// Get all products for a company
-export const getProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+// Get public products
+export const getPublicProducts = async (req: Request, res: Response) => {
   try {
-    const companyId = req.company._id;
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const skip = (page - 1) * limit;
-
-    // Build query based on filters
-    const queryObj: any = { companyId };
-
-    // Filter by status if provided
-    if (req.query.status) {
-      queryObj.status = req.query.status;
-    }
-
-    // Filter by category if provided
-    if (req.query.category) {
-      queryObj.category = req.query.category;
-    }
-
-    // Search by name or SKU
-    if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search as string, "i");
-      queryObj.$or = [{ name: searchRegex }, { sku: searchRegex }];
-    }
-
-    // Filter by stock threshold
-    if (req.query.lowStock === "true") {
-      queryObj.$expr = {
-        $lte: ["$stockQuantity", "$lowStockThreshold"],
-      };
-    }
-
-    // Get total count
-    const total = await Product.countDocuments(queryObj);
-
-    // Get products with pagination
-    const products = await Product.find(queryObj)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    res.status(200).json(
-      successResponse("Products retrieved successfully", {
-        products,
-        pagination: {
-          total,
-          page,
-          limit,
-          pages: Math.ceil(total / limit),
-        },
-      }),
-    );
+    const products = await Product.find({ isPublic: true });
+    res.json(products);
   } catch (error) {
-    next(error);
+    console.error('Error fetching public products:', error);
+    res.status(500).json({ message: 'Failed to fetch public products' });
   }
 };
 
-// Get a single product
-export const getProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+// Get product by ID
+export const getProductById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const companyId = req.company._id;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid product ID", 400));
-    }
-
-    const product = await Product.findOne({ _id: id, companyId });
-
+    const product = await Product.findById(req.params.id);
     if (!product) {
-      return next(new AppError("Product not found", 404));
+      return res.status(404).json({ message: 'Product not found' });
     }
-
-    // Get inventory levels for this product
-    const inventoryItems = await Inventory.find({
-      productId: id,
-      companyId,
-    }).populate("locationId", "name type");
-
-    res.status(200).json(
-      successResponse("Product retrieved successfully", {
-        product,
-        inventory: inventoryItems,
-      }),
-    );
+    res.json(product);
   } catch (error) {
-    next(error);
+    console.error('Error fetching product:', error);
+    res.status(500).json({ message: 'Failed to fetch product' });
   }
 };
 
-// Update a product
-export const updateProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+// Create new product
+export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const companyId = req.company._id;
+    const product = new Product(req.body);
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ message: 'Failed to create product' });
+  }
+};
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid product ID", 400));
+// Update product
+export const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
     }
+    res.json(product);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ message: 'Failed to update product' });
+  }
+};
 
-    // If SKU is changing, check for uniqueness
-    if (req.body.sku) {
-      const existingProduct = await Product.findOne({
-        companyId,
-        sku: req.body.sku,
-        _id: { $ne: id },
-      });
+// Delete product
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ message: 'Failed to delete product' });
+  }
+};
 
-      if (existingProduct) {
-        return next(new AppError("Product with this SKU already exists", 409));
+// Bulk create products
+export const bulkCreateProducts = async (req: Request, res: Response) => {
+  try {
+    const products = await Product.insertMany(req.body);
+    res.status(201).json(products);
+  } catch (error) {
+    console.error('Error bulk creating products:', error);
+    res.status(500).json({ message: 'Failed to bulk create products' });
+  }
+};
+
+// Bulk update products
+export const bulkUpdateProducts = async (req: Request, res: Response) => {
+  try {
+    const bulkOps = req.body.map((product: any) => ({
+      updateOne: {
+        filter: { _id: product._id },
+        update: product
       }
-    }
-
-    const product = await Product.findOneAndUpdate(
-      { _id: id, companyId },
-      { ...req.body, updatedAt: new Date() },
-      { new: true, runValidators: true },
-    );
-
-    if (!product) {
-      return next(new AppError("Product not found", 404));
-    }
-
-    res
-      .status(200)
-      .json(successResponse("Product updated successfully", product));
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Delete a product
-export const deleteProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { id } = req.params;
-    const companyId = req.company._id;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return next(new AppError("Invalid product ID", 400));
-    }
-
-    // Check if product exists
-    const product = await Product.findOne({ _id: id, companyId });
-
-    if (!product) {
-      return next(new AppError("Product not found", 404));
-    }
-
-    // Check if product has any inventory
-    const inventoryCount = await Inventory.countDocuments({
-      productId: id,
-      companyId,
-      quantity: { $gt: 0 },
-    });
-
-    if (inventoryCount > 0) {
-      return next(
-        new AppError(
-          "Cannot delete product with inventory. Please update status to discontinued instead.",
-          400,
-        ),
-      );
-    }
-
-    // Delete all inventory records
-    await Inventory.deleteMany({ productId: id, companyId });
-
-    // Delete the product
-    await Product.deleteOne({ _id: id, companyId });
-
-    res.status(200).json(successResponse("Product deleted successfully", null));
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Get categories (unique list)
-export const getCategories = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const companyId = req.company._id;
-
-    // Aggregate to get unique categories
-    const categories = await Product.aggregate([
-      {
-        $match: {
-          companyId: new mongoose.Types.ObjectId(companyId.toString()),
-        },
-      },
-      { $group: { _id: "$category" } },
-      { $match: { _id: { $ne: null } } },
-      { $sort: { _id: 1 } },
-    ]);
-
-    res.status(200).json(
-      successResponse(
-        "Categories retrieved successfully",
-        categories.map((item) => item._id),
-      ),
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Import products from CSV
-export const importProducts = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const companyId = req.company._id;
-    const products = req.body.products;
-
-    if (!Array.isArray(products) || products.length === 0) {
-      return next(new AppError("No products provided for import", 400));
-    }
-
-    // Validate SKU uniqueness
-    const skus = products.map((p) => p.sku);
-    const existingProducts = await Product.find({
-      companyId,
-      sku: { $in: skus },
-    });
-
-    if (existingProducts.length > 0) {
-      const existingSkus = existingProducts.map((p) => p.sku);
-      return next(
-        new AppError(
-          `The following SKUs already exist: ${existingSkus.join(", ")}`,
-          409,
-        ),
-      );
-    }
-
-    // Add companyId to each product
-    const productsWithCompany = products.map((product) => ({
-      ...product,
-      companyId,
     }));
+    await Product.bulkWrite(bulkOps);
+    res.json({ message: 'Products updated successfully' });
+  } catch (error) {
+    console.error('Error bulk updating products:', error);
+    res.status(500).json({ message: 'Failed to bulk update products' });
+  }
+};
 
-    // Insert all products
-    const result = await Product.insertMany(productsWithCompany);
+// Adjust stock
+export const adjustStock = async (req: Request, res: Response) => {
+  try {
+    const { adjustment } = req.body;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
 
-    res.status(201).json(
-      successResponse("Products imported successfully", {
-        count: result.length,
-        products: result,
-      }),
+    product.stockQuantity += adjustment;
+    await product.save();
+
+    res.json(product);
+  } catch (error) {
+    console.error('Error adjusting stock:', error);
+    res.status(500).json({ message: 'Failed to adjust stock' });
+  }
+};
+
+// Transfer stock
+export const transferStock = async (req: Request, res: Response) => {
+  try {
+    const { fromProductId, toProductId, quantity, reason } = req.body;
+
+    // Find source and destination products
+    const sourceProduct = await Product.findById(fromProductId);
+    const destProduct = await Product.findById(toProductId);
+
+    if (!sourceProduct || !destProduct) {
+      return res.status(404).json({ message: 'One or both products not found' });
+    }
+
+    // Check if source has enough stock
+    if (sourceProduct.stockQuantity < quantity) {
+      return res.status(400).json({ message: 'Not enough stock to transfer' });
+    }
+
+    // Update stock quantities
+    sourceProduct.stockQuantity -= quantity;
+    destProduct.stockQuantity += quantity;
+
+    await sourceProduct.save();
+    await destProduct.save();
+
+    res.json({ 
+      message: 'Stock transferred successfully',
+      sourceProduct,
+      destProduct
+    });
+  } catch (error) {
+    console.error('Error transferring stock:', error);
+    res.status(500).json({ message: 'Failed to transfer stock' });
+  }
+};
+
+// Get low stock products
+export const getLowStockProducts = async (req: Request, res: Response) => {
+  try {
+    const threshold = req.query.threshold ? parseInt(req.query.threshold as string) : 10;
+    const products = await Product.find({ stockQuantity: { $lte: threshold } });
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching low stock products:', error);
+    res.status(500).json({ message: 'Failed to fetch low stock products' });
+  }
+};
+
+// Get categories
+export const getCategories = async (req: Request, res: Response) => {
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: 'Failed to fetch categories' });
+  }
+};
+
+// Create category
+export const createCategory = async (req: Request, res: Response) => {
+  try {
+    const category = new Category(req.body);
+    await category.save();
+    res.status(201).json(category);
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ message: 'Failed to create category' });
+  }
+};
+
+// Update category
+export const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const category = await Category.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
     );
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json(category);
   } catch (error) {
-    next(error);
+    console.error('Error updating category:', error);
+    res.status(500).json({ message: 'Failed to update category' });
   }
 };
 
-// Analytics
-export const getProductSalesAnalytics = async (req, res) => {
+// Delete category
+export const deleteCategory = async (req: Request, res: Response) => {
   try {
-    // Placeholder implementation
-    res.json({ message: "Sales analytics endpoint" });
+    const category = await Category.findByIdAndDelete(req.params.id);
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+    res.json({ message: 'Category deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: "Failed to get product sales analytics" });
+    console.error('Error deleting category:', error);
+    res.status(500).json({ message: 'Failed to delete category' });
   }
 };
 
-export const getStockLevelAnalytics = async (req, res) => {
+// Product analytics
+export const getProductSalesAnalytics = async (req: Request, res: Response) => {
   try {
-    // Placeholder implementation
-    res.json({ message: "Stock level analytics endpoint" });
+    // Mock analytics data for now
+    const analytics = {
+      totalSales: 12500,
+      topSellingProducts: [
+        { id: '1', name: 'Product A', sales: 500 },
+        { id: '2', name: 'Product B', sales: 350 },
+        { id: '3', name: 'Product C', sales: 275 }
+      ],
+      salesByCategory: [
+        { category: 'Electronics', sales: 5000 },
+        { category: 'Clothing', sales: 3500 },
+        { category: 'Home Goods', sales: 2500 }
+      ]
+    };
+
+    res.json(analytics);
   } catch (error) {
-    res.status(500).json({ error: "Failed to get stock level analytics" });
+    console.error('Error getting product sales analytics:', error);
+    res.status(500).json({ message: 'Failed to get product sales analytics' });
+  }
+};
+
+// Stock level analytics
+export const getStockLevelAnalytics = async (req: Request, res: Response) => {
+  try {
+    // Mock analytics data for now
+    const analytics = {
+      totalStock: 2500,
+      stockByCategory: [
+        { category: 'Electronics', stock: 800 },
+        { category: 'Clothing', stock: 1200 },
+        { category: 'Home Goods', stock: 500 }
+      ],
+      lowStockItems: 15,
+      outOfStockItems: 3
+    };
+
+    res.json(analytics);
+  } catch (error) {
+    console.error('Error getting stock level analytics:', error);
+    res.status(500).json({ message: 'Failed to get stock level analytics' });
   }
 };

@@ -8,32 +8,32 @@ import { validateProduct } from '../validators/product.validator';
 const router = Router();
 
 // Public routes
-router.get('/public', productController.getPublicProducts);
+router.get('/products/public', productController.getPublicProducts);
 
 // Protected routes
-router.get('/', requireAuth, requireSystemAdmin, productController.getProducts);
-router.get('/:id', requireAuth, requireSystemAdmin, productController.getProductById);
-router.post('/', requireAuth, requireSystemAdmin, validateProduct, productController.createProduct);
-router.put('/:id', requireAuth, requireSystemAdmin, validateProduct, productController.updateProduct);
-router.delete('/:id', requireAuth, requireSystemAdmin, productController.deleteProduct);
+router.get('/products', requireAuth, requireSystemAdmin, productController.getProducts);
+router.get('/products/:id', requireAuth, requireSystemAdmin, productController.getProductById);
+router.post('/products', requireAuth, requireSystemAdmin, validateProduct, productController.createProduct);
+router.put('/products/:id', requireAuth, requireSystemAdmin, validateProduct, productController.updateProduct);
+router.delete('/products/:id', requireAuth, requireSystemAdmin, productController.deleteProduct);
 
 // Batch operations
-router.post('/bulk', requireAuth, requireSystemAdmin, productController.bulkCreateProducts);
-router.put('/bulk', requireAuth, requireSystemAdmin, productController.bulkUpdateProducts);
+router.post('/products/bulk', requireAuth, requireSystemAdmin, productController.bulkCreateProducts);
+router.put('/products/bulk', requireAuth, requireSystemAdmin, productController.bulkUpdateProducts);
 
 // Stock related operations
-router.post('/:id/stock/adjust', requireAuth, requireSystemAdmin, productController.adjustStock);
-router.post('/transfer', requireAuth, requireSystemAdmin, productController.transferStock);
-router.get('/low-stock', requireAuth, requireSystemAdmin, productController.getLowStockProducts);
+router.post('/products/:id/stock/adjust', requireAuth, requireSystemAdmin, productController.adjustStock);
+router.post('/products/transfer', requireAuth, requireSystemAdmin, productController.transferStock);
+router.get('/products/low-stock', requireAuth, requireSystemAdmin, productController.getLowStockProducts);
 
 // Category operations
-router.get('/categories', requireAuth, requireSystemAdmin, productController.getCategories);
-router.post('/categories', requireAuth, requireSystemAdmin, productController.createCategory);
-router.put('/categories/:id', requireAuth, requireSystemAdmin, productController.updateCategory);
-router.delete('/categories/:id', requireAuth, requireSystemAdmin, productController.deleteCategory);
+router.get('/products/categories', requireAuth, requireSystemAdmin, productController.getCategories);
+router.post('/products/categories', requireAuth, requireSystemAdmin, productController.createCategory);
+router.put('/products/categories/:id', requireAuth, requireSystemAdmin, productController.updateCategory);
+router.delete('/products/categories/:id', requireAuth, requireSystemAdmin, productController.deleteCategory);
 
 // Analytics
-router.get('/analytics/sales', requireAuth, requireSystemAdmin, productController.getProductSalesAnalytics);
-router.get('/analytics/stock', requireAuth, requireSystemAdmin, productController.getStockLevelAnalytics);
+router.get('/products/analytics/sales', requireAuth, requireSystemAdmin, productController.getProductSalesAnalytics);
+router.get('/products/analytics/stock', requireAuth, requireSystemAdmin, productController.getStockLevelAnalytics);
 
 export default router;
