@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/company-preferences', companyPreferenceRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/billing', billingRoutes);
-  
+
   // Webhook routes do not use tenant middleware
   app.use('/webhooks/payments', paymentWebhookRoutes);
 

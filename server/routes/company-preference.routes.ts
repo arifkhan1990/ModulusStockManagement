@@ -1,9 +1,8 @@
-
 import express from 'express';
-import companyPreferenceController from '../controllers/company-preference.controller';
 import { requireAuth } from '../middleware/auth';
 import { requireCompanyAdmin } from '../middleware/rbac';
 import companyPreferenceValidator from '../validators/company-preference.validator';
+import * as companyPreferenceController from '../controllers/company-preference.controller';
 
 const router = express.Router();
 
@@ -32,5 +31,12 @@ router.patch('/sharing', requireCompanyAdmin, companyPreferenceValidator.validat
 
 // General settings
 router.patch('/general', requireCompanyAdmin, companyPreferenceValidator.validateGeneralSettings, companyPreferenceController.updateGeneralSettings);
+
+// New routes from edited code
+router.get('/features', companyPreferenceController.getFeatures);
+router.put('/features', companyPreferenceController.updateFeatures);
+router.get('/preferences', companyPreferenceController.getPreferences);
+router.put('/preferences', companyPreferenceController.updatePreferences);
+
 
 export default router;
