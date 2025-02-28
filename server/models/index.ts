@@ -1,4 +1,3 @@
-
 import User from './user.model';
 import DemoRequest from './demoRequest.model';
 import Location from './location.model';
@@ -14,6 +13,7 @@ import PurchaseOrder from './purchaseOrder.model';
 import SalesChannel from './salesChannel.model';
 import Report from './report.model';
 import Alert from './alert.model';
+import Payment from './payment.model';
 
 export {
   User,
@@ -30,5 +30,6 @@ export {
   PurchaseOrder,
   SalesChannel,
   Report,
-  Alert
+  Alert,
+  Payment
 };

@@ -1,4 +1,3 @@
-
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -49,7 +48,7 @@ app.use((req, res, next) => {
     // Initialize the database connection
     await initDatabase();
     console.log("Database initialized successfully");
-    
+
     // Register routes and get the HTTP server
     const server = await registerRoutes(app);
 

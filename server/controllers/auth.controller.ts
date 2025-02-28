@@ -1,169 +1,348 @@
 
-import { Request, Response } from "express";
-import User from "../models/user.model";
-import { createSession, destroySession } from "../services/session.service";
-import { validateLoginInput, validateRegisterInput } from "../validators/auth.validator";
-import { hashPassword, comparePassword } from "../utils/password";
-import { AppError } from "../utils/error";
+import { Request, Response } from 'express';
+import User from '../models/user.model';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import config from '../config';
+import { v4 as uuidv4 } from 'uuid';
 
+// Register a new user
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = validateRegisterInput(req.body);
-    
+    const { name, email, password, username, role, businessSize, businessType } = req.body;
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
+
     if (existingUser) {
-      throw new AppError("User with this email already exists", 409);
+      return res.status(400).json({ 
+        message: 'User already exists with this email or username' 
+      });
     }
-    
-    // Hash password and create user
-    const hashedPassword = await hashPassword(password);
-    const user = await User.create({
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user
+    const user = new User({
       name,
       email,
+      username: username || email.split('@')[0] + uuidv4().substring(0, 6),
       password: hashedPassword,
+      role: role || 'staff',
+      businessSize: businessSize || 'small',
+      businessType,
+      status: 'active'
     });
-    
-    // Create session
-    await createSession(req, user);
-    
-    // Return user data without password
-    res.status(201).json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
+
+    await user.save();
+
+    // Create JWT
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role
+      }
+    };
+
+    const token = jwt.sign(
+      payload, 
+      config.jwtSecret, 
+      { expiresIn: '24h' }
+    );
+
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return res.status(201).json({
+      token,
+      user: userResponse
     });
   } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.status).json({ message: error.message });
-    } else {
-      console.error("Register error:", error);
-      res.status(500).json({ message: "Something went wrong" });
-    }
+    console.error('Registration error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
   }
 };
 
+// Login user
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = validateLoginInput(req.body);
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ 
+      $or: [{ email }, { username: email }] 
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check if account is active
+    if (user.status !== 'active') {
+      return res.status(401).json({ 
+        message: 'Account is not active. Please contact administrator.' 
+      });
+    }
+
+    // Verify password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    // Create JWT
+    const payload = {
+      user: {
+        id: user.id,
+        role: user.role
+      }
+    };
+
+    const token = jwt.sign(
+      payload, 
+      config.jwtSecret, 
+      { expiresIn: '24h' }
+    );
+
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return res.status(200).json({
+      token,
+      user: userResponse
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// Logout user (token invalidation would typically be handled client-side)
+export const logout = (req: Request, res: Response) => {
+  return res.status(200).json({ message: 'Logged out successfully' });
+};
+
+// Get current user
+export const getCurrentUser = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error('Get current user error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// Update user profile
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const { name, email, phone, position, department, avatar, preferences } = req.body;
+    
+    // Find user and update
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { 
+        $set: { 
+          name, 
+          email, 
+          phone, 
+          position, 
+          department, 
+          avatar,
+          preferences
+        } 
+      },
+      { new: true }
+    ).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// Change password
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
     
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findById(req.user.id);
     if (!user) {
-      throw new AppError("Invalid credentials", 401);
+      return res.status(404).json({ message: 'User not found' });
     }
     
-    // Check password
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      throw new AppError("Invalid credentials", 401);
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
     }
     
-    // Create session
-    await createSession(req, user);
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
     
-    // Return user data without password
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
+    await user.save();
+    
+    return res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    if (error instanceof AppError) {
-      res.status(error.status).json({ message: error.message });
-    } else {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Something went wrong" });
-    }
-  }
-};
-
-export const logout = (req: Request, res: Response) => {
-  destroySession(req);
-  res.json({ message: "Logged out successfully" });
-};
-
-export const getCurrentUser = async (req: Request, res: Response) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-  
-  try {
-    const user = await User.findById(req.session.userId);
-    if (!user) {
-      destroySession(req);
-      return res.status(401).json({ message: "User not found" });
-    }
-    
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email,
+    console.error('Change password error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
     });
-  } catch (error) {
-    console.error("Get current user error:", error);
-    res.status(500).json({ message: "Something went wrong" });
   }
 };
-import { Request, Response, NextFunction } from 'express';
-import { scrypt, randomBytes, timingSafeEqual } from 'crypto';
-import { promisify } from 'util';
-import { storage } from '../storage';
 
-const scryptAsync = promisify(scrypt);
+// Admin endpoints
 
-export async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-export async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
-}
-
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+// Get all users (admin only)
+export const getUsers = async (req: Request, res: Response) => {
   try {
-    const existingUser = await storage.getUserByUsername(req.body.username);
+    const users = await User.find().select('-password');
+    return res.status(200).json(users);
+  } catch (error) {
+    console.error('Get users error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
+};
+
+// Create user (admin only)
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const { name, email, password, username, role, businessSize, businessType, status, permissions } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ 
+      $or: [{ email }, { username }] 
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(400).json({ 
+        message: 'User already exists with this email or username' 
+      });
     }
 
-    const existingEmail = await storage.getUserByUsername(req.body.email);
-    if (existingEmail) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await storage.createUser({
-      ...req.body,
-      password: await hashPassword(req.body.password),
-      provider: "local",
+    // Create new user
+    const user = new User({
+      name,
+      email,
+      username: username || email.split('@')[0] + uuidv4().substring(0, 6),
+      password: hashedPassword,
+      role: role || 'staff',
+      permissions,
+      businessSize: businessSize || 'small',
+      businessType,
+      status: status || 'active'
     });
 
-    req.login(user, (err) => {
-      if (err) return next(err);
-      res.status(201).json(user);
-    });
+    await user.save();
+
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    return res.status(201).json(userResponse);
   } catch (error) {
-    next(error);
+    console.error('Create user error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
   }
 };
 
-export const login = (req: Request, res: Response) => {
-  res.json(req.user);
+// Update user (admin only)
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { name, email, username, role, permissions, status, businessSize, businessType } = req.body;
+    
+    // Find user and update
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { 
+        $set: { 
+          name, 
+          email, 
+          username,
+          role,
+          permissions,
+          status,
+          businessSize,
+          businessType
+        } 
+      },
+      { new: true }
+    ).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error('Update user error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
 };
 
-export const logout = (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.sendStatus(200);
-  });
-};
-
-export const getCurrentUser = (req: Request, res: Response) => {
-  if (!req.isAuthenticated()) return res.sendStatus(401);
-  res.json(req.user);
+// Delete user (admin only)
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    return res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message 
+    });
+  }
 };

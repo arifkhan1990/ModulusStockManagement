@@ -7,7 +7,9 @@ import {
   Supplier,
   Product,
   Inventory,
-  StockMovement 
+  StockMovement,
+  Order,
+  Payment
 } from '../models';
 import { 
   InsertUser, 
@@ -197,4 +199,81 @@ export const getAllStockMovements = async () => {
   .populate('fromLocationId')
   .populate('toLocationId')
   .populate('createdBy');
+};
+
+
+// Payment operations
+export const getPayments = async (query = {}, page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  return await Payment.find(query)
+    .sort({ paymentDate: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate('orderId', 'orderNumber customerName total')
+    .populate('createdBy', 'name');
+};
+
+export const getPayment = async (id: string) => {
+  return await Payment.findById(id)
+    .populate('orderId')
+    .populate('createdBy', 'name');
+};
+
+export const createPayment = async (paymentData: any) => {
+  const payment = new Payment(paymentData);
+  await payment.save();
+  
+  // Update order payment status
+  const order = await Order.findById(payment.orderId);
+  if (order) {
+    const orderPayments = await Payment.find({ 
+      orderId: order._id, 
+      status: 'completed' 
+    });
+    
+    const totalPaid = orderPayments.reduce((sum, p) => sum + p.amount, 0);
+    
+    let paymentStatus = 'pending';
+    if (totalPaid >= order.total) {
+      paymentStatus = 'paid';
+    } else if (totalPaid > 0) {
+      paymentStatus = 'partially paid';
+    }
+    
+    await Order.findByIdAndUpdate(payment.orderId, { paymentStatus });
+  }
+  
+  return payment;
+};
+
+export const updatePaymentStatus = async (id: string, status: string, updatedBy: string) => {
+  const payment = await Payment.findByIdAndUpdate(
+    id,
+    { status, updatedBy },
+    { new: true }
+  );
+  
+  if (payment) {
+    // Update order payment status
+    const order = await Order.findById(payment.orderId);
+    if (order) {
+      const orderPayments = await Payment.find({ 
+        orderId: order._id, 
+        status: 'completed' 
+      });
+      
+      const totalPaid = orderPayments.reduce((sum, p) => sum + p.amount, 0);
+      
+      let paymentStatus = 'pending';
+      if (totalPaid >= order.total) {
+        paymentStatus = 'paid';
+      } else if (totalPaid > 0) {
+        paymentStatus = 'partially paid';
+      }
+      
+      await Order.findByIdAndUpdate(payment.orderId, { paymentStatus });
+    }
+  }
+  
+  return payment;
 };

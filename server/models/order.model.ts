@@ -99,6 +99,12 @@ const OrderSchema = new Schema<IOrder>({
     enum: ['pending', 'partially paid', 'paid', 'refunded', 'failed'],
     default: 'pending'
   },
+  paymentStatus: { 
+    type: String, 
+    required: true,
+    enum: ['pending', 'partially paid', 'paid', 'refunded', 'failed'],
+    default: 'pending'
+  },
   paymentMethod: { type: String },
   paymentReference: { type: String },
   shippingMethod: { type: String },
