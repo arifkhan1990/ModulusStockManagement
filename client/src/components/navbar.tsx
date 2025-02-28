@@ -23,7 +23,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Link href="/">
-            <a className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -41,31 +41,31 @@ export function Navbar() {
               <span className="hidden font-bold sm:inline-block">
                 MSM System
               </span>
-            </a>
+            </div>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/features">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+            <span className="text-sm font-medium transition-colors hover:text-primary">
               Features
-            </a>
+            </span>
           </Link>
           <Link href="/pricing">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+            <span className="text-sm font-medium transition-colors hover:text-primary">
               Pricing
-            </a>
+            </span>
           </Link>
           <Link href="/about">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+            <span className="text-sm font-medium transition-colors hover:text-primary">
               About
-            </a>
+            </span>
           </Link>
           <Link href="/contact">
-            <a className="text-sm font-medium transition-colors hover:text-primary">
+            <span className="text-sm font-medium transition-colors hover:text-primary">
               Contact
-            </a>
+            </span>
           </Link>
         </nav>
 
@@ -76,9 +76,11 @@ export function Navbar() {
           ) : user ? (
             <div className="flex items-center gap-4">
               <Link href="/dashboard">
-                <Button variant="outline" size="sm">
-                  Dashboard
-                </Button>
+                <div>
+                  <Button variant="outline" size="sm">
+                    Dashboard
+                  </Button>
+                </div>
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -89,11 +91,11 @@ export function Navbar() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">Dashboard</Link>
+                  <DropdownMenuItem onClick={() => window.location.href = "/dashboard"}>
+                    Dashboard
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">Settings</Link>
+                  <DropdownMenuItem onClick={() => window.location.href = "/settings"}>
+                    Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
@@ -106,12 +108,16 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
-                  Login
-                </Button>
+                <div>
+                  <Button variant="ghost" size="sm">
+                    Login
+                  </Button>
+                </div>
               </Link>
               <Link href="/register">
-                <Button size="sm">Register</Button>
+                <div>
+                  <Button size="sm">Register</Button>
+                </div>
               </Link>
             </>
           )}
@@ -158,45 +164,47 @@ export function Navbar() {
           </button>
           <nav className="flex flex-col gap-4">
             <Link href="/features">
-              <a
+              <span
                 className="text-lg font-medium py-2 transition-colors hover:text-primary"
                 onClick={() => setIsOpen(false)}
               >
                 Features
-              </a>
+              </span>
             </Link>
             <Link href="/pricing">
-              <a
+              <span
                 className="text-lg font-medium py-2 transition-colors hover:text-primary"
                 onClick={() => setIsOpen(false)}
               >
                 Pricing
-              </a>
+              </span>
             </Link>
             <Link href="/about">
-              <a
+              <span
                 className="text-lg font-medium py-2 transition-colors hover:text-primary"
                 onClick={() => setIsOpen(false)}
               >
                 About
-              </a>
+              </span>
             </Link>
             <Link href="/contact">
-              <a
+              <span
                 className="text-lg font-medium py-2 transition-colors hover:text-primary"
                 onClick={() => setIsOpen(false)}
               >
                 Contact
-              </a>
+              </span>
             </Link>
           </nav>
           <div className="mt-auto flex flex-col gap-2">
             {user ? (
               <>
                 <Link href="/dashboard">
-                  <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
-                    Dashboard
-                  </Button>
+                  <div>
+                    <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
+                      Dashboard
+                    </Button>
+                  </div>
                 </Link>
                 <Button variant="outline" className="w-full" onClick={logout}>
                   Logout
@@ -205,14 +213,18 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
-                    Login
-                  </Button>
+                  <div>
+                    <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
+                      Login
+                    </Button>
+                  </div>
                 </Link>
                 <Link href="/register">
-                  <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
-                    Register
-                  </Button>
+                  <div>
+                    <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
+                      Register
+                    </Button>
+                  </div>
                 </Link>
               </>
             )}
