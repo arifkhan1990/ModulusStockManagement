@@ -1,10 +1,9 @@
-
-import express from 'express';
-import { requireAuth } from '../middleware/auth';
-import { checkCompanyAccess } from '../middleware/tenant';
-import { validateRequest } from '../middleware/validator';
-import { backupValidators } from '../validators/backup.validator';
-import backupController from '../controllers/backup.controller';
+import express from "express";
+import { requireAuth } from "../middleware/auth";
+import { tenantMiddleware } from "../middleware/tenant";
+import { validateResource } from "../middleware/validator";
+import { backupValidators } from "../validators/backup.validator";
+import backupController from "../controllers/backup.controller";
 
 const router = express.Router();
 
@@ -12,26 +11,28 @@ const router = express.Router();
 router.use(requireAuth);
 
 // Get all backups
-router.get('/', checkCompanyAccess, backupController.getBackups);
+router.get("/", tenantMiddleware, backupController.getBackups);
 
 // Create a new backup
-router.post('/', 
-  checkCompanyAccess, 
-  validateRequest(backupValidators.createBackup),
-  backupController.createBackup
+router.post(
+  "/",
+  tenantMiddleware,
+  validateResource(backupValidators.createBackup),
+  backupController.createBackup,
 );
 
 // Get a single backup
-router.get('/:id', checkCompanyAccess, backupController.getBackup);
+router.get("/:id", tenantMiddleware, backupController.getBackup);
 
 // Restore from a backup
-router.post('/:id/restore', 
-  checkCompanyAccess, 
-  validateRequest(backupValidators.restoreBackup),
-  backupController.restoreBackup
+router.post(
+  "/:id/restore",
+  tenantMiddleware,
+  validateResource(backupValidators.restoreBackup),
+  backupController.restoreBackup,
 );
 
 // Delete a backup
-router.delete('/:id', checkCompanyAccess, backupController.deleteBackup);
+router.delete("/:id", tenantMiddleware, backupController.deleteBackup);
 
 export default router;
