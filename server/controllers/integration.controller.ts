@@ -5,7 +5,7 @@ import Integration from '../models/integration.model';
 import { AppError } from '../utils/error';
 import { successResponse } from '../utils/helpers';
 import SystemLog from '../models/system-log.model';
-import { encryptData, decryptData } from '../utils/encryption';
+import { encrypt, decrypt } from '../utils/encryption';
 
 // Get available integrations
 export const getAvailableIntegrations = async (req: Request, res: Response, next: NextFunction) => {
