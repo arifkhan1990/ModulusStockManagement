@@ -1,34 +1,46 @@
-import { Router } from 'express';
-import { productController } from '../controllers';
-import { requireAuth } from '../middleware/auth';
-import { validateRequest } from '../middleware/validator';
-import { productValidator } from '../validators';
 
-const router = Router();
+import express from 'express';
+import * as productController from '../controllers/product.controller';
+import { validateProductCreation, validateProductUpdate } from '../validators/product.validator';
+import { authenticate } from '../middleware/auth';
+import { checkFeatureEnabled } from '../middleware/feature-toggle';
 
-// Create a new product
-router.post(
-  '/',
-  requireAuth,
-  validateRequest(productValidator.createProductSchema),
-  productController.createProduct
+const router = express.Router();
+
+// Public routes
+router.get('/public/:companyId', productController.getPublicProducts);
+
+// Protected routes
+router.use(authenticate);
+
+// Basic product operations
+router.get('/', productController.getProducts);
+router.get('/:id', productController.getProductById);
+router.post('/', validateProductCreation, productController.createProduct);
+router.put('/:id', validateProductUpdate, productController.updateProduct);
+router.delete('/:id', productController.deleteProduct);
+
+// Stock management routes
+router.post('/transfer', 
+  checkFeatureEnabled('inventory_management'),
+  productController.transferStock
 );
 
-// Get all products
-router.get('/', requireAuth, productController.getProducts);
-
-// Get a single product
-router.get('/:id', requireAuth, productController.getProduct);
-
-// Update a product
-router.patch(
-  '/:id',
-  requireAuth,
-  validateRequest(productValidator.updateProductSchema),
-  productController.updateProduct
+// Bulk operations - require specific features
+router.post('/bulk-import', 
+  checkFeatureEnabled('import_export'),
+  productController.bulkImportProducts
 );
 
-// Delete a product
-router.delete('/:id', requireAuth, productController.deleteProduct);
+router.get('/export/all', 
+  checkFeatureEnabled('import_export'),
+  productController.exportProducts
+);
+
+// Product batch operations
+router.post('/batch/update-prices',
+  checkFeatureEnabled('batch_operations'),
+  productController.batchUpdatePrices
+);
 
 export default router;

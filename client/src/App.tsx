@@ -1,12 +1,13 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Route, Switch } from "wouter";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { queryClient } from "@/lib/query";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LandingLayout } from "@/components/layouts/landing-layout";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
+import { AdminLayout } from "@/components/layout/AdminLayout"; // Added import
 import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
@@ -23,167 +24,12 @@ const LoadingSpinner = () => {
   return <div className="flex items-center justify-center h-screen">Loading...</div>;
 };
 
-// Protected route component
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  // Placeholder authentication logic.  Replace with actual authentication.
+  const isAuthenticated = true; // Replace with actual authentication check
+  return isAuthenticated ? children : <Navigate to="/auth/login" replace />;
 };
-
-export default function App() {
-  return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <LanguageProvider>
-            <CurrencyProvider>
-              <AuthProvider>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Switch>
-                    <Route path="/">
-                      <LandingLayout>
-                        <HomePage />
-                      </LandingLayout>
-                    </Route>
-
-                    <Route path="/auth/login">
-                      <LandingLayout>
-                        <LoginPage />
-                      </LandingLayout>
-                    </Route>
-
-                    <Route path="/auth/register">
-                      <LandingLayout>
-                        <RegisterPage />
-                      </LandingLayout>
-                    </Route>
-
-                    <Route path="/auth/forgot-password">
-                      <LandingLayout>
-                        <ForgotPasswordPage />
-                      </LandingLayout>
-                    </Route>
-
-                    <Route path="/auth/reset-password">
-                      <LandingLayout>
-                        <ResetPasswordPage />
-                      </LandingLayout>
-                    </Route>
-
-                    {/* Dashboard routes */}
-                    <Route path="/dashboard">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <DashboardPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Stock management routes */}
-                    <Route path="/dashboard/stock">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <StockPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    <Route path="/dashboard/stock/movements">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <StockMovementsPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Products routes */}
-                    <Route path="/dashboard/products">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <ProductsPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Locations routes */}
-                    <Route path="/dashboard/locations">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <LocationsPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Suppliers routes */}
-                    <Route path="/dashboard/suppliers">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <SuppliersPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Customers routes - will be implemented later */}
-                    <Route path="/dashboard/customers">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <div className="container py-8">
-                            <h1 className="text-3xl font-bold">Customers</h1>
-                            <p className="mt-4">Coming soon...</p>
-                          </div>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Reports routes - will be implemented later */}
-                    <Route path="/dashboard/reports">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <div className="container py-8">
-                            <h1 className="text-3xl font-bold">Reports</h1>
-                            <p className="mt-4">Coming soon...</p>
-                          </div>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Settings routes */}
-                    <Route path="/dashboard/settings">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <SettingsPage />
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* Profile routes - will be implemented later */}
-                    <Route path="/dashboard/profile">
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <div className="container py-8">
-                            <h1 className="text-3xl font-bold">Profile</h1>
-                            <p className="mt-4">Coming soon...</p>
-                          </div>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    </Route>
-
-                    {/* 404 route */}
-                    <Route>
-                      <LandingLayout>
-                        <NotFoundPage />
-                      </LandingLayout>
-                    </Route>
-                  </Switch>
-                </Suspense>
-                <Toaster />
-              </AuthProvider>
-            </CurrencyProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
-}
 
 // Lazy loaded page components
 const LoginPage = lazy(() => import("@/pages/auth/login"));
@@ -197,69 +43,69 @@ const StockPage = lazy(() => import("@/pages/dashboard/stock"));
 const StockMovementsPage = lazy(() => import("@/pages/dashboard/stock/movements"));
 const SuppliersPage = lazy(() => import("@/pages/dashboard/suppliers"));
 const SettingsPage = lazy(() => import("@/pages/dashboard/settings"));
-import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+const NotificationsPage = lazy(() => import("@/pages/dashboard/notifications")); // Added
+const SharingPage = lazy(() => import("@/pages/dashboard/sharing")); // Added
+const DownloadsPage = lazy(() => import("@/pages/dashboard/downloads")); // Added
+const AdminDashboard = lazy(() => import("@/pages/admin")); // Added
+const AdminFeaturesPage = lazy(() => import("@/pages/admin/features")); // Added
+const CompaniesPage = lazy(() => import("@/pages/admin/companies")); // Added
+const SubscriptionTiersPage = lazy(() => import("@/pages/admin/subscription-tiers")); // Added
 
-// Lazy-loaded components
-const HomePage = lazy(() => import('./pages/home'));
-const Dashboard = lazy(() => import('./pages/dashboard'));
-const StockPage = lazy(() => import('./pages/dashboard/stock'));
-const Login = lazy(() => import('./pages/auth/login'));
-const Signup = lazy(() => import('./pages/auth/signup'));
-const NotFound = lazy(() => import('./pages/not-found'));
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
-
-// Loading component
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <motion.div
-      animate={{ 
-        rotate: 360,
-        scale: [1, 1.2, 1],
-      }}
-      transition={{ 
-        rotate: { repeat: Infinity, duration: 1, ease: "linear" },
-        scale: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
-      }}
-      className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
-    />
-  </div>
-);
-
-function App() {
+export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <AnimatePresence mode="wait">
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/dashboard/stock" element={<StockPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/404" element={<NotFound />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Routes>
-          </Suspense>
-        </AnimatePresence>
-      </Router>
-      <Toaster position="top-right" />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CurrencyProvider>
+              <AuthProvider>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Router>
+                    <Routes>
+                      <Route path="/" element={<LandingLayout><HomePage /></LandingLayout>} />
+
+                      <Route path="/auth/login" element={<LandingLayout><LoginPage /></LandingLayout>} />
+                      <Route path="/auth/register" element={<LandingLayout><RegisterPage /></LandingLayout>} />
+                      <Route path="/auth/forgot-password" element={<LandingLayout><ForgotPasswordPage /></LandingLayout>} />
+                      <Route path="/auth/reset-password" element={<LandingLayout><ResetPasswordPage /></LandingLayout>} />
+
+                      <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><Outlet /></DashboardLayout></ProtectedRoute>}>
+                        <Route index element={<DashboardPage />} />
+                        <Route path="stock" element={<Outlet />}>
+                          <Route index element={<StockPage />} />
+                          <Route path="movements" element={<StockMovementsPage />} /> {/* Added movements route */}
+                        </Route>
+                        <Route path="products" element={<ProductsPage />} />
+                        <Route path="locations" element={<LocationsPage />} />
+                        <Route path="suppliers" element={<SuppliersPage />} />
+                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
+                        <Route path="sharing" element={<SharingPage />} />
+                        <Route path="downloads" element={<DownloadsPage />} />
+                        <Route path="profile" element={<div>Profile Page</div>} /> {/* Placeholder */}
+                        <Route path="customers" element={<div>Customers Page</div>} /> {/* Placeholder */}
+                        <Route path="reports" element={<div>Reports Page</div>} /> {/* Placeholder */}
+                      </Route>
+
+                      {/* Admin routes */}
+                      <Route path="/admin" element={<ProtectedRoute><AdminLayout><Outlet /></AdminLayout></ProtectedRoute>}> {/* Added ProtectedRoute */}
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="features" element={<AdminFeaturesPage />} />
+                        <Route path="companies" element={<CompaniesPage />} />
+                        <Route path="subscription-tiers" element={<SubscriptionTiersPage />} />
+                      </Route>
+
+                      <Route path="*" element={<LandingLayout><NotFoundPage /></LandingLayout>} />
+                    </Routes>
+                  </Router>
+                  <Toaster />
+              </AuthProvider>
+            </CurrencyProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
-
-export default App;
