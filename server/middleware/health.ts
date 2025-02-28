@@ -1,104 +1,66 @@
-
-import { Request, Response } from 'express';
-import { checkDatabaseHealth } from '../db';
-import os from 'os';
-
-// Basic health check
-export const healthCheck = (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-};
-
-// Detailed health check
-export const detailedHealthCheck = async (req: Request, res: Response) => {
-  const dbHealth = await checkDatabaseHealth();
-  
-  // System resource usage
-  const systemInfo = {
-    uptime: process.uptime(),
-    memory: {
-      total: os.totalmem(),
-      free: os.freemem(),
-      used: os.totalmem() - os.freemem(),
-      process: process.memoryUsage(),
-    },
-    cpu: {
-      loadAvg: os.loadavg(),
-      cpus: os.cpus().length,
-    },
-  };
-  
-  res.status(dbHealth.status === 'healthy' ? 200 : 500).json({
-    status: dbHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
-    timestamp: new Date().toISOString(),
-    database: dbHealth,
-    system: systemInfo,
-  });
-};
-
-// Ready check for load balancers
-export const readyCheck = async (req: Request, res: Response) => {
-  const dbHealth = await checkDatabaseHealth();
-  
-  if (dbHealth.status === 'healthy') {
-    res.status(200).json({ status: 'ready' });
-  } else {
-    res.status(503).json({ status: 'not ready' });
-  }
-};
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import os from 'os';
 
 /**
  * Simple health check endpoint for load balancers
  */
 export const healthCheck = (req: Request, res: Response) => {
-  return res.status(200).json({ status: 'ok' });
+  res.status(200).json({ status: 'ok' });
 };
 
 /**
- * More detailed health check with system information
+ * Detailed health check that includes database connectivity
+ * and other system component statuses
  */
-export const detailedHealthCheck = (req: Request, res: Response) => {
-  const health = {
-    status: 'ok',
-    timestamp: new Date(),
-    uptime: process.uptime(),
-    database: {
-      status: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-    },
-    system: {
-      loadAvg: os.loadavg(),
-      memory: {
-        total: os.totalmem(),
-        free: os.freemem(),
-        usage: (1 - os.freemem() / os.totalmem()) * 100
+export const detailedHealthCheck = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const healthStatus = {
+      status: 'ok',
+      timestamp: new Date(),
+      services: {
+        server: { status: 'ok' },
+        database: { status: 'unknown' }
       },
-      cpus: os.cpus().length
-    },
-    process: {
-      memory: process.memoryUsage(),
-      version: process.version
+      environment: process.env.NODE_ENV || 'development'
+    };
+
+    // Check database connection
+    if (mongoose.connection.readyState === 1) {
+      healthStatus.services.database.status = 'ok';
+    } else {
+      healthStatus.services.database.status = 'error';
+      healthStatus.status = 'degraded';
     }
-  };
-  
-  const statusCode = health.database.status === 'connected' ? 200 : 503;
-  return res.status(statusCode).json(health);
+
+    // Add more service checks here as needed
+    // For example, Redis, external APIs, etc.
+
+    const statusCode = healthStatus.status === 'ok' ? 200 : 503;
+    res.status(statusCode).json(healthStatus);
+  } catch (error) {
+    next(error);
+  }
 };
 
 /**
- * Readiness check that verifies if the service is ready to accept traffic
+ * Readiness check that verifies if the application is ready to serve requests
+ * This is different from health check as it ensures all required services
+ * are connected and ready
  */
-export const readyCheck = (req: Request, res: Response) => {
-  // Check database connection
-  const dbReady = mongoose.connection.readyState === 1;
-  
-  if (!dbReady) {
-    return res.status(503).json({
-      status: 'not_ready',
-      reason: 'Database connection not established'
-    });
+export const readyCheck = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        status: 'not_ready', 
+        message: 'Database connection not established'
+      });
+    }
+
+    // Add additional readiness checks here
+    // For example, checking if required cache is warmed up
+
+    res.status(200).json({ status: 'ready' });
+  } catch (error) {
+    next(error);
   }
-  
-  return res.status(200).json({ status: 'ready' });
 };

@@ -30,6 +30,10 @@ import backupRoutes from './routes/backup.routes';
 import notificationRoutes from './routes/notification.routes';
 import integrationRoutes from './routes/integration.routes';
 import sharingRoutes from './routes/sharing.routes';
+import featureRoutes from './routes/feature.routes';
+import subscriptionTierRoutes from './routes/subscription-tier.routes';
+import companyPreferenceRoutes from './routes/company-preference.routes';
+import analyticsRoutes from './routes/analytics.routes';
 import { tenantMiddleware } from './middleware/tenant';
 import { authRateLimit } from './middleware/rate-limit';
 
@@ -79,6 +83,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/integrations', integrationRoutes);
   app.use('/api/sharing', sharingRoutes);
+  app.use('/api/features', featureRoutes);
+  app.use('/api/subscription-tiers', subscriptionTierRoutes);
+  app.use('/api/company-preferences', companyPreferenceRoutes);
+  app.use('/api/analytics', analyticsRoutes);
 
   // Legacy routes for backward compatibility
   // These will be migrated to the modular structure over time

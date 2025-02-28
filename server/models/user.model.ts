@@ -1,156 +1,101 @@
-
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
-  username: string;
-  name: string;
   email: string;
   password: string;
-  provider?: string;
-  providerId?: string;
-  role: string;
-  companyId: Schema.Types.ObjectId; // Reference to the company the user belongs to
-  isCompanyAdmin: boolean; // Is this user a company admin
-  phone?: string;
-  position?: string;
-  department?: string;
+  firstName: string;
+  lastName: string;
   avatar?: string;
-  permissions?: string[];
-  preferredLocations?: Schema.Types.ObjectId[];
-  lastLogin?: Date;
-  status: string;
-  twoFactorEnabled?: boolean;
-  twoFactorSecret?: string;
-  businessSize: string; // small, medium, large
-  businessType?: string; // retail, manufacturing, distribution, etc.
-  preferences?: {
-    language?: string;
-    theme?: string;
-    timezone?: string;
-    dateFormat?: string;
-    notifications?: {
-      email?: boolean;
-      sms?: boolean;
-      inApp?: boolean;
-    }
+  phone?: string;
+  companyId?: Schema.Types.ObjectId; // For subscriber users
+  roleIds: Schema.Types.ObjectId[]; // Multiple roles support
+  type: 'system_admin' | 'company_admin' | 'company_user'; // System admins are SaaS admins
+  isActive: boolean;
+  isSuperAdmin: boolean; // Only for system admins with full access
+  preferences: {
+    theme: string;
+    language: string;
+    notifications: {
+      email: boolean;
+      push: boolean;
+      inApp: boolean;
+    };
   };
+  lastLoginAt?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+  emailVerificationToken?: string;
+  emailVerified: boolean;
   createdAt: Date;
   updatedAt: Date;
+  stripeCustomerId?: string;
+
+  // Methods
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserSchema = new Schema<IUser>(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    provider: {
-      type: String,
-      default: 'local',
-    },
-    providerId: {
-      type: String,
-    },
-    role: {
-      type: String,
-      enum: ['admin', 'manager', 'staff', 'viewer', 'customer', 'supplier'],
-      default: 'staff',
-    },
-    companyId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Company',
-      required: true,
-    },
-    isCompanyAdmin: {
-      type: Boolean,
-      default: false,
-    },
-    phone: {
-      type: String,
-    },
-    position: {
-      type: String,
-    },
-    department: {
-      type: String,
-    },
-    avatar: {
-      type: String,
-    },
-    permissions: [{
-      type: String,
-    }],
-    preferredLocations: [{
-      type: Schema.Types.ObjectId,
-      ref: 'Location',
-    }],
-    lastLogin: {
-      type: Date,
-    },
-    status: {
-      type: String,
-      enum: ['active', 'inactive', 'suspended', 'pending'],
-      default: 'active',
-    },
-    twoFactorEnabled: {
-      type: Boolean,
-      default: false,
-    },
-    twoFactorSecret: {
-      type: String,
-    },
-    businessSize: { 
-      type: String, 
-      enum: ['small', 'medium', 'large'], 
-      default: 'small' 
-    },
-    businessType: { 
-      type: String 
-    },
-    preferences: {
-      language: { type: String, default: 'en' },
-      theme: { type: String, default: 'light' },
-      timezone: { type: String, default: 'UTC' },
-      dateFormat: { type: String, default: 'MM/DD/YYYY' },
-      notifications: {
-        email: { type: Boolean, default: true },
-        sms: { type: Boolean, default: false },
-        inApp: { type: Boolean, default: true },
-      }
+const UserSchema = new Schema<IUser>({
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  password: { type: String, required: true, select: false },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  avatar: { type: String },
+  phone: { type: String },
+  companyId: { type: Schema.Types.ObjectId, ref: 'Company' },
+  roleIds: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
+  type: { 
+    type: String, 
+    enum: ['system_admin', 'company_admin', 'company_user'], 
+    required: true 
+  },
+  isActive: { type: Boolean, default: true },
+  isSuperAdmin: { type: Boolean, default: false },
+  preferences: {
+    theme: { type: String, default: 'light' },
+    language: { type: String, default: 'en' },
+    notifications: {
+      email: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      inApp: { type: Boolean, default: true }
     }
   },
-  {
-    timestamps: true,
+  lastLoginAt: { type: Date },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
+  emailVerificationToken: { type: String },
+  emailVerified: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  stripeCustomerId: { type: String }
+});
+
+// Indexes
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ companyId: 1 });
+UserSchema.index({ type: 1 });
+UserSchema.index({ isActive: 1 });
+UserSchema.index({ emailVerificationToken: 1 });
+UserSchema.index({ passwordResetToken: 1 });
+
+// Hash password before saving
+UserSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error: any) {
+    next(error);
   }
-);
+});
 
-// Indexes for faster lookups
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
-UserSchema.index({ role: 1 });
-UserSchema.index({ status: 1 });
-UserSchema.index({ companyId: 1 }); // Index for faster company-based queries
-UserSchema.index({ companyId: 1, role: 1 }); // Compound index for filtering users by company and role
-UserSchema.index({ email: 1, companyId: 1 }, { unique: true }); // Ensure email uniqueness within a company
+// Method to compare passwords
+UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
-const User = mongoose.model<IUser>("User", UserSchema);
+const User = mongoose.model<IUser>('User', UserSchema);
 
 export default User;

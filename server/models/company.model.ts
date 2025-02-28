@@ -1,152 +1,109 @@
-
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICompany extends Document {
   name: string;
-  businessType: string; // retail, manufacturing, wholesale, etc.
-  businessSize: string; // small, medium, large
-  maxUsers: number;
-  maxProducts: number;
-  maxLocations: number;
-  subscriptionPlan: string; // monthly, quarterly, biannual, annual
-  subscriptionStatus: string; // active, expired, trial
-  subscriptionStartDate: Date;
-  subscriptionEndDate: Date;
-  paymentHistory: Array<{
-    amount: number;
-    date: Date;
-    method: string;
-    reference: string;
-  }>;
-  settings: {
-    logo?: string;
-    primaryColor?: string;
-    timezone?: string;
-    currency?: string;
-    language?: string;
-    enableAdvancedFeatures?: boolean;
-    enableApis?: boolean;
-    enableReports?: boolean;
+  slug: string; // For subdomain (e.g., companyname.saasdomain.com)
+  domain: string; // Custom domain if any
+  email: string;
+  phone: string;
+  logo: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
   };
-  apiKey?: string;
-  contactEmail: string;
-  contactPhone?: string;
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    postalCode?: string;
-    country?: string;
+  subscription: {
+    tierId: Schema.Types.ObjectId;
+    status: 'active' | 'inactive' | 'trial' | 'expired' | 'canceled';
+    startDate: Date;
+    endDate: Date;
+    trialEndsAt: Date;
+    currentPeriodStart: Date;
+    currentPeriodEnd: Date;
+    cancelAtPeriodEnd: boolean;
+    paymentMethod: string;
+    stripeCustomerId: string;
+    stripeSubscriptionId: string;
+  };
+  usage: {
+    users: number;
+    storage: number; // in MB
+    products: number;
+    customers: number;
+    apiRequests: number;
+    lastUpdated: Date;
+  };
+  settings: {
+    theme: string;
+    timezone: string;
+    currency: string;
+    language: string;
+    taxRate: number;
   };
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  ownerId: Schema.Types.ObjectId; // Reference to the user who owns this company
 }
 
-const CompanySchema = new Schema<ICompany>(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    businessType: {
-      type: String,
-      required: true,
-    },
-    businessSize: {
-      type: String,
-      enum: ["small", "medium", "large"],
-      default: "small",
-    },
-    maxUsers: {
-      type: Number,
-      default: 5, // Default limit based on plan
-    },
-    maxProducts: {
-      type: Number,
-      default: 1000, // Default limit based on plan
-    },
-    maxLocations: {
-      type: Number,
-      default: 3, // Default limit based on plan
-    },
-    subscriptionPlan: {
-      type: String,
-      enum: ["monthly", "quarterly", "biannual", "annual", "trial"],
-      default: "trial",
-    },
-    subscriptionStatus: {
-      type: String,
-      enum: ["active", "expired", "trial", "canceled"],
-      default: "trial",
-    },
-    subscriptionStartDate: {
-      type: Date,
-      default: Date.now,
-    },
-    subscriptionEndDate: {
-      type: Date,
-      required: true,
-    },
-    paymentHistory: [
-      {
-        amount: Number,
-        date: Date,
-        method: String,
-        reference: String,
-      },
-    ],
-    settings: {
-      logo: String,
-      primaryColor: String,
-      timezone: { type: String, default: "UTC" },
-      currency: { type: String, default: "USD" },
-      language: { type: String, default: "en" },
-      enableAdvancedFeatures: { type: Boolean, default: false },
-      enableApis: { type: Boolean, default: false },
-      enableReports: { type: Boolean, default: true },
-    },
-    apiKey: {
-      type: String,
-    },
-    contactEmail: {
-      type: String,
-      required: true,
-    },
-    contactPhone: String,
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      postalCode: String,
-      country: String,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+const CompanySchema = new Schema<ICompany>({
+  name: { type: String, required: true },
+  slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  domain: { type: String, unique: true, sparse: true },
+  email: { type: String, required: true },
+  phone: { type: String },
+  logo: { type: String },
+  address: {
+    street: { type: String },
+    city: { type: String },
+    state: { type: String },
+    postalCode: { type: String },
+    country: { type: String }
   },
-  {
-    timestamps: true,
-  }
-);
+  subscription: {
+    tierId: { type: Schema.Types.ObjectId, ref: 'SubscriptionTier' },
+    status: { type: String, enum: ['active', 'inactive', 'trial', 'expired', 'canceled'], default: 'trial' },
+    startDate: { type: Date, default: Date.now },
+    endDate: { type: Date },
+    trialEndsAt: { type: Date },
+    currentPeriodStart: { type: Date },
+    currentPeriodEnd: { type: Date },
+    cancelAtPeriodEnd: { type: Boolean, default: false },
+    paymentMethod: { type: String },
+    stripeCustomerId: { type: String },
+    stripeSubscriptionId: { type: String }
+  },
+  usage: {
+    users: { type: Number, default: 0 },
+    storage: { type: Number, default: 0 },
+    products: { type: Number, default: 0 },
+    customers: { type: Number, default: 0 },
+    apiRequests: { type: Number, default: 0 },
+    lastUpdated: { type: Date, default: Date.now }
+  },
+  settings: {
+    theme: { type: String, default: 'light' },
+    timezone: { type: String, default: 'UTC' },
+    currency: { type: String, default: 'USD' },
+    language: { type: String, default: 'en' },
+    taxRate: { type: Number, default: 0 }
+  },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+});
 
-// Add indexes for faster lookups
-CompanySchema.index({ name: 1 });
-CompanySchema.index({ subscriptionStatus: 1 });
-CompanySchema.index({ subscriptionEndDate: 1 });
-CompanySchema.index({ businessSize: 1, businessType: 1 });
+// Indexes
+CompanySchema.index({ slug: 1 }, { unique: true });
+CompanySchema.index({ domain: 1 }, { unique: true, sparse: true });
+CompanySchema.index({ ownerId: 1 });
+CompanySchema.index({ 'subscription.status': 1 });
+CompanySchema.index({ 'subscription.endDate': 1 });
 CompanySchema.index({ isActive: 1 });
 
-const Company = mongoose.model<ICompany>("Company", CompanySchema);
+const Company = mongoose.model<ICompany>('Company', CompanySchema);
 
 export default Company;

@@ -1,6 +1,6 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/error';
+import Role from '../models/role.model';
 
 // Define roles and their hierarchy
 export const roles = {
@@ -86,17 +86,17 @@ const resourcePermissions = {
 const hasPermission = (role: string, resource: string, action: string): boolean => {
   if (!roleHierarchy[role]) return false;
   if (!resourcePermissions[resource]) return false;
-  
+
   // Check each role in the hierarchy
   for (const r of roleHierarchy[role]) {
     if (
-      resourcePermissions[resource][r] && 
+      resourcePermissions[resource][r] &&
       resourcePermissions[resource][r].includes(action)
     ) {
       return true;
     }
   }
-  
+
   return false;
 };
 
@@ -137,8 +137,107 @@ export const restrictTo = (...allowedRoles: string[]) => {
   };
 };
 
+// Require system admin role
+export const requireSystemAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return next(new AppError('Authentication required', 401));
+    }
+
+    // Check if user is a system admin
+    if (req.user.type !== 'system_admin') {
+      return next(new AppError('Access denied. System administrator privileges required.', 403));
+    }
+
+    // If we're here, the user is a system admin
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Require company admin role
+export const requireCompanyAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return next(new AppError('Authentication required', 401));
+    }
+
+    // Check if user is a company admin
+    if (req.user.type === 'company_admin') {
+      return next();
+    }
+
+    // Check if user has company admin role
+    if (req.user.roleIds && req.user.roleIds.length > 0) {
+      const roles = await Role.find({
+        _id: { $in: req.user.roleIds },
+        companyId: req.company._id
+      });
+
+      const hasAdminPermission = roles.some(role =>
+        role.permissions.includes('admin') ||
+        role.permissions.includes('company_admin')
+      );
+
+      if (hasAdminPermission) {
+        return next();
+      }
+    }
+
+    return next(new AppError('Access denied. Company administrator privileges required.', 403));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Check if user has specific permission
+export const hasPermission = (permission: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return next(new AppError('Authentication required', 401));
+      }
+
+      // System admins have all permissions
+      if (req.user.type === 'system_admin') {
+        return next();
+      }
+
+      // Company admins have all permissions for their company
+      if (req.user.type === 'company_admin' && req.company) {
+        return next();
+      }
+
+      // Check specific permission
+      if (req.user.roleIds && req.user.roleIds.length > 0) {
+        const roles = await Role.find({
+          _id: { $in: req.user.roleIds },
+          companyId: req.company._id
+        });
+
+        const hasRequiredPermission = roles.some(role =>
+          role.permissions.includes(permission) ||
+          role.permissions.includes('admin')
+        );
+
+        if (hasRequiredPermission) {
+          return next();
+        }
+      }
+
+      return next(new AppError(`Access denied. '${permission}' permission required.`, 403));
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
 export default {
   roles,
   requirePermission,
-  restrictTo
+  restrictTo,
+  requireSystemAdmin,
+  requireCompanyAdmin,
+  hasPermission
 };

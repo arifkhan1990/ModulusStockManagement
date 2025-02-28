@@ -1,63 +1,45 @@
-import User from './user.model';
-import DemoRequest from './demoRequest.model';
-import Location from './location.model';
-import Supplier from './supplier.model';
-import Product from './product.model';
-import Inventory from './inventory.model';
-import StockMovement from './stockMovement.model';
-import Category from './category.model';
-import Customer from './customer.model';
-import Order from './order.model';
-import Warehouse from './warehouse.model';
-import PurchaseOrder from './purchaseOrder.model';
-import SalesChannel from './salesChannel.model';
-import Report from './report.model';
-import Alert from './alert.model';
-import Payment from './payment.model';
-import Company from './company.model';
-import LandingPage from './landing-page.model';
-import Invoice from './invoice.model';
-import InvoiceTemplate from './invoice-template.model';
-import SystemLog from './system-log.model';
-import FeatureToggle from './feature-toggle.model';
-import Page from './page.model';
-import SupportTicket from './support-ticket.model';
-import Backup from './backup.model';
-import Notification from './notification.model';
-import NotificationPreference from './notification-preference.model';
-import Integration from './integration.model';
-import Sharing from './sharing.model';
-import Download from './download.model';
+// User and authentication
+export { default as User } from './user.model';
 
-export {
-  User,
-  DemoRequest,
-  Location,
-  Supplier,
-  Product,
-  Inventory,
-  StockMovement,
-  Category,
-  Customer,
-  Order,
-  Warehouse,
-  PurchaseOrder,
-  SalesChannel,
-  Report,
-  Alert,
-  Payment,
-  Company,
-  LandingPage,
-  Invoice,
-  InvoiceTemplate,
-  SystemLog,
-  FeatureToggle,
-  Page,
-  SupportTicket,
-  Backup,
-  Notification,
-  NotificationPreference,
-  Integration,
-  Sharing,
-  Download
-};
+// Company and subscription
+export { default as Company } from './company.model';
+export { default as SubscriptionTier } from './subscription-tier.model';
+export { default as CompanyPreference } from './company-preference.model';
+
+// Feature management
+export { default as Feature } from './feature.model';
+export { default as FeatureToggle } from './feature-toggle.model';
+
+// Product and inventory
+export { default as Product } from './product.model';
+export { default as Inventory } from './inventory.model';
+export { default as Location } from './location.model';
+export { default as StockMovement } from './stock-movement.model';
+export { default as Supplier } from './supplier.model';
+
+// Sales and orders
+export { default as Order } from './order.model';
+export { default as Payment } from './payment.model';
+export { default as Customer } from './customer.model';
+export { default as Invoice } from './invoice.model';
+export { default as InvoiceTemplate } from './invoice-template.model';
+
+// Content management
+export { default as Page } from './page.model';
+
+// Support and communication
+export { default as SupportTicket } from './support-ticket.model';
+export { default as Notification } from './notification.model';
+export { default as NotificationPreference } from './notification-preference.model';
+
+// Sharing and integrations
+export { default as Sharing } from './sharing.model';
+export { default as Integration } from './integration.model';
+
+// System and analytics
+export { default as SystemLog } from './system-log.model';
+export { default as Backup } from './backup.model';
+export { default as Analytics } from './analytics.model';
+export { default as AuditLog } from './audit-log.model';
+export { default as Role } from './role.model';
+export { default as Download } from './download.model';
