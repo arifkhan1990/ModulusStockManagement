@@ -1,7 +1,10 @@
 
-// This file is kept for compatibility but not used with MongoDB
-// The mongoose configuration is now in server/db.ts
+import type { Config } from 'drizzle-kit';
 
+// This is a configuration file for Drizzle ORM, but the project is using Mongoose with MongoDB.
+// This configuration is provided to prevent errors when running drizzle commands.
 export default {
-  // This is a placeholder config that is not used with MongoDB
-};
+  dialect: 'mysql', // Using MySQL as a placeholder since MongoDB is not directly supported by Drizzle
+  out: './drizzle',
+  schema: './shared/schema.ts',
+} satisfies Config;
