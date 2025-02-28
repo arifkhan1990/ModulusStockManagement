@@ -1,0 +1,28 @@
+  ➜  press h + enter to show help
+Error: The following dependencies are imported but could not be resolved:
+
+  @/hooks/use-toast (imported by /home/runner/workspace/client/src/pages/auth/login.tsx)
+  @/components/ui/toast (imported by /home/runner/workspace/client/src/components/ui/toaster.tsx)
+  @/hooks/use-auth (imported by /home/runner/workspace/client/src/pages/auth/login.tsx)
+  @/components/ui/button (imported by /home/runner/workspace/client/src/components/ui/pagination.tsx)
+  @/components/ui/input (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/card (imported by /home/runner/workspace/client/src/pages/auth/register.tsx)
+  @/components/ui/label (imported by /home/runner/workspace/client/src/components/ui/form.tsx)
+  @/components/ui/switch (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/badge (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/separator (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/select (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/dialog (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/table (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/tabs (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/lib/utils (imported by /home/runner/workspace/client/src/components/ui/dropdown-menu.tsx)
+  @/components/ui/tooltip (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/utils/api (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/form (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/checkbox (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+  @/components/ui/accordion (imported by /home/runner/workspace/client/src/pages/admin/features/index.tsx)
+
+Are they installed?
+    at file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50668:15
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50173:26
