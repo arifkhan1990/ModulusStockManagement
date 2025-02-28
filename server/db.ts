@@ -1,14 +1,29 @@
 
 import mongoose from 'mongoose';
-import * as schema from "@shared/schema";
-import config from "./config";
+import config from './config';
+import { 
+  User,
+  DemoRequest, 
+  Location, 
+  Supplier, 
+  Product, 
+  Inventory, 
+  StockMovement 
+} from './models';
 
+/**
+ * Initialize the MongoDB connection
+ */
 export async function initDatabase() {
   try {
     if (!config.database.url) {
       throw new Error("DATABASE_URL env var is not set");
     }
     
+    // Configure mongoose
+    mongoose.set('strictQuery', true);
+    
+    // Connect to MongoDB
     await mongoose.connect(config.database.url);
     console.log("Connected to MongoDB successfully");
   } catch (error) {
@@ -17,15 +32,16 @@ export async function initDatabase() {
   }
 }
 
+// Export database models
 export const db = {
   mongoose,
   models: {
-    User: schema.User,
-    DemoRequest: schema.DemoRequest,
-    Location: schema.Location,
-    Supplier: schema.Supplier,
-    Product: schema.Product,
-    Inventory: schema.Inventory,
-    StockMovement: schema.StockMovement
+    User,
+    DemoRequest,
+    Location,
+    Supplier,
+    Product,
+    Inventory,
+    StockMovement
   }
 };

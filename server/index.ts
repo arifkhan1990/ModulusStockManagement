@@ -1,13 +1,18 @@
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import config from "./config";
-import { initDatabase } from "./db"; // Added import for MongoDB initialization
+import { initDatabase } from "./db";
 
+// Create Express app
 const app = express();
+
+// Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -38,40 +43,41 @@ app.use((req, res, next) => {
   next();
 });
 
+// Self-executing async function to start the server
 (async () => {
   try {
-    // Initialize the database connection first
+    // Initialize the database connection
     await initDatabase();
     console.log("Database initialized successfully");
     
+    // Register routes and get the HTTP server
     const server = await registerRoutes(app);
 
+    // Global error handler
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
-  });
+      res.status(status).json({ message });
+      throw err;
+    });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (config.isDev) {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
+    // Setup Vite in development or serve static files in production
+    if (config.isDev) {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
 
-  // This serves both the API and the client
-  const { port, host } = config.server;
-  server.listen({
-    port,
-    host,
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port} in ${config.environment} mode`);
-  });
+    // Start the server
+    const { port, host } = config.server;
+    server.listen({
+      port,
+      host,
+      reusePort: true,
+    }, () => {
+      log(`Server running on port ${port} in ${config.environment} mode`);
+    });
   } catch (error) {
     console.error("Failed to start the server:", error);
     process.exit(1);
