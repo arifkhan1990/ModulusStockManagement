@@ -15,10 +15,10 @@ const Register = lazy(() => import("@/pages/register"));
 
 // Dashboard pages
 const Dashboard = lazy(() => import("@/pages/dashboard"));
-const Products = lazy(() => import("@/pages/products"));
+const Products = lazy(() => import("@/pages/dashboard/products"));
 const Stock = lazy(() => import("@/pages/stock"));
-const Locations = lazy(() => import("@/pages/locations"));
-const Suppliers = lazy(() => import("@/pages/suppliers"));
+const Locations = lazy(() => import("@/pages/dashboard/locations"));
+const Suppliers = lazy(() => import("@/pages/dashboard/suppliers"));
 const Customers = lazy(() => import("@/pages/customers"));
 const Reports = lazy(() => import("@/pages/reports"));
 const Settings = lazy(() => import("@/pages/settings"));
