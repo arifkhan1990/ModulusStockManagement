@@ -9,7 +9,7 @@ import {
   useRegisterMutation,
 } from "@/hooks/use-auth";
 import { apiRequest } from "@/lib/api";
-import { type User } from "@shared/schema";
+import { User } from "@/types";
 
 // Define the AuthProvider component
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
