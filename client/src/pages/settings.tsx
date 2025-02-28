@@ -147,3 +147,259 @@ export default function SettingsPage() {
     </div>
   );
 }
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+
+export default function Settings() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Account settings
+  const [name, setName] = useState(user?.name || "");
+  const [email, setEmail] = useState(user?.email || "");
+
+  // Notification settings
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [stockAlerts, setStockAlerts] = useState(true);
+  const [activitySummary, setActivitySummary] = useState(false);
+
+  const handleAccountUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdating(true);
+
+    setTimeout(() => {
+      setIsUpdating(false);
+      toast({
+        title: "Settings Updated",
+        description: "Your account settings have been updated successfully.",
+      });
+    }, 1000);
+  };
+
+  const handleNotificationUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdating(true);
+
+    setTimeout(() => {
+      setIsUpdating(false);
+      toast({
+        title: "Notification Settings Updated",
+        description: "Your notification preferences have been saved.",
+      });
+    }, 1000);
+  };
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your account and application settings
+        </p>
+      </div>
+
+      <Tabs defaultValue="account" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="account">Account</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="appearance">Appearance</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="account">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>
+                Update your personal information and preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAccountUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company Name (Optional)</Label>
+                  <Input id="company" placeholder="Your company name" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio (Optional)</Label>
+                  <Textarea
+                    id="bio"
+                    placeholder="A brief description about yourself"
+                    className="resize-none"
+                  />
+                </div>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Updating..." : "Update Account"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Settings</CardTitle>
+              <CardDescription>
+                Configure how and when you receive notifications
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleNotificationUpdate} className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive notifications via email
+                      </p>
+                    </div>
+                    <Switch
+                      checked={emailNotifications}
+                      onCheckedChange={setEmailNotifications}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Low Stock Alerts</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when products reach low stock levels
+                      </p>
+                    </div>
+                    <Switch
+                      checked={stockAlerts}
+                      onCheckedChange={setStockAlerts}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Weekly Activity Summary</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive a weekly summary of inventory activities
+                      </p>
+                    </div>
+                    <Switch
+                      checked={activitySummary}
+                      onCheckedChange={setActivitySummary}
+                    />
+                  </div>
+                </div>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Preferences"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>
+                Manage your password and security preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <Button type="submit">Change Password</Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="appearance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance Settings</CardTitle>
+              <CardDescription>
+                Customize the look and feel of your dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" className="flex-1">Light</Button>
+                    <Button variant="outline" className="flex-1">Dark</Button>
+                    <Button variant="default" className="flex-1">System</Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Dashboard Layout</Label>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" className="flex-1">Compact</Button>
+                    <Button variant="default" className="flex-1">Default</Button>
+                    <Button variant="outline" className="flex-1">Comfortable</Button>
+                  </div>
+                </div>
+                <Button>Save Preferences</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
