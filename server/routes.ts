@@ -34,6 +34,8 @@ import featureRoutes from './routes/feature.routes';
 import subscriptionTierRoutes from './routes/subscription-tier.routes';
 import companyPreferenceRoutes from './routes/company-preference.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import billingRoutes from './routes/billing.routes';
+import paymentWebhookRoutes from './routes/payment-webhook.routes';
 import { tenantMiddleware } from './middleware/tenant';
 import { authRateLimit } from './middleware/rate-limit';
 
@@ -87,6 +89,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/subscription-tiers', subscriptionTierRoutes);
   app.use('/api/company-preferences', companyPreferenceRoutes);
   app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/billing', billingRoutes);
+  
+  // Webhook routes do not use tenant middleware
+  app.use('/webhooks/payments', paymentWebhookRoutes);
 
   // Legacy routes for backward compatibility
   // These will be migrated to the modular structure over time
