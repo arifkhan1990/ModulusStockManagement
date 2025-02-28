@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ICategory extends Document {
   name: string;
@@ -23,31 +23,37 @@ export interface ICategory extends Document {
 const CategorySchema = new Schema<ICategory>({
   name: { type: String, required: true },
   description: { type: String },
-  parentId: { type: Schema.Types.ObjectId, ref: 'Category' },
+  parentId: { type: Schema.Types.ObjectId, ref: "Category" },
   level: { type: Number, default: 0 },
   path: { type: String },
   imageUrl: { type: String },
   isActive: { type: Boolean, default: true },
-  businessSize: { type: String, enum: ['small', 'medium', 'large'], default: 'small' },
+  businessSize: {
+    type: String,
+    enum: ["small", "medium", "large"],
+    default: "small",
+  },
   businessType: { type: String },
-  attributes: [{
-    name: { type: String },
-    type: { type: String, enum: ['text', 'number', 'boolean', 'date'] },
-    required: { type: Boolean, default: false },
-    options: [{ type: String }]
-  }],
+  attributes: [
+    {
+      name: { type: String },
+      type: { type: String, enum: ["text", "number", "boolean", "date"] },
+      required: { type: Boolean, default: false },
+      options: [{ type: String }],
+    },
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
 // Update path on save
-CategorySchema.pre('save', async function(next) {
-  if (this.isModified('parentId') || this.isModified('name') || this.isNew) {
+CategorySchema.pre("save", async function (next) {
+  if (this.isModified("parentId") || this.isModified("name") || this.isNew) {
     if (!this.parentId) {
       this.path = this.name;
       this.level = 0;
     } else {
-      const parent = await mongoose.model('Category').findById(this.parentId);
+      const parent = await mongoose.model("Category").findById(this.parentId);
       if (parent) {
         this.path = `${parent.path} > ${this.name}`;
         this.level = parent.level + 1;
@@ -65,6 +71,6 @@ CategorySchema.index({ isActive: 1 });
 CategorySchema.index({ companyId: 1 }); // For tenant isolation
 CategorySchema.index({ companyId: 1, name: 1 }); // For searching by name within company
 
-const Category = mongoose.model<ICategory>('Category', CategorySchema);
+const Category = mongoose.model<ICategory>("Category", CategorySchema);
 
 export default Category;

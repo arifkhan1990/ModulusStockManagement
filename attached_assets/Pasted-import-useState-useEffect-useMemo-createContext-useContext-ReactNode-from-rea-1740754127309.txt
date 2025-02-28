@@ -1,4 +1,3 @@
-
 import {
   useState,
   useEffect,
@@ -21,10 +20,7 @@ const initialState: ThemeProviderState = {
 };
 
 // Explicitly type the context to avoid ambiguity
-const ThemeProviderContext = createContext<ThemeContext>({
-  theme: "light",
-  toggleTheme: () => {},
-});
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -37,18 +33,46 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'ui-theme',
 }: ThemeProviderProps) {
-  export const useTheme = () => {
-    const [theme, setTheme] = useState("light");
-    const [isDarkMode, setIsDarkMode] = useState(false);
-    const toggleTheme = () => {
-      const newTheme = theme === "light" ? "dark" : "light";
-      setTheme(newTheme);
-      setIsDarkMode(newTheme === "dark");
+  const [theme, setThemeState] = useState<Theme>(() =>
+    getStoredTheme(storageKey, defaultTheme)
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      root.classList.remove('light', 'dark');
+      const effectiveTheme =
+        theme === 'system'
+          ? mediaQuery.matches
+            ? 'dark'
+            : 'light'
+          : theme;
+      root.classList.add(effectiveTheme);
     };
-    const contextValue = { theme, toggleTheme };
+
+    applyTheme();
+
+    if (theme === 'system') {
+      mediaQuery.addEventListener('change', applyTheme);
+      return () => mediaQuery.removeEventListener('change', applyTheme);
+    }
+  }, [theme]);
+
+  const contextValue = useMemo(
+    () => ({
+      theme,
+      setTheme: (newTheme: Theme) => {
+        localStorage.setItem(storageKey, newTheme);
+        setThemeState(newTheme);
+      },
+    }),
+    [theme, storageKey]
+  );
 
   return (
-    <ThemeProviderContext.Provider value={{...contextValue}}>
+    <ThemeProviderContext.Provider value={contextValue}>
       {children}
     </ThemeProviderContext.Provider>
   );
