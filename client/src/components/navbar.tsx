@@ -23,7 +23,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between py-4">
         <div className="flex items-center gap-2">
           <Link href="/">
-            <div className="flex items-center space-x-2">
+            <span className="flex items-center space-x-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -41,7 +41,7 @@ export function Navbar() {
               <span className="hidden font-bold sm:inline-block">
                 MSM System
               </span>
-            </div>
+            </span>
           </Link>
         </div>
 
@@ -76,11 +76,9 @@ export function Navbar() {
           ) : user ? (
             <div className="flex items-center gap-4">
               <Link href="/dashboard">
-                <div>
-                  <Button variant="outline" size="sm">
-                    Dashboard
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm">
+                  Dashboard
+                </Button>
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -108,16 +106,12 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <div>
-                  <Button variant="ghost" size="sm">
-                    Login
-                  </Button>
-                </div>
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
               </Link>
               <Link href="/register">
-                <div>
-                  <Button size="sm">Register</Button>
-                </div>
+                <Button size="sm">Register</Button>
               </Link>
             </>
           )}
@@ -200,11 +194,9 @@ export function Navbar() {
             {user ? (
               <>
                 <Link href="/dashboard">
-                  <div>
-                    <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
-                      Dashboard
-                    </Button>
-                  </div>
+                  <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
+                    Dashboard
+                  </Button>
                 </Link>
                 <Button variant="outline" className="w-full" onClick={logout}>
                   Logout
@@ -213,18 +205,14 @@ export function Navbar() {
             ) : (
               <>
                 <Link href="/login">
-                  <div>
-                    <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
-                      Login
-                    </Button>
-                  </div>
+                  <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
+                    Login
+                  </Button>
                 </Link>
                 <Link href="/register">
-                  <div>
-                    <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
-                      Register
-                    </Button>
-                  </div>
+                  <Button variant="default" className="w-full" onClick={() => setIsOpen(false)}>
+                    Register
+                  </Button>
                 </Link>
               </>
             )}

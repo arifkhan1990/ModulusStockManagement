@@ -1,8 +1,11 @@
+
 import { Suspense, lazy } from "react";
 import { Switch, Route } from "wouter";
 import { AuthProvider } from "@/hooks/use-auth";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // Added import
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 // Layouts
 import { LandingLayout } from "@/components/layouts/landing-layout";
@@ -24,101 +27,123 @@ const Reports = lazy(() => import("@/pages/reports"));
 const Settings = lazy(() => import("@/pages/settings"));
 const TestAuth = lazy(() => import("@/pages/test-auth"));
 
-const queryClient = new QueryClient(); // Created a new QueryClient instance
+const LoadingFallback = () => (
+  <div className="flex h-screen w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+  </div>
+);
 
-export default function App() {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}> {/* Wrapped with QueryClientProvider */}
-      <AuthProvider>
-        <Switch>
-          {/* Landing Routes */}
-          <Route path="/">
-            <LandingLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Home />
-              </Suspense>
-            </LandingLayout>
-          </Route>
-          <Route path="/login">
-            <LandingLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Login />
-              </Suspense>
-            </LandingLayout>
-          </Route>
-          <Route path="/register">
-            <LandingLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Register />
-              </Suspense>
-            </LandingLayout>
-          </Route>
-          <Route path="/test-auth">
-            <Suspense fallback={<div>Loading...</div>}>
-              <TestAuth />
-            </Suspense>
-          </Route>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Switch>
+            {/* Public routes */}
+            <Route path="/">
+              <LandingLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Home />
+                </Suspense>
+              </LandingLayout>
+            </Route>
+            <Route path="/login">
+              <LandingLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Login />
+                </Suspense>
+              </LandingLayout>
+            </Route>
+            <Route path="/register">
+              <LandingLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Register />
+                </Suspense>
+              </LandingLayout>
+            </Route>
 
-          {/* Dashboard Routes */}
-          <Route path="/dashboard">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Dashboard />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/products">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Products />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/stock">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Stock />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/locations">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Locations />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/suppliers">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Suppliers />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/customers">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Customers />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/reports">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Reports />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-          <Route path="/settings">
-            <DashboardLayout>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Settings />
-              </Suspense>
-            </DashboardLayout>
-          </Route>
-        </Switch>
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+            {/* Dashboard routes */}
+            <Route path="/dashboard">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Dashboard />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/products">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Products />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/stock">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Stock />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/locations">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Locations />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/suppliers">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Suppliers />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/customers">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Customers />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/reports">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Reports />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/settings">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Settings />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+            <Route path="/test-auth">
+              <DashboardLayout>
+                <Suspense fallback={<LoadingFallback />}>
+                  <TestAuth />
+                </Suspense>
+              </DashboardLayout>
+            </Route>
+
+            {/* 404 fallback */}
+            <Route>
+              <LandingLayout>
+                <div className="container flex h-screen items-center justify-center">
+                  <div className="text-center">
+                    <h1 className="text-4xl font-bold">404</h1>
+                    <p className="mt-4 text-lg">Page not found</p>
+                  </div>
+                </div>
+              </LandingLayout>
+            </Route>
+          </Switch>
+          <Toaster />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
+
+export default App;
