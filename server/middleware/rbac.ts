@@ -1,103 +1,89 @@
-import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../utils/error';
-import Role from '../models/role.model';
+import { Request, Response, NextFunction } from "express";
+import { AppError } from "../utils/error";
+import Role from "../models/role.model";
 
 // Define roles and their hierarchy
 export const roles = {
-  ADMIN: 'admin',
-  MANAGER: 'manager',
-  STAFF: 'staff',
-  CASHIER: 'cashier',
-  VIEWER: 'viewer'
+  ADMIN: "admin",
+  MANAGER: "manager",
+  STAFF: "staff",
+  CASHIER: "cashier",
+  VIEWER: "viewer",
 };
 
 // Role hierarchy and permissions
 const roleHierarchy = {
-  [roles.ADMIN]: [roles.ADMIN, roles.MANAGER, roles.STAFF, roles.CASHIER, roles.VIEWER],
+  [roles.ADMIN]: [
+    roles.ADMIN,
+    roles.MANAGER,
+    roles.STAFF,
+    roles.CASHIER,
+    roles.VIEWER,
+  ],
   [roles.MANAGER]: [roles.MANAGER, roles.STAFF, roles.CASHIER, roles.VIEWER],
   [roles.STAFF]: [roles.STAFF, roles.CASHIER, roles.VIEWER],
   [roles.CASHIER]: [roles.CASHIER, roles.VIEWER],
-  [roles.VIEWER]: [roles.VIEWER]
+  [roles.VIEWER]: [roles.VIEWER],
 };
 
 // Resource permissions by role
 const resourcePermissions = {
   products: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['create', 'read', 'update'],
-    [roles.STAFF]: ['read', 'update'],
-    [roles.CASHIER]: ['read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["create", "read", "update"],
+    [roles.STAFF]: ["read", "update"],
+    [roles.CASHIER]: ["read"],
+    [roles.VIEWER]: ["read"],
   },
   inventory: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['create', 'read', 'update'],
-    [roles.STAFF]: ['read', 'update'],
-    [roles.CASHIER]: ['read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["create", "read", "update"],
+    [roles.STAFF]: ["read", "update"],
+    [roles.CASHIER]: ["read"],
+    [roles.VIEWER]: ["read"],
   },
   invoices: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['create', 'read', 'update'],
-    [roles.STAFF]: ['create', 'read', 'update'],
-    [roles.CASHIER]: ['create', 'read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["create", "read", "update"],
+    [roles.STAFF]: ["create", "read", "update"],
+    [roles.CASHIER]: ["create", "read"],
+    [roles.VIEWER]: ["read"],
   },
   orders: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['create', 'read', 'update'],
-    [roles.STAFF]: ['create', 'read', 'update'],
-    [roles.CASHIER]: ['create', 'read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["create", "read", "update"],
+    [roles.STAFF]: ["create", "read", "update"],
+    [roles.CASHIER]: ["create", "read"],
+    [roles.VIEWER]: ["read"],
   },
   users: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['read'],
-    [roles.STAFF]: ['read'],
-    [roles.CASHIER]: ['read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["read"],
+    [roles.STAFF]: ["read"],
+    [roles.CASHIER]: ["read"],
+    [roles.VIEWER]: ["read"],
   },
   customers: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['create', 'read', 'update'],
-    [roles.STAFF]: ['create', 'read', 'update'],
-    [roles.CASHIER]: ['read'],
-    [roles.VIEWER]: ['read']
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["create", "read", "update"],
+    [roles.STAFF]: ["create", "read", "update"],
+    [roles.CASHIER]: ["read"],
+    [roles.VIEWER]: ["read"],
   },
   settings: {
-    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
-    [roles.MANAGER]: ['read'],
+    [roles.ADMIN]: ["create", "read", "update", "delete"],
+    [roles.MANAGER]: ["read"],
     [roles.STAFF]: [],
     [roles.CASHIER]: [],
-    [roles.VIEWER]: []
+    [roles.VIEWER]: [],
   },
   reports: {
-    [roles.ADMIN]: ['read'],
-    [roles.MANAGER]: ['read'],
-    [roles.STAFF]: ['read'],
+    [roles.ADMIN]: ["read"],
+    [roles.MANAGER]: ["read"],
+    [roles.STAFF]: ["read"],
     [roles.CASHIER]: [],
-    [roles.VIEWER]: ['read']
-  }
-};
-
-/**
- * Check if a role has access to a specific resource and action
- */
-const hasPermission = (role: string, resource: string, action: string): boolean => {
-  if (!roleHierarchy[role]) return false;
-  if (!resourcePermissions[resource]) return false;
-
-  // Check each role in the hierarchy
-  for (const r of roleHierarchy[role]) {
-    if (
-      resourcePermissions[resource][r] &&
-      resourcePermissions[resource][r].includes(action)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
+    [roles.VIEWER]: ["read"],
+  },
 };
 
 /**
@@ -107,7 +93,7 @@ export const requirePermission = (resource: string, action: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // Check if user exists and has a role
     if (!req.user || !req.user.role) {
-      return next(new AppError('Unauthorized access', 401));
+      return next(new AppError("Unauthorized access", 401));
     }
 
     // Check if user has permission
@@ -116,7 +102,9 @@ export const requirePermission = (resource: string, action: string) => {
     }
 
     // If not, return forbidden error
-    return next(new AppError('You do not have permission to perform this action', 403));
+    return next(
+      new AppError("You do not have permission to perform this action", 403),
+    );
   };
 };
 
@@ -126,27 +114,38 @@ export const requirePermission = (resource: string, action: string) => {
 export const restrictTo = (...allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !req.user.role) {
-      return next(new AppError('Unauthorized access', 401));
+      return next(new AppError("Unauthorized access", 401));
     }
 
     if (allowedRoles.includes(req.user.role)) {
       return next();
     }
 
-    return next(new AppError('You do not have permission to perform this action', 403));
+    return next(
+      new AppError("You do not have permission to perform this action", 403),
+    );
   };
 };
 
 // Require system admin role
-export const requireSystemAdmin = async (req: Request, res: Response, next: NextFunction) => {
+export const requireSystemAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     if (!req.user) {
-      return next(new AppError('Authentication required', 401));
+      return next(new AppError("Authentication required", 401));
     }
 
     // Check if user is a system admin
-    if (req.user.type !== 'system_admin') {
-      return next(new AppError('Access denied. System administrator privileges required.', 403));
+    if (req.user.type !== "system_admin") {
+      return next(
+        new AppError(
+          "Access denied. System administrator privileges required.",
+          403,
+        ),
+      );
     }
 
     // If we're here, the user is a system admin
@@ -157,14 +156,18 @@ export const requireSystemAdmin = async (req: Request, res: Response, next: Next
 };
 
 // Require company admin role
-export const requireCompanyAdmin = async (req: Request, res: Response, next: NextFunction) => {
+export const requireCompanyAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     if (!req.user) {
-      return next(new AppError('Authentication required', 401));
+      return next(new AppError("Authentication required", 401));
     }
 
     // Check if user is a company admin
-    if (req.user.type === 'company_admin') {
+    if (req.user.type === "company_admin") {
       return next();
     }
 
@@ -172,12 +175,13 @@ export const requireCompanyAdmin = async (req: Request, res: Response, next: Nex
     if (req.user.roleIds && req.user.roleIds.length > 0) {
       const roles = await Role.find({
         _id: { $in: req.user.roleIds },
-        companyId: req.company._id
+        companyId: req.company._id,
       });
 
-      const hasAdminPermission = roles.some(role =>
-        role.permissions.includes('admin') ||
-        role.permissions.includes('company_admin')
+      const hasAdminPermission = roles.some(
+        (role) =>
+          role.permissions.includes("admin") ||
+          role.permissions.includes("company_admin"),
       );
 
       if (hasAdminPermission) {
@@ -185,7 +189,12 @@ export const requireCompanyAdmin = async (req: Request, res: Response, next: Nex
       }
     }
 
-    return next(new AppError('Access denied. Company administrator privileges required.', 403));
+    return next(
+      new AppError(
+        "Access denied. Company administrator privileges required.",
+        403,
+      ),
+    );
   } catch (error) {
     next(error);
   }
@@ -196,16 +205,16 @@ export const hasPermission = (permission: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return next(new AppError('Authentication required', 401));
+        return next(new AppError("Authentication required", 401));
       }
 
       // System admins have all permissions
-      if (req.user.type === 'system_admin') {
+      if (req.user.type === "system_admin") {
         return next();
       }
 
       // Company admins have all permissions for their company
-      if (req.user.type === 'company_admin' && req.company) {
+      if (req.user.type === "company_admin" && req.company) {
         return next();
       }
 
@@ -213,12 +222,13 @@ export const hasPermission = (permission: string) => {
       if (req.user.roleIds && req.user.roleIds.length > 0) {
         const roles = await Role.find({
           _id: { $in: req.user.roleIds },
-          companyId: req.company._id
+          companyId: req.company._id,
         });
 
-        const hasRequiredPermission = roles.some(role =>
-          role.permissions.includes(permission) ||
-          role.permissions.includes('admin')
+        const hasRequiredPermission = roles.some(
+          (role) =>
+            role.permissions.includes(permission) ||
+            role.permissions.includes("admin"),
         );
 
         if (hasRequiredPermission) {
@@ -226,7 +236,12 @@ export const hasPermission = (permission: string) => {
         }
       }
 
-      return next(new AppError(`Access denied. '${permission}' permission required.`, 403));
+      return next(
+        new AppError(
+          `Access denied. '${permission}' permission required.`,
+          403,
+        ),
+      );
     } catch (error) {
       next(error);
     }
@@ -239,5 +254,5 @@ export default {
   restrictTo,
   requireSystemAdmin,
   requireCompanyAdmin,
-  hasPermission
+  hasPermission,
 };

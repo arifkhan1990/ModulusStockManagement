@@ -1,38 +1,4 @@
-
-import mongoose, { Schema, Document } from 'mongoose';
-
-export interface ISystemLog extends Document {
-  companyId: Schema.Types.ObjectId;
-  action: string;
-  entityType?: string;
-  entityId?: Schema.Types.ObjectId;
-  userId: Schema.Types.ObjectId;
-  details?: object;
-  ipAddress?: string;
-  timestamp: Date;
-}
-
-const SystemLogSchema = new Schema<ISystemLog>({
-  companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
-  action: { type: String, required: true },
-  entityType: { type: String },
-  entityId: { type: Schema.Types.ObjectId },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  details: { type: Schema.Types.Mixed },
-  ipAddress: { type: String },
-  timestamp: { type: Date, default: Date.now }
-});
-
-// Indexes for faster lookups
-SystemLogSchema.index({ companyId: 1, timestamp: -1 });
-SystemLogSchema.index({ userId: 1 });
-SystemLogSchema.index({ action: 1 });
-SystemLogSchema.index({ entityType: 1, entityId: 1 });
-
-const SystemLog = mongoose.model<ISystemLog>('SystemLog', SystemLogSchema);
-
-export default SystemLog;
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISystemLog extends Document {
   companyId: Schema.Types.ObjectId;
@@ -47,15 +13,15 @@ export interface ISystemLog extends Document {
 }
 
 const SystemLogSchema = new Schema<ISystemLog>({
-  companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   action: { type: String, required: true }, // e.g., 'create', 'update', 'delete', 'login', 'logout'
   entity: { type: String, required: true }, // e.g., 'product', 'order', 'invoice', 'user'
   entityId: { type: Schema.Types.ObjectId },
   details: { type: Schema.Types.Mixed }, // Can contain any additional details
   ipAddress: { type: String },
   userAgent: { type: String },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Indexes for faster queries
@@ -67,6 +33,6 @@ SystemLogSchema.index({ entityId: 1 });
 SystemLogSchema.index({ createdAt: 1 });
 SystemLogSchema.index({ companyId: 1, createdAt: -1 }); // For company-specific recent activity
 
-const SystemLog = mongoose.model<ISystemLog>('SystemLog', SystemLogSchema);
+const SystemLog = mongoose.model<ISystemLog>("SystemLog", SystemLogSchema);
 
 export default SystemLog;
