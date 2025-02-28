@@ -7,8 +7,6 @@ import {
   Warehouse,
   Users,
   TrendingUp,
-  Settings,
-  LogOut,
   ArrowRightLeft,
   BarChart3,
   Store,
@@ -42,7 +40,11 @@ const sidebarItems = [
   },
 ];
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [location] = useLocation();
   const { logout } = useAuth();
 
@@ -61,7 +63,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <Button
                     variant={location === item.href ? "secondary" : "ghost"}
                     className="w-full justify-start"
-                    onClick={() => window.location.href = item.href}
+                    onClick={() => (window.location.href = item.href)}
                   >
                     {item.icon && <item.icon className="w-5 h-5 mr-2" />}
                     {item.label}
@@ -84,9 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto p-6">
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto p-6">{children}</main>
     </div>
   );
 }
@@ -95,11 +95,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 const NavItem = ({ href, icon: Icon, children, isActive }) => {
   return (
     <li>
-      <div 
-        onClick={() => window.location.href = href}
+      <div
+        onClick={() => (window.location.href = href)}
         className={cn(
           "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary cursor-pointer",
-          isActive ? "bg-secondary text-primary" : "hover:bg-secondary"
+          isActive ? "bg-secondary text-primary" : "hover:bg-secondary",
         )}
       >
         <Icon className="h-5 w-5" />
@@ -108,7 +108,6 @@ const NavItem = ({ href, icon: Icon, children, isActive }) => {
     </li>
   );
 };
-
 
 // Placeholder components - Replace with your actual implementation
 const Dashboard = () => <div>Dashboard Content</div>;
@@ -120,33 +119,29 @@ const Settings = () => <div>Settings Content</div>;
 const StockMovements = () => <div>Stock Movements Content</div>;
 const Locations = () => <div>Locations Content</div>;
 
-
 // Example Route Configuration (adapt to your routing library)
 const routes = [
-  { path: '/dashboard', component: Dashboard },
-  { path: '/dashboard/products', component: Products },
-  { path: '/dashboard/inventory', component: Inventory },
-  { path: '/dashboard/suppliers', component: Suppliers },
-  { path: '/dashboard/reports', component: Reports },
-  { path: '/dashboard/settings', component: Settings },
-  { path: '/dashboard/stock-movements', component: StockMovements },
-  { path: '/dashboard/locations', component: Locations },
+  { path: "/dashboard", component: Dashboard },
+  { path: "/dashboard/products", component: Products },
+  { path: "/dashboard/inventory", component: Inventory },
+  { path: "/dashboard/suppliers", component: Suppliers },
+  { path: "/dashboard/reports", component: Reports },
+  { path: "/dashboard/settings", component: Settings },
+  { path: "/dashboard/stock-movements", component: StockMovements },
+  { path: "/dashboard/locations", component: Locations },
 ];
-
 
 //Example App.tsx (Adapt this to your actual routing setup)
 function App() {
-    const [location] = useLocation();
+  const [location] = useLocation();
 
   const renderRoute = () => {
-    const currentRoute = routes.find(route => location.startsWith(route.path));
+    const currentRoute = routes.find((route) =>
+      location.startsWith(route.path),
+    );
     return currentRoute ? <currentRoute.component /> : <div>404 Not Found</div>;
   };
-    return (
-    <DashboardLayout>
-      {renderRoute()}
-    </DashboardLayout>
-  );
+  return <DashboardLayout>{renderRoute()}</DashboardLayout>;
 }
 
 export default App;
