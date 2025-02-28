@@ -43,7 +43,7 @@ export default defineConfig({
     allowedHosts: [
       "6518eacd-285a-4a12-8e0f-10c1d5858f28-00-1r3dbzdzv4kw5.pike.replit.dev",
       "localhost", // Optional: Keep localhost for local development
-      true, // Allow all hosts to connect
+      // Allow all hosts to connect
     ],
   },
 });
