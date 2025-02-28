@@ -1,10 +1,9 @@
-
-import express from 'express';
-import { requireAuth } from '../middleware/auth';
-import { checkCompanyAccess } from '../middleware/tenant';
-import { validateRequest } from '../middleware/validator';
-import { integrationValidators } from '../validators/integration.validator';
-import integrationController from '../controllers/integration.controller';
+import express from "express";
+import { requireAuth } from "../middleware/auth";
+import { tenantMiddleware } from "../middleware/tenant";
+import { validateResource } from "../middleware/validator";
+import { integrationValidators } from "../validators/integration.validator";
+import integrationController from "../controllers/integration.controller";
 
 const router = express.Router();
 
@@ -12,36 +11,47 @@ const router = express.Router();
 router.use(requireAuth);
 
 // Get available integrations
-router.get('/available', checkCompanyAccess, integrationController.getAvailableIntegrations);
+router.get(
+  "/available",
+  tenantMiddleware,
+  integrationController.getAvailableIntegrations,
+);
 
 // Get all integrations for a company
-router.get('/', checkCompanyAccess, integrationController.getIntegrations);
+router.get("/", tenantMiddleware, integrationController.getIntegrations);
 
 // Create a new integration
-router.post('/', 
-  checkCompanyAccess, 
-  validateRequest(integrationValidators.createIntegration),
-  integrationController.createIntegration
+router.post(
+  "/",
+  tenantMiddleware,
+  validateResource(integrationValidators.createIntegration),
+  integrationController.createIntegration,
 );
 
 // Get a single integration
-router.get('/:id', checkCompanyAccess, integrationController.getIntegration);
+router.get("/:id", tenantMiddleware, integrationController.getIntegration);
 
 // Update an integration
-router.put('/:id', 
-  checkCompanyAccess, 
-  validateRequest(integrationValidators.updateIntegration),
-  integrationController.updateIntegration
+router.put(
+  "/:id",
+  tenantMiddleware,
+  validateResource(integrationValidators.updateIntegration),
+  integrationController.updateIntegration,
 );
 
 // Delete an integration
-router.delete('/:id', checkCompanyAccess, integrationController.deleteIntegration);
+router.delete(
+  "/:id",
+  tenantMiddleware,
+  integrationController.deleteIntegration,
+);
 
 // Sync data with integration
-router.post('/:id/sync', 
-  checkCompanyAccess, 
-  validateRequest(integrationValidators.syncIntegration),
-  integrationController.syncIntegration
+router.post(
+  "/:id/sync",
+  tenantMiddleware,
+  validateResource(integrationValidators.syncIntegration),
+  integrationController.syncIntegration,
 );
 
 export default router;
