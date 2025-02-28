@@ -60,11 +60,11 @@ export function Navbar({ toggleSidebar }: NavbarProps) {
             <div className="flex gap-2">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/login")}
+                onClick={() => setLocation("/auth/login")}
               >
                 Log in
               </Button>
-              <Button onClick={() => setLocation("/register")}>
+              <Button onClick={() => setLocation("/auth/register")}>
                 Sign up
               </Button>
             </div>
