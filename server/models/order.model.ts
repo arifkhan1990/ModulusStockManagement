@@ -268,7 +268,7 @@ OrderSchema.pre('save', async function(next) {
 });
 
 // Indexes for faster lookups
-OrderSchema.index({ orderNumber: 1 });
+// Note: orderNumber field index is already defined in the schema
 OrderSchema.index({ customerId: 1 });
 OrderSchema.index({ orderStatus: 1 });
 OrderSchema.index({ paymentStatus: 1 });

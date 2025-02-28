@@ -71,7 +71,7 @@ const UserSchema = new Schema<IUser>({
 });
 
 // Indexes
-UserSchema.index({ email: 1 }, { unique: true });
+// Note: email field index is already defined in the schema
 UserSchema.index({ companyId: 1 });
 UserSchema.index({ type: 1 });
 UserSchema.index({ isActive: 1 });

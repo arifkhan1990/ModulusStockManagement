@@ -98,7 +98,7 @@ const CompanySchema = new Schema<ICompany>({
 
 // Indexes
 CompanySchema.index({ slug: 1 }, { unique: true });
-CompanySchema.index({ domain: 1 }, { unique: true, sparse: true });
+// Note: domain field index is already defined in the schema
 CompanySchema.index({ ownerId: 1 });
 CompanySchema.index({ 'subscription.status': 1 });
 CompanySchema.index({ 'subscription.endDate': 1 });

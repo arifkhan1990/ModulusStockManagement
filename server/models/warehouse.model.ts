@@ -92,7 +92,7 @@ const WarehouseSchema = new Schema<IWarehouse>({
 });
 
 // Indexes for faster lookups
-WarehouseSchema.index({ code: 1 });
+// Note: code field index is likely already defined in the schema definition
 WarehouseSchema.index({ name: 1 });
 WarehouseSchema.index({ 'address.country': 1, 'address.city': 1 });
 

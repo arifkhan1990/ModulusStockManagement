@@ -164,7 +164,7 @@ PurchaseOrderSchema.pre('save', async function(next) {
 });
 
 // Indexes for faster lookups
-PurchaseOrderSchema.index({ poNumber: 1 });
+// Note: poNumber field index is already defined in the schema
 PurchaseOrderSchema.index({ supplierId: 1 });
 PurchaseOrderSchema.index({ status: 1 });
 PurchaseOrderSchema.index({ orderDate: 1 });
