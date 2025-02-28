@@ -37,6 +37,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   // Track open menu sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -57,6 +58,10 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   const isLinkActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const pathMatches = (href:string) => {
+    return location.pathname.startsWith(href);
+  }
 
   const sidebarVariants = {
     open: { width: 260, transition: { duration: 0.2 } },
@@ -140,6 +145,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
         { label: t('companySettings'), path: '/dashboard/settings/company' },
         { label: t('users'), path: '/dashboard/settings/users' },
         { label: t('features'), path: '/dashboard/settings/features' },
+        { label: t('preferences'), path: '/dashboard/settings/preferences' },
       ],
     },
     {
@@ -150,6 +156,19 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
       path: '/dashboard/billing',
     },
   ];
+
+  const adminLinks = [
+    { name: t('dashboard'), href: '/admin', icon: LayoutDashboard },
+    { name: t('features'), href: '/admin/features', icon: <Puzzle /> },
+    { name: t('subscriptionTiers'), href: '/admin/subscription-tiers', icon: <Tag /> },
+    { name: t('companies'), href: '/admin/companies', icon: <Building2 /> },
+    { name: t('analytics'), href: '/admin/analytics', icon: <BarChart /> },
+  ];
+
+  const settingsLinks = [
+    { name: t('preferences'), href: '/dashboard/settings/preferences', icon: <Settings /> },
+  ];
+
 
   return (
     <AnimatePresence>

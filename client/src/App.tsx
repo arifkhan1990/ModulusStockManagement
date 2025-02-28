@@ -7,12 +7,18 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { LandingLayout } from "@/components/layouts/landing-layout";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
-import { AdminLayout } from "@/components/layout/AdminLayout"; // Added import
+import { AdminLayout } from "@/components/layout/AdminLayout";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
 import HomePage from "@/pages/home";
 import NotFoundPage from "@/pages/not-found";
+import NotificationsPage from "@/pages/dashboard/notifications"; // Added import
+import SharingPage from "@/pages/dashboard/sharing"; // Added import
+import DownloadsPage from "@/pages/dashboard/downloads"; // Added import
+import InvoicesPage from "@/pages/dashboard/invoices"; // Added import
+import PreferencesPage from "@/pages/dashboard/settings/preferences"; // Added import
+
 
 // Error boundary component
 const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
@@ -43,18 +49,15 @@ const StockPage = lazy(() => import("@/pages/dashboard/stock"));
 const StockMovementsPage = lazy(() => import("@/pages/dashboard/stock/movements"));
 const SuppliersPage = lazy(() => import("@/pages/dashboard/suppliers"));
 const SettingsPage = lazy(() => import("@/pages/dashboard/settings"));
-const NotificationsPage = lazy(() => import("@/pages/dashboard/notifications")); // Added
-const SharingPage = lazy(() => import("@/pages/dashboard/sharing")); // Added
-const DownloadsPage = lazy(() => import("@/pages/dashboard/downloads")); // Added
-const AdminDashboard = lazy(() => import("@/pages/admin")); // Added
-const AdminFeaturesPage = lazy(() => import("@/pages/admin/features")); // Added
-const CompaniesPage = lazy(() => import("@/pages/admin/companies")); // Added
-const SubscriptionTiersPage = lazy(() => import("@/pages/admin/subscription-tiers")); // Added
-const AdminCompaniesDetailPage = lazy(() => import('@/pages/admin/companies/detail')); // Added
-const AdminCompaniesNewPage = lazy(() => import('@/pages/admin/companies/new')); // Added
-const AdminAnalyticsPage = lazy(() => import('@/pages/admin/analytics')); // Added
-const AdminUsersPage = lazy(() => import('@/pages/admin/users')); // Added
-const PosPage = lazy(() => import('@/pages/dashboard/pos')); // Added
+const AdminDashboard = lazy(() => import("@/pages/admin"));
+const AdminFeaturesPage = lazy(() => import("@/pages/admin/features"));
+const CompaniesPage = lazy(() => import("@/pages/admin/companies"));
+const SubscriptionTiersPage = lazy(() => import("@/pages/admin/subscription-tiers"));
+const AdminCompaniesDetailPage = lazy(() => import('@/pages/admin/companies/detail'));
+const AdminCompaniesNewPage = lazy(() => import('@/pages/admin/companies/new'));
+const AdminAnalyticsPage = lazy(() => import('@/pages/admin/analytics'));
+const AdminUsersPage = lazy(() => import('@/pages/admin/users'));
+const PosPage = lazy(() => import('@/pages/dashboard/pos'));
 
 
 export default function App() {
@@ -79,7 +82,7 @@ export default function App() {
                         <Route index element={<DashboardPage />} />
                         <Route path="stock" element={<Outlet />}>
                           <Route index element={<StockPage />} />
-                          <Route path="movements" element={<StockMovementsPage />} /> {/* Added movements route */}
+                          <Route path="movements" element={<StockMovementsPage />} />
                         </Route>
                         <Route path="products" element={<ProductsPage />} />
                         <Route path="locations" element={<LocationsPage />} />
@@ -89,13 +92,14 @@ export default function App() {
                         <Route path="sharing" element={<SharingPage />} />
                         <Route path="downloads" element={<DownloadsPage />} />
                         <Route path="pos" element={<PosPage />} />
-                        <Route path="profile" element={<div>Profile Page</div>} /> {/* Placeholder */}
-                        <Route path="customers" element={<div>Customers Page</div>} /> {/* Placeholder */}
-                        <Route path="reports" element={<div>Reports Page</div>} /> {/* Placeholder */}
+                        <Route path="invoices" element={<InvoicesPage />} /> {/* Added invoices route */}
+                        <Route path="settings/preferences" element={<PreferencesPage />} /> {/* Added preferences route */}
+                        <Route path="profile" element={<div>Profile Page</div>} />
+                        <Route path="customers" element={<div>Customers Page</div>} />
+                        <Route path="reports" element={<div>Reports Page</div>} />
                       </Route>
 
-                      {/* Admin routes */}
-                      <Route path="/admin" element={<ProtectedRoute><AdminLayout><Outlet /></AdminLayout></ProtectedRoute>}> {/* Added ProtectedRoute */}
+                      <Route path="/admin" element={<ProtectedRoute><AdminLayout><Outlet /></AdminLayout></ProtectedRoute>}>
                         <Route index element={<AdminDashboard />} />
                         <Route path="features" element={<AdminFeaturesPage />} />
                         <Route path="subscription-tiers" element={<SubscriptionTiersPage />} />

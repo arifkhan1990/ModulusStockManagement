@@ -1,57 +1,38 @@
-
-import express from 'express';
-import { body } from 'express-validator';
+import { Router } from 'express';
 import * as productController from '../controllers/product.controller';
-import { validateRequest } from '../middleware/validate-request';
-import { requireAuth } from '../middleware/auth';
-import { checkFeatureEnabled } from '../middleware/feature-toggle';
+import { authenticate } from '../middleware/auth';
+import { validateProduct } from '../validators/product.validator';
+import { checkFeatureAccess } from '../middleware/rbac';
 
-const router = express.Router();
+const router = Router();
 
-// Apply auth middleware to all routes
-router.use(requireAuth);
+// Public routes
+router.get('/products/public', productController.getPublicProducts);
 
-// Get all products
-router.get('/', 
-  checkFeatureEnabled('inventory_management'),
-  productController.getAllProducts
-);
+// Protected routes
+router.get('/products', authenticate, checkFeatureAccess('stock_management'), productController.getProducts);
+router.get('/products/:id', authenticate, checkFeatureAccess('stock_management'), productController.getProductById);
+router.post('/products', authenticate, checkFeatureAccess('stock_management'), validateProduct, productController.createProduct);
+router.put('/products/:id', authenticate, checkFeatureAccess('stock_management'), validateProduct, productController.updateProduct);
+router.delete('/products/:id', authenticate, checkFeatureAccess('stock_management'), productController.deleteProduct);
 
-// Get a single product
-router.get('/:id', 
-  checkFeatureEnabled('inventory_management'),
-  productController.getProductById
-);
+// Batch operations
+router.post('/products/bulk', authenticate, checkFeatureAccess('stock_management'), productController.bulkCreateProducts);
+router.put('/products/bulk', authenticate, checkFeatureAccess('stock_management'), productController.bulkUpdateProducts);
 
-// Create a new product
-router.post('/',
-  checkFeatureEnabled('inventory_management'),
-  [
-    body('name').trim().notEmpty().withMessage('Product name is required'),
-    body('sku').trim().notEmpty().withMessage('SKU is required'),
-    body('price').isNumeric().withMessage('Price must be a number'),
-    body('stockQuantity').isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
-  ],
-  validateRequest,
-  productController.createProduct
-);
+// Stock related operations
+router.post('/products/:id/stock/adjust', authenticate, checkFeatureAccess('stock_management'), productController.adjustStock);
+router.post('/products/transfer', authenticate, checkFeatureAccess('stock_management'), productController.transferStock);
+router.get('/products/low-stock', authenticate, checkFeatureAccess('stock_management'), productController.getLowStockProducts);
 
-// Update a product
-router.put('/:id',
-  checkFeatureEnabled('inventory_management'),
-  [
-    body('name').optional().trim().notEmpty().withMessage('Product name is required'),
-    body('price').optional().isNumeric().withMessage('Price must be a number'),
-    body('stockQuantity').optional().isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
-  ],
-  validateRequest,
-  productController.updateProduct
-);
+// Category operations
+router.get('/categories', authenticate, checkFeatureAccess('stock_management'), productController.getCategories);
+router.post('/categories', authenticate, checkFeatureAccess('stock_management'), productController.createCategory);
+router.put('/categories/:id', authenticate, checkFeatureAccess('stock_management'), productController.updateCategory);
+router.delete('/categories/:id', authenticate, checkFeatureAccess('stock_management'), productController.deleteCategory);
 
-// Delete a product
-router.delete('/:id',
-  checkFeatureEnabled('inventory_management'),
-  productController.deleteProduct
-);
+// Analytics
+router.get('/products/analytics/sales', authenticate, checkFeatureAccess('analytics'), productController.getProductSalesAnalytics);
+router.get('/products/analytics/stock', authenticate, checkFeatureAccess('analytics'), productController.getStockLevelAnalytics);
 
 export default router;
