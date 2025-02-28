@@ -151,23 +151,7 @@ export async function downloadFile(
 }
 import { useState } from 'react';
 
-// Assuming this file already has the apiRequest function
-// If not, we're adding it here
-export const apiRequest = async (method = 'GET', url: string, data?: any) => {
-  const options: RequestInit = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  };
-
-  if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-    options.body = JSON.stringify(data);
-  }
-
-  return fetch(url, options);
-};
+// Using the existing apiRequest function that's already defined in this file
 
 // Add the useApi hook that was missing
 export const useApi = () => {
