@@ -4,8 +4,8 @@ import { requireAuth } from '../middleware/auth';
 import { requireSystemAdmin } from '../middleware/rbac';
 import subscriptionTierValidator from '../validators/subscription-tier.validator';
 
-// Import controller directly to avoid undefined functions
-import subscriptionTierController from '../controllers/subscription-tier.controller';
+// Import controller with named exports
+import * as subscriptionTierController from '../controllers/subscription-tier.controller';
 
 const router = express.Router();
 
