@@ -19,7 +19,7 @@ router.get('/history', billingController.getBillingHistory);
 // Process new subscription - requires admin role
 router.post(
   '/process-subscription',
-  requireAdminRole,
+  requireCompanyAdmin,
   billingValidator.validateSubscriptionProcess,
   billingController.processSubscription
 );
@@ -27,7 +27,7 @@ router.post(
 // Update subscription - requires admin role
 router.put(
   '/subscription/:companyId',
-  requireAdminRole,
+  requireSystemAdmin,
   billingValidator.validateSubscriptionUpdate,
   billingController.updateSubscription
 );
@@ -35,7 +35,7 @@ router.put(
 // Cancel subscription - requires admin role
 router.post(
   '/subscription/:companyId/cancel',
-  requireAdminRole,
+  requireCompanyAdmin,
   billingValidator.validateSubscriptionCancel,
   billingController.cancelSubscription
 );
