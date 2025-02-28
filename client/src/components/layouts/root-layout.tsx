@@ -1,10 +1,10 @@
 
 import React, { ReactNode } from "react";
 import { useLocation } from "wouter";
-import { useAuth } from "@/providers/auth-provider";
+import { useAuth } from "@/hooks/use-auth";
 import LoadingLayout from "./loading-layout";
 import DashboardLayout from "./dashboard-layout";
-import Navbar from "@/components/navbar";
+import LandingLayout from "./landing-layout";
 
 export function RootLayout({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -21,19 +21,7 @@ export function RootLayout({ children }: { children: ReactNode }) {
   }
   
   // For public pages, use the landing layout
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow container mx-auto py-8 px-4">
-        {children}
-      </main>
-      <footer className="bg-secondary py-6">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Modulus Stock Management. All rights reserved.
-        </div>
-      </footer>
-    </div>
-  );
+  return <LandingLayout>{children}</LandingLayout>;
 }
 
 export default RootLayout;

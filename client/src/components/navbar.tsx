@@ -73,6 +73,9 @@ export default function Navbar() {
         </NavigationMenu>
 
         <div className="ml-auto flex items-center space-x-4">
+          <Link href="/test-auth">
+            <Button variant="outline" size="sm">Test Auth</Button>
+          </Link>
           {user ? (
             <>
               <Link href="/dashboard">

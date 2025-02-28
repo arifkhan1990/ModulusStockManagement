@@ -1,9 +1,9 @@
-
 import React, { Suspense } from 'react';
 import { Route, Switch, Redirect } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SkeletonPage } from '@/components/ui/skeleton';
 import { AuthProvider } from '@/hooks/use-auth';
+import TestAuthPage from './pages/test-auth'; // Added import
 
 // Lazy-loaded components for better performance
 const DashboardLayout = React.lazy(() => import('@/components/layouts/dashboard-layout'));
@@ -37,13 +37,13 @@ export default function App() {
               <AuthPage />
             </Suspense>
           </Route>
-          
+
           <Route path="/">
             <Suspense fallback={<SkeletonPage />}>
               <HomePage />
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -51,7 +51,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/products">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -59,7 +59,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/locations">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -67,7 +67,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/stock-movements">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -75,7 +75,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/profile">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -83,7 +83,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/settings">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -91,7 +91,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route path="/dashboard/notifications">
             <Suspense fallback={<SkeletonPage />}>
               <DashboardLayout>
@@ -99,7 +99,7 @@ export default function App() {
               </DashboardLayout>
             </Suspense>
           </Route>
-          
+
           <Route>
             <Redirect to="/" />
           </Route>
