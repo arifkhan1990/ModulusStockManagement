@@ -8,7 +8,7 @@ export default {
   out: './drizzle',
   schema: './shared/schema.ts',
   // Adding placeholder values to avoid configuration errors
-  host: '',
+  host: 'placeholder',
   database: 'placeholder',
   user: 'placeholder',
   password: 'placeholder'
