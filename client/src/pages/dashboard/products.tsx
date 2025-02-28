@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,24 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -33,267 +14,98 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 
-// Mock data
+// Mock data for demonstration
 const mockProducts = [
   {
     id: "1",
-    sku: "PROD-001",
     name: "Wireless Headphones",
+    sku: "WH-001",
     category: "Electronics",
     price: 129.99,
-    quantity: 45,
-    status: "In Stock",
+    stock: 45
   },
   {
     id: "2",
-    sku: "PROD-002",
-    name: "Smartphone Charger",
+    name: "Smart Watch",
+    sku: "SW-002",
     category: "Electronics",
-    price: 24.99,
-    quantity: 12,
-    status: "Low Stock",
+    price: 249.99,
+    stock: 28
   },
   {
     id: "3",
-    sku: "PROD-003",
     name: "Bluetooth Speaker",
+    sku: "BS-003",
     category: "Electronics",
-    price: 89.99,
-    quantity: 30,
-    status: "In Stock",
+    price: 79.99,
+    stock: 62
   },
   {
     id: "4",
-    sku: "PROD-004",
-    name: "Desk Lamp",
-    category: "Home",
-    price: 49.99,
-    quantity: 20,
-    status: "In Stock",
+    name: "Laptop Backpack",
+    sku: "LB-004",
+    category: "Accessories",
+    price: 69.99,
+    stock: 94
   },
   {
     id: "5",
-    sku: "PROD-005",
-    name: "Coffee Mug",
-    category: "Kitchen",
-    price: 14.99,
-    quantity: 5,
-    status: "Low Stock",
-  },
+    name: "USB-C Cable (2m)",
+    sku: "UC-005",
+    category: "Accessories",
+    price: 19.99,
+    stock: 152
+  }
 ];
 
 export default function Products() {
-  const [search, setSearch] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const { toast } = useToast();
-
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Product Added",
-      description: "New product has been added successfully.",
-    });
-    setIsAddDialogOpen(false);
-  };
-
-  const filteredProducts = mockProducts.filter(
-    (product) =>
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.sku.toLowerCase().includes(search.toLowerCase()) ||
-      product.category.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  const statusColor = (status: string) => {
-    switch (status) {
-      case "In Stock":
-        return "bg-green-100 text-green-800";
-      case "Low Stock":
-        return "bg-amber-100 text-amber-800";
-      case "Out of Stock":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const [products] = useState(mockProducts);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">Manage your product inventory</p>
+          <p className="text-muted-foreground">
+            Manage your product inventory
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <form onSubmit={handleAddProduct}>
-                <DialogHeader>
-                  <DialogTitle>Add New Product</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details to add a new product to inventory
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="sku">SKU</Label>
-                      <Input id="sku" placeholder="PROD-XXX" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Product Name</Label>
-                      <Input id="name" placeholder="Product name" required />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="electronics">
-                            Electronics
-                          </SelectItem>
-                          <SelectItem value="home">Home</SelectItem>
-                          <SelectItem value="kitchen">Kitchen</SelectItem>
-                          <SelectItem value="office">Office</SelectItem>
-                          <SelectItem value="clothing">Clothing</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="price">Price ($)</Label>
-                      <Input
-                        id="price"
-                        type="number"
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="initial-stock">Initial Stock</Label>
-                      <Input
-                        id="initial-stock"
-                        type="number"
-                        placeholder="0"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="min-stock">Minimum Stock Level</Label>
-                      <Input
-                        id="min-stock"
-                        type="number"
-                        placeholder="0"
-                        min="0"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Product description"
-                      className="resize-none"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">Save Product</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Button className="md:w-auto w-full">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Product
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Products</CardTitle>
+          <CardTitle>Product Inventory</CardTitle>
           <CardDescription>
-            View and manage your entire product inventory
+            View and manage all products in your inventory
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center mb-4">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                className="pl-8"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>SKU</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>SKU</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">Stock</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.sku}</TableCell>
-                    <TableCell>{product.name}</TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.sku}</TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-right">
-                      ${product.price.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {product.quantity}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(
-                          product.status,
-                        )}`}
-                      >
-                        {product.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{product.stock}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -301,141 +113,6 @@ export default function Products() {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Plus, Search, Filter, FileExport } from "lucide-react";
-
-export default function Products() {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock data - in a real app, this would come from an API
-  const products = [
-    {
-      id: "PROD001",
-      name: "Premium T-Shirt",
-      sku: "TS-001",
-      category: "Apparel",
-      stock: 145,
-      price: 24.99,
-      threshold: 20,
-    },
-    {
-      id: "PROD002",
-      name: "Wireless Headphones",
-      sku: "WH-100",
-      category: "Electronics",
-      stock: 32,
-      price: 99.99,
-      threshold: 10,
-    },
-    {
-      id: "PROD003",
-      name: "Desk Lamp",
-      sku: "DL-200",
-      category: "Home",
-      stock: 78,
-      price: 49.50,
-      threshold: 15,
-    },
-    {
-      id: "PROD004",
-      name: "Notebook Set",
-      sku: "NS-300",
-      category: "Stationery",
-      stock: 215,
-      price: 12.99,
-      threshold: 30,
-    },
-    {
-      id: "PROD005",
-      name: "Water Bottle",
-      sku: "WB-100",
-      category: "Accessories",
-      stock: 97,
-      price: 18.50,
-      threshold: 25,
-    },
-  ];
-
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">
-            Manage your product inventory and details
-          </p>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Product
-        </Button>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-auto flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search products..."
-            className="pl-8 w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" /> Filter
-          </Button>
-          <Button variant="outline" size="sm">
-            <FileExport className="mr-2 h-4 w-4" /> Export
-          </Button>
-        </div>
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Stock</TableHead>
-              <TableHead className="text-right">Price</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-                <TableCell>{product.category}</TableCell>
-                <TableCell className={`text-right ${product.stock < product.threshold ? 'text-destructive' : ''}`}>
-                  {product.stock}
-                </TableCell>
-                <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
     </div>
   );
 }

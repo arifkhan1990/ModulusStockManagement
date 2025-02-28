@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,24 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -33,328 +14,103 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Plus, MapPin, Edit, Trash2, Search } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PlusCircle } from "lucide-react";
 
-// Mock data
+// Mock data for demonstration
 const mockLocations = [
   {
     id: "1",
     name: "Main Warehouse",
+    address: "123 Industrial Park, New York, NY",
     type: "Warehouse",
-    address: "123 Storage Ave, New York, NY 10001",
-    contactNumber: "+1 (555) 123-4567",
-    isActive: true,
+    status: "Active",
+    productCount: 287
   },
   {
     id: "2",
     name: "Downtown Store",
-    type: "Store",
-    address: "456 Retail St, New York, NY 10002",
-    contactNumber: "+1 (555) 987-6543",
-    isActive: true,
+    address: "456 Main Street, New York, NY",
+    type: "Retail",
+    status: "Active",
+    productCount: 124
   },
   {
     id: "3",
     name: "West Coast Distribution",
-    type: "Distribution Center",
-    address: "789 Logistics Blvd, Los Angeles, CA 90001",
-    contactNumber: "+1 (555) 246-8101",
-    isActive: true,
+    address: "789 Pacific Ave, Los Angeles, CA",
+    type: "Distribution",
+    status: "Active",
+    productCount: 346
   },
   {
     id: "4",
-    name: "South Fulfillment",
-    type: "Fulfillment Center",
-    address: "321 Shipping Lane, Miami, FL 33101",
-    contactNumber: "+1 (555) 369-1472",
-    isActive: false,
+    name: "North Campus Store",
+    address: "101 University Blvd, Boston, MA",
+    type: "Retail",
+    status: "Active",
+    productCount: 98
   },
   {
     id: "5",
-    name: "Pop-up Shop",
-    type: "Temporary Storage",
-    address: "555 Event Plaza, Chicago, IL 60601",
-    contactNumber: "+1 (555) 258-3690",
-    isActive: true,
-  },
+    name: "Old Storage Facility",
+    address: "202 Storage Lane, Chicago, IL",
+    type: "Warehouse",
+    status: "Inactive",
+    productCount: 12
+  }
 ];
-
-const locationTypes = [
-  "Warehouse",
-  "Store",
-  "Distribution Center",
-  "Fulfillment Center",
-  "Retail Shop",
-  "Dropship Location",
-  "Production Facility",
-  "Temporary Storage",
-  "Other",
-];
-
-// Form schema
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  type: z.string().min(1, { message: "Please select a location type." }),
-  address: z.string().min(5, { message: "Please enter a valid address." }),
-  contactNumber: z.string().optional(),
-  isActive: z.boolean().default(true),
-});
-
-type FormValues = z.infer<typeof formSchema>;
 
 export default function Locations() {
-  const [search, setSearch] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const { toast } = useToast();
-
-  const form = useForm<FormValues>({
-    defaultValues: {
-      name: "",
-      type: "",
-      address: "",
-      contactNumber: "",
-      isActive: true,
-    },
-  });
-
-  const handleAddLocation = (values: FormValues) => {
-    toast({
-      title: "Location Added",
-      description: "New location has been added successfully.",
-    });
-    setIsAddDialogOpen(false);
-    form.reset();
-  };
-
-  const filteredLocations = mockLocations.filter(
-    (location) =>
-      location.name.toLowerCase().includes(search.toLowerCase()) ||
-      location.type.toLowerCase().includes(search.toLowerCase()) ||
-      location.address.toLowerCase().includes(search.toLowerCase()),
-  );
+  const [locations] = useState(mockLocations);
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Locations</h1>
           <p className="text-muted-foreground">
-            Manage warehouses, stores, and other inventory locations
+            Manage your inventory locations
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Location
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <form onSubmit={form.handleSubmit(handleAddLocation)}>
-                <DialogHeader>
-                  <DialogTitle>Add New Location</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details to add a new inventory location
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter location name"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location Type</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select location type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {locationTypes.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Enter full address"
-                              className="resize-none"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="contactNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contact Number (Optional)</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter contact number"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="isActive"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                          <div className="space-y-0.5">
-                            <FormLabel>Active</FormLabel>
-                            <FormDescription>
-                              Inactive locations will not be available for stock
-                              movements
-                            </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsAddDialogOpen(false);
-                      form.reset();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">Save Location</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <Button className="md:w-auto w-full">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          Add Location
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Locations</CardTitle>
+          <CardTitle>Inventory Locations</CardTitle>
           <CardDescription>
-            View and manage your inventory locations
+            View and manage all your inventory locations
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center mb-4">
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search locations..."
-                className="pl-8"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-          </div>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
                   <TableHead>Address</TableHead>
-                  <TableHead>Contact</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">Products</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredLocations.map((location) => (
+                {locations.map((location) => (
                   <TableRow key={location.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                        {location.name}
-                      </div>
-                    </TableCell>
-                    <TableCell>{location.type}</TableCell>
+                    <TableCell className="font-medium">{location.name}</TableCell>
                     <TableCell>{location.address}</TableCell>
-                    <TableCell>{location.contactNumber}</TableCell>
+                    <TableCell>{location.type}</TableCell>
                     <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          location.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {location.isActive ? "Active" : "Inactive"}
-                      </span>
+                      <Badge variant={location.status === "Active" ? "default" : "secondary"}>
+                        {location.status}
+                      </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    <TableCell className="text-right">{location.productCount}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -362,115 +118,6 @@ export default function Locations() {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-import { Button } from "@/components/ui/button";
-import { Plus, MapPin, Building, Package, AlertTriangle } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-export default function Locations() {
-  // Mock data - in a real app, this would come from an API
-  const locations = [
-    {
-      id: "LOC001",
-      name: "Main Warehouse",
-      type: "Warehouse",
-      city: "New York",
-      country: "United States",
-      products: 532,
-      lowStock: 2,
-    },
-    {
-      id: "LOC002",
-      name: "West Coast Distribution Center",
-      type: "Distribution Center",
-      city: "Los Angeles",
-      country: "United States",
-      products: 478,
-      lowStock: 5,
-    },
-    {
-      id: "LOC003",
-      name: "European Hub",
-      type: "Warehouse",
-      city: "Amsterdam",
-      country: "Netherlands",
-      products: 356,
-      lowStock: 1,
-    },
-    {
-      id: "LOC004",
-      name: "Retail Store - Downtown",
-      type: "Retail",
-      city: "Chicago",
-      country: "United States",
-      products: 189,
-      lowStock: 0,
-    },
-  ];
-
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Locations</h1>
-          <p className="text-muted-foreground">
-            Manage your warehouses, distribution centers, and retail locations
-          </p>
-        </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Add Location
-        </Button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {locations.map((location) => (
-          <Card key={location.id} className="overflow-hidden">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle>{location.name}</CardTitle>
-                  <CardDescription>
-                    {location.type} • {location.city}, {location.country}
-                  </CardDescription>
-                </div>
-                {location.type === "Warehouse" ? (
-                  <Building className="h-5 w-5 text-muted-foreground" />
-                ) : location.type === "Distribution Center" ? (
-                  <Package className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <span className="text-muted-foreground text-sm">Products</span>
-                  <span className="text-xl font-semibold">{location.products}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-muted-foreground text-sm">Low Stock</span>
-                  <span className={`text-xl font-semibold ${location.lowStock > 0 ? 'text-amber-500 flex items-center gap-1' : ''}`}>
-                    {location.lowStock > 0 && <AlertTriangle className="h-4 w-4" />}
-                    {location.lowStock}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 flex justify-end">
-                <Button variant="ghost" size="sm">View Details</Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }

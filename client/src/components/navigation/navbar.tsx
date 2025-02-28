@@ -1,73 +1,83 @@
+
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Menu, User } from "lucide-react";
-import { useLocation } from "wouter";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DrawerMenu } from "./drawer-menu";
 
-interface NavbarProps {
-  toggleSidebar: () => void;
-}
-
-export function Navbar({ toggleSidebar }: NavbarProps) {
+export function Navbar() {
   const { user, logout } = useAuth();
-  const [, setLocation] = useLocation();
+  const [_, setLocation] = useLocation();
+  const isMobile = useIsMobile();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/");
+  };
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
-      <div className="container flex h-14 items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="mr-2 lg:hidden"
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle sidebar</span>
-        </Button>
-        <div className="flex flex-1 items-center justify-end space-x-4">
+    <header className="border-b bg-background">
+      <div className="container flex h-16 items-center justify-between py-4">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg">
+            <span>MSM</span>
+          </Link>
+
+          {!isMobile && (
+            <nav className="flex items-center gap-6">
+              <Link href="/about" className="text-sm font-medium hover:underline">
+                About
+              </Link>
+              <Link href="/features" className="text-sm font-medium hover:underline">
+                Features
+              </Link>
+              <Link href="/pricing" className="text-sm font-medium hover:underline">
+                Pricing
+              </Link>
+            </nav>
+          )}
+        </div>
+
+        <div className="flex items-center gap-4">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="relative h-8 w-8 rounded-full"
-                >
-                  <User className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setLocation("/settings")}
-                >
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => logout()}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <>
+              {isMobile ? (
+                <DrawerMenu 
+                  isOpen={isMenuOpen} 
+                  setIsOpen={setIsMenuOpen} 
+                  onLogout={handleLogout}
+                />
+              ) : (
+                <>
+                  <Link href="/dashboard" className="text-sm font-medium hover:underline">
+                    Dashboard
+                  </Link>
+                  <Button onClick={handleLogout} variant="outline" size="sm">
+                    Logout
+                  </Button>
+                </>
+              )}
+            </>
           ) : (
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                onClick={() => setLocation("/auth/login")}
-              >
-                Log in
-              </Button>
-              <Button onClick={() => setLocation("/auth/register")}>
-                Sign up
-              </Button>
-            </div>
+            <>
+              {isMobile ? (
+                <DrawerMenu 
+                  isOpen={isMenuOpen} 
+                  setIsOpen={setIsMenuOpen}
+                />
+              ) : (
+                <>
+                  <Link href="/auth/login" className="text-sm font-medium hover:underline">
+                    Login
+                  </Link>
+                  <Button asChild size="sm">
+                    <Link href="/auth/register">Sign Up</Link>
+                  </Button>
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
