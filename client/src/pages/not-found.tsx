@@ -1,38 +1,32 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
 
-export default function NotFound() {
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
 export default function NotFound() {
   return (
-    <div className="container flex flex-col items-center justify-center min-h-[70vh] text-center gap-6">
-      <h1 className="text-6xl font-bold">404</h1>
-      <h2 className="text-2xl font-medium">Page not found</h2>
-      <p className="text-muted-foreground max-w-md">
-        The page you are looking for doesn't exist or has been moved.
+    <div className="container flex flex-col items-center justify-center min-h-screen px-4 text-center">
+      <h1 className="text-9xl font-extrabold tracking-tight text-primary">
+        404
+      </h1>
+      <h2 className="text-4xl font-bold tracking-tight mb-6">
+        Page Not Found
+      </h2>
+      <p className="text-lg text-muted-foreground mb-8 max-w-md">
+        Sorry, we couldn't find the page you're looking for. It might have been
+        moved or doesn't exist.
       </p>
-      <Button asChild>
-        <Link href="/">Go back home</Link>
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Link href="/">
+          <Button size="lg" variant="default">
+            Go Home
+          </Button>
+        </Link>
+        <Link href="/dashboard">
+          <Button size="lg" variant="outline">
+            Go to Dashboard
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

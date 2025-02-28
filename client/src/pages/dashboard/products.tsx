@@ -304,3 +304,138 @@ export default function Products() {
     </div>
   );
 }
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Plus, Search, Filter, FileExport } from "lucide-react";
+
+export default function Products() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Mock data - in a real app, this would come from an API
+  const products = [
+    {
+      id: "PROD001",
+      name: "Premium T-Shirt",
+      sku: "TS-001",
+      category: "Apparel",
+      stock: 145,
+      price: 24.99,
+      threshold: 20,
+    },
+    {
+      id: "PROD002",
+      name: "Wireless Headphones",
+      sku: "WH-100",
+      category: "Electronics",
+      stock: 32,
+      price: 99.99,
+      threshold: 10,
+    },
+    {
+      id: "PROD003",
+      name: "Desk Lamp",
+      sku: "DL-200",
+      category: "Home",
+      stock: 78,
+      price: 49.50,
+      threshold: 15,
+    },
+    {
+      id: "PROD004",
+      name: "Notebook Set",
+      sku: "NS-300",
+      category: "Stationery",
+      stock: 215,
+      price: 12.99,
+      threshold: 30,
+    },
+    {
+      id: "PROD005",
+      name: "Water Bottle",
+      sku: "WB-100",
+      category: "Accessories",
+      stock: 97,
+      price: 18.50,
+      threshold: 25,
+    },
+  ];
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground">
+            Manage your product inventory and details
+          </p>
+        </div>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" /> Add Product
+        </Button>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:w-auto flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search products..."
+            className="pl-8 w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Button variant="outline" size="sm">
+            <Filter className="mr-2 h-4 w-4" /> Filter
+          </Button>
+          <Button variant="outline" size="sm">
+            <FileExport className="mr-2 h-4 w-4" /> Export
+          </Button>
+        </div>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="text-right">Stock</TableHead>
+              <TableHead className="text-right">Price</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredProducts.map((product) => (
+              <TableRow key={product.id}>
+                <TableCell className="font-medium">{product.name}</TableCell>
+                <TableCell>{product.sku}</TableCell>
+                <TableCell>{product.category}</TableCell>
+                <TableCell className={`text-right ${product.stock < product.threshold ? 'text-destructive' : ''}`}>
+                  {product.stock}
+                </TableCell>
+                <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}

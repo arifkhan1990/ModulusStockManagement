@@ -365,3 +365,112 @@ export default function Locations() {
     </div>
   );
 }
+import { Button } from "@/components/ui/button";
+import { Plus, MapPin, Building, Package, AlertTriangle } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+export default function Locations() {
+  // Mock data - in a real app, this would come from an API
+  const locations = [
+    {
+      id: "LOC001",
+      name: "Main Warehouse",
+      type: "Warehouse",
+      city: "New York",
+      country: "United States",
+      products: 532,
+      lowStock: 2,
+    },
+    {
+      id: "LOC002",
+      name: "West Coast Distribution Center",
+      type: "Distribution Center",
+      city: "Los Angeles",
+      country: "United States",
+      products: 478,
+      lowStock: 5,
+    },
+    {
+      id: "LOC003",
+      name: "European Hub",
+      type: "Warehouse",
+      city: "Amsterdam",
+      country: "Netherlands",
+      products: 356,
+      lowStock: 1,
+    },
+    {
+      id: "LOC004",
+      name: "Retail Store - Downtown",
+      type: "Retail",
+      city: "Chicago",
+      country: "United States",
+      products: 189,
+      lowStock: 0,
+    },
+  ];
+
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Locations</h1>
+          <p className="text-muted-foreground">
+            Manage your warehouses, distribution centers, and retail locations
+          </p>
+        </div>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" /> Add Location
+        </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {locations.map((location) => (
+          <Card key={location.id} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <CardTitle>{location.name}</CardTitle>
+                  <CardDescription>
+                    {location.type} • {location.city}, {location.country}
+                  </CardDescription>
+                </div>
+                {location.type === "Warehouse" ? (
+                  <Building className="h-5 w-5 text-muted-foreground" />
+                ) : location.type === "Distribution Center" ? (
+                  <Package className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-sm">Products</span>
+                  <span className="text-xl font-semibold">{location.products}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-muted-foreground text-sm">Low Stock</span>
+                  <span className={`text-xl font-semibold ${location.lowStock > 0 ? 'text-amber-500 flex items-center gap-1' : ''}`}>
+                    {location.lowStock > 0 && <AlertTriangle className="h-4 w-4" />}
+                    {location.lowStock}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button variant="ghost" size="sm">View Details</Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}

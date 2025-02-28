@@ -16,6 +16,9 @@ const Login = lazy(() => import("@/pages/login"));
 const Register = lazy(() => import("@/pages/register"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+//const Products = lazy(() => import("@/pages/dashboard/products")); // Add this import manually
+//const Locations = lazy(() => import("@/pages/dashboard/locations")); // Add this import manually
+
 
 export default function App() {
   return (
@@ -52,6 +55,24 @@ export default function App() {
                 <DashboardLayout>
                   <Suspense fallback={<LoadingSpinner />}>
                     <Dashboard />
+                  </Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            </Route>
+            <Route path="/dashboard/products">
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    {/*<Products />*/}
+                  </Suspense>
+                </DashboardLayout>
+              </ProtectedRoute>
+            </Route>
+            <Route path="/dashboard/locations">
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    {/*<Locations />*/}
                   </Suspense>
                 </DashboardLayout>
               </ProtectedRoute>
