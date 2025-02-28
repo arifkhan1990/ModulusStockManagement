@@ -147,3 +147,56 @@ export async function downloadFile(endpoint: string, filename: string): Promise<
     throw error;
   }
 }
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+interface RequestOptions {
+  headers?: Record<string, string>;
+  params?: Record<string, string>;
+}
+
+export async function apiRequest<T = any>(
+  method: HttpMethod,
+  endpoint: string,
+  data?: any,
+  options: RequestOptions = {}
+): Promise<{ data: T; status: number }> {
+  const url = new URL(endpoint, window.location.origin);
+  
+  // Add query parameters if provided
+  if (options.params) {
+    Object.entries(options.params).forEach(([key, value]) => {
+      url.searchParams.append(key, value);
+    });
+  }
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  const config: RequestInit = {
+    method,
+    headers,
+    credentials: "include", // Include cookies for authentication
+  };
+
+  if (data && method !== "GET") {
+    config.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(url.toString(), config);
+  
+  // Handle API errors
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: "An unknown error occurred" }));
+    throw new Error(errorData.message || `Request failed with status ${response.status}`);
+  }
+
+  // Parse JSON response or return empty object if no content
+  const responseData = response.status !== 204 ? await response.json() : {};
+  
+  return {
+    data: responseData,
+    status: response.status,
+  };
+}

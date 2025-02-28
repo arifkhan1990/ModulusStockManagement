@@ -595,3 +595,280 @@ export function StockTransferForm({ onSuccess }: { onSuccess?: () => void }) {
     </Form>
   );
 }
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PackagePlus, Truck, Search } from "lucide-react";
+import { apiRequest } from "../../utils/api";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../ui/popover";
+import { useToast } from "../ui/use-toast";
+
+interface Location {
+  id: string;
+  name: string;
+  type: string;
+}
+
+interface Product {
+  id: string;
+  sku: string;
+  name: string;
+  stockLevel: number;
+}
+
+export function StockTransferForm() {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [fromLocation, setFromLocation] = useState("");
+  const [toLocation, setToLocation] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [reason, setReason] = useState("restock");
+  const [open, setOpen] = useState(false);
+  
+  // Fetch locations
+  const { data: locations = [] } = useQuery<Location[]>({
+    queryKey: ["locations"],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest("GET", "/api/locations");
+        return response.data;
+      } catch (error) {
+        console.error("Failed to fetch locations", error);
+        return [];
+      }
+    },
+  });
+  
+  // Fetch products
+  const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
+    queryKey: ["products", searchTerm],
+    queryFn: async () => {
+      try {
+        const params = searchTerm ? { search: searchTerm } : undefined;
+        const response = await apiRequest("GET", "/api/products", undefined, { params });
+        return response.data;
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+        return [];
+      }
+    },
+  });
+  
+  // Create stock transfer mutation
+  const transferMutation = useMutation({
+    mutationFn: async (transferData: any) => {
+      const response = await apiRequest("POST", "/api/stock/transfer", transferData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["stock"]);
+      toast({
+        title: t("transferCreated"),
+        description: t("stockTransferCreatedSuccessfully"),
+      });
+      
+      // Reset form
+      setSelectedProduct(null);
+      setQuantity(1);
+      setSearchTerm("");
+    },
+    onError: (error) => {
+      toast({
+        title: t("transferFailed"),
+        description: error instanceof Error ? error.message : t("couldNotCreateTransfer"),
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const handleTransfer = () => {
+    if (!fromLocation || !toLocation || !selectedProduct || !quantity) {
+      toast({
+        title: t("validationError"),
+        description: t("pleaseCompleteAllFields"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (fromLocation === toLocation) {
+      toast({
+        title: t("validationError"),
+        description: t("sourceAndDestinationMustBeDifferent"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (quantity <= 0) {
+      toast({
+        title: t("validationError"),
+        description: t("quantityMustBeGreaterThanZero"),
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    transferMutation.mutate({
+      fromLocationId: fromLocation,
+      toLocationId: toLocation,
+      productId: selectedProduct.id,
+      quantity,
+      reason,
+    });
+  };
+  
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="fromLocation">{t("fromLocation")}</Label>
+          <Select value={fromLocation} onValueChange={setFromLocation}>
+            <SelectTrigger id="fromLocation">
+              <SelectValue placeholder={t("selectSourceLocation")} />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map(location => (
+                <SelectItem key={location.id} value={location.id}>
+                  {location.name} ({location.type})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="toLocation">{t("toLocation")}</Label>
+          <Select value={toLocation} onValueChange={setToLocation}>
+            <SelectTrigger id="toLocation">
+              <SelectValue placeholder={t("selectDestinationLocation")} />
+            </SelectTrigger>
+            <SelectContent>
+              {locations.map(location => (
+                <SelectItem key={location.id} value={location.id}>
+                  {location.name} ({location.type})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="product">{t("product")}</Label>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between"
+            >
+              {selectedProduct
+                ? `${selectedProduct.name} (${selectedProduct.sku})`
+                : t("selectProduct")}
+              <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput 
+                placeholder={t("searchProducts")} 
+                value={searchTerm}
+                onValueChange={setSearchTerm}
+              />
+              <CommandList>
+                <CommandEmpty>{t("noProductsFound")}</CommandEmpty>
+                <CommandGroup>
+                  {products.map((product) => (
+                    <CommandItem
+                      key={product.id}
+                      onSelect={() => {
+                        setSelectedProduct(product);
+                        setOpen(false);
+                      }}
+                    >
+                      <span className="font-medium">{product.name}</span>
+                      <span className="ml-2 text-muted-foreground">(SKU: {product.sku})</span>
+                      <span className="ml-auto">{t("stock")}: {product.stockLevel}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="quantity">{t("quantity")}</Label>
+          <Input
+            id="quantity"
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="reason">{t("reason")}</Label>
+          <Select value={reason} onValueChange={setReason}>
+            <SelectTrigger id="reason">
+              <SelectValue placeholder={t("selectReason")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="restock">{t("restock")}</SelectItem>
+              <SelectItem value="return">{t("return")}</SelectItem>
+              <SelectItem value="damaged">{t("damaged")}</SelectItem>
+              <SelectItem value="lost">{t("lost")}</SelectItem>
+              <SelectItem value="other">{t("other")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <Button 
+        className="w-full" 
+        onClick={handleTransfer}
+        disabled={transferMutation.isLoading}
+      >
+        {transferMutation.isLoading ? (
+          <>{t("processing")}...</>
+        ) : (
+          <>
+            <Truck className="mr-2 h-4 w-4" />
+            {t("createTransfer")}
+          </>
+        )}
+      </Button>
+    </div>
+  );
+}
