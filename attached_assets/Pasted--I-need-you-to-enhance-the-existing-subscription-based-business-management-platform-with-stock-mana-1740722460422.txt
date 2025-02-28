@@ -1,0 +1,89 @@
+"I need you to enhance the existing subscription-based business management platform (with stock management, POS, invoice system, customer management, and informational pages) by adding a comprehensive notification system and sharing/download features. The system must support multiple notification channels (email, push, SMS, Messenger, Discord, etc.) for key actions and enable sharing of invoices/reports across social media platforms (Facebook, Messenger, X, LinkedIn, Discord, Instagram, TikTok, etc.) with full download options. This should be an industry-grade, production-level solution that is secure, scalable, and user-friendly. Below are the detailed requirements. Please generate a modular codebase with explanations of the implementation, suggested technologies (e.g., React, Node.js, MongoDB), and integration with the existing system.
+
+Project Overview:
+The platform currently manages stock, POS, invoices, customers, and informational pages under a personalized URL (e.g., companyname.platformdomain.com). Now, I want to add a notification system that alerts subscribers and their clients about important actions (e.g., new product added, order placed, payment due) via multiple channels, along with a sharing system for invoices and reports across social platforms, and download options in various formats. The solution must be robust, compliant with industry standards (e.g., GDPR for notifications), and optimized for real-world use.
+
+Detailed Features:
+1. Notification System
+Notification Channels:
+Email: Send via SMTP (e.g., Nodemailer) or third-party service (e.g., SendGrid).
+Push Notifications: Web and mobile push via Firebase Cloud Messaging (FCM).
+SMS: Text messages via Twilio or similar SMS gateway.
+Messenger: Facebook Messenger integration via official API.
+Discord: Send messages to a Discord channel or user via Discord Webhook/API.
+Additional Channels: Optional WhatsApp (via Twilio) and Telegram (via Telegram Bot API).
+Trigger Events:
+New product added to stock.
+Order placed (via POS or online).
+Order shipped (with tracking details if available).
+Order delivered.
+Payment received (full or partial).
+Payment due/overdue (with customizable reminders, e.g., 3 days before, on due date).
+Invoice created or shared.
+Report generated or shared.
+Low stock alert (from stock management).
+New support ticket created/resolved.
+Customization:
+Subscribers can enable/disable specific channels per event.
+Templates for each notification type (e.g., email subject/body, SMS text) editable via a UI.
+Personalization (e.g., include customer name, order ID, due date).
+Recipient Options:
+Notify subscriber (business owner).
+Notify customer (based on contact info in customer management).
+Notify employees (based on roles, e.g., manager for payment alerts).
+Queueing System:
+Use a message queue (e.g., RabbitMQ, Redis) to handle high volumes of notifications asynchronously.
+Retry mechanism for failed deliveries (e.g., 3 attempts with exponential backoff).
+Compliance:
+Opt-in/opt-out for customers (GDPR/CCPA compliant).
+Unsubscribe links in emails/SMS.
+2. Invoice and Report Sharing System
+Sharing Options:
+Facebook: Share invoice/report as a post or private message via Facebook API.
+Messenger: Send directly to a contact via Messenger API.
+X: Post a summary with a link to the full document via X API.
+LinkedIn: Share as a post or message via LinkedIn API.
+Discord: Post to a channel or DM via Discord API/Webhook.
+Email: Send as an attachment or inline content.
+Instagram: Share as a story/post with a link (via Instagram API, if supported).
+TikTok: Share a summary with a link (manual URL or API if available).
+WhatsApp: Optional sharing via Twilio WhatsApp API.
+Sharing Workflow:
+From the invoice/report management UI, add a ‘Share’ button.
+Modal with channel options, preview of content, and customizable message (e.g., “Here’s your invoice!”).
+Generate a secure, short-lived URL for shared documents (e.g., expires in 24 hours).
+Analytics:
+Track which shares were clicked/viewed (if possible via URL tracking).
+Display stats in the dashboard (e.g., “Shared 5 invoices this week”).
+3. Download Options
+Formats:
+PDF: High-quality, branded output (e.g., using pdfkit or Puppeteer).
+CSV: Structured data export.
+Excel (XLSX): Formatted spreadsheet (e.g., using exceljs).
+JSON: Raw data for developers/integrations.
+Customization:
+Option to include/exclude fields (e.g., exclude internal notes from PDF).
+Apply subscriber branding (logo, colors) to PDF downloads.
+Availability:
+Download button on every invoice, report, and log page.
+Bulk download option for multiple items (e.g., all invoices from a month).
+Storage:
+Temporarily store generated files on the server (e.g., AWS S3) with auto-deletion after download or timeout.
+4. Dashboard Enhancements
+Notification Center:
+Centralized hub showing all sent/received notifications (filterable by type, channel, date).
+Mark as read/unread, delete, or resend options.
+Sharing History:
+Log all sharing actions (e.g., “Invoice #123 shared on X on Feb 27, 2025”).
+Viewable by admins with click tracking (if applicable).
+Settings:
+UI to configure notification preferences (channels, events, recipients).
+API key/token input for third-party integrations (e.g., Discord, Twilio).
+5. Additional Production-Grade Features
+Rate Limiting: Prevent abuse of notifications/sharing (e.g., max 100 emails/hour per subscriber).
+Monitoring: Log notification failures (e.g., invalid email, API downtime) with admin alerts.
+** Scalability**: Design for thousands of subscribers (e.g., use CDN for downloads, queue for notifications).
+Security:
+Encrypt sensitive data in notifications (e.g., payment details).
+OAuth2 for social media integrations.
+Rate limit and validate API requests.
