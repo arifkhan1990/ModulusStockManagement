@@ -1,0 +1,96 @@
+"Design and implement a React-based authentication and navigation system for an industry-grade stock management application with the following features and requirements:
+
+1. Login Redirect
+Behavior: After a successful login, redirect the user to the dashboard home page (/dashboard) with a seamless transition (no page reload if possible).
+Error Handling: If the redirect fails (e.g., network issue), display a user-friendly error message with a retry option.
+Post-Login State: Persist the user’s session (e.g., via JWT or cookies) and validate it on page refresh to avoid unnecessary re-authentication.
+2. Navbar
+Purpose: Provide a persistent, responsive navigation bar at the top of the dashboard panel after login, serving as the primary interaction hub.
+Components:
+Search Bar:
+A debounced, accessible search input (e.g., 300ms delay) to query products, stock, or locations.
+Display real-time suggestions as the user types (e.g., via an API call like /api/search?q={query}).
+Include a clear button and placeholder text (e.g., “Search products...”).
+User Profile:
+Show the authenticated user’s full name (e.g., from user.name) and a circular profile image (default to a placeholder if none exists).
+Fetch the image from a secure URL (e.g., /api/user/avatar) with lazy loading and error fallback.
+Online/Offline Indicator:
+A dynamic dot (green for online, gray for offline) next to the user’s name or image.
+Reflect real-time network status using the Navigator onLine API or WebSocket heartbeat.
+Drawer Toggle:
+A hamburger icon (e.g., <Menu /> from Lucide React) to toggle the sidebar/drawer.
+Animate the toggle (e.g., fade or slide) for a polished UX.
+Responsiveness: Collapse into a mobile-friendly layout (e.g., hide search bar, show toggle) below 768px.
+Accessibility: Add ARIA labels (e.g., aria-label="Toggle navigation") and keyboard navigation support.
+3. Drawer Menu
+Purpose: Offer an extensible, collapsible sidebar/drawer for additional navigation and user options, accessible via the navbar toggle.
+Behavior:
+Open by default on desktop (>1024px), collapsible via toggle.
+Slide in/out on mobile (<768px) with overlay and close button.
+Persist open/closed state in local storage for user preference.
+Menu Items:
+Profile: Link to /dashboard/profile for viewing/editing user details (e.g., name, email, avatar).
+Settings: Link to /dashboard/settings for app preferences (e.g., theme, notifications).
+Notifications:
+Display a bell icon (<Bell />) with a badge (e.g., red dot or number) for unread notifications.
+Link to /dashboard/notifications, showing a list fetched from /api/notifications.
+Support real-time updates via WebSocket or polling.
+Core Navigation:
+Dashboard (/dashboard): Overview with key metrics.
+Products (/dashboard/products): Manage product catalog.
+Locations (/dashboard/locations): Manage warehouses/stores.
+Stock Movements (/dashboard/stock-movements): Track inventory changes.
+Logout: Trigger logout() from useAuth, clear session, and redirect to /auth.
+Design:
+Use consistent icons (e.g., Lucide React) with hover states and active route highlighting.
+Support nested submenus (e.g., under Settings) for future scalability.
+Accessibility: Ensure keyboard navigation (e.g., Tab key) and screen reader compatibility (e.g., role="navigation").
+4. Technical Requirements
+Framework: Use React 18+ with TypeScript for type safety and maintainability.
+State Management:
+Integrate with @tanstack/react-query for API caching and optimistic updates (e.g., user data, notifications).
+Use an existing AuthContext (@/hooks/use-auth) for auth state (user, login, logout).
+Routing: Leverage wouter for client-side navigation with route guards (e.g., AuthWrapper for protected routes).
+UI Library: Use Shadcn/UI or Tailwind CSS with custom components for consistency and rapid development.
+API Integration:
+Secure endpoints (e.g., /api/login, /api/user) with HTTPS and token-based auth (JWT).
+Handle errors globally with a custom apiRequest utility (e.g., from @/lib/api).
+Performance:
+Lazy-load components (e.g., React.lazy for pages) and images.
+Memoize expensive computations (e.g., useMemo for sidebar items).
+Security:
+Sanitize user inputs (e.g., search queries) to prevent XSS.
+Protect routes with role-based access control (RBAC) if applicable (e.g., admin vs. user).
+Testing:
+Write unit tests for hooks (e.g., useAuth) using Jest and React Testing Library.
+Add end-to-end tests (e.g., Cypress) for login flow and navigation.
+5. Industry-Standard Enhancements
+Theming: Support light/dark mode with a toggle in Settings, stored in local storage.
+Internationalization (i18n): Prepare for multi-language support using react-i18next.
+Analytics: Track user interactions (e.g., login, search) with a tool like Mixpanel or custom logging.
+Error Boundary: Wrap the app in an error boundary to catch and display runtime errors gracefully.
+Loading States: Show skeleton loaders during data fetching (e.g., navbar user info, drawer notifications).
+Documentation: Provide inline JSDoc/TypeScript comments and a README for setup and usage.
+6. Bonus Features
+Real-Time Updates: Use WebSocket (e.g., Socket.IO) for live notifications and online status.
+Dropdown Alternative: On desktop, add a dropdown under the user’s name/image with quick links (Profile, Settings, Logout) as a secondary navigation option.
+Keyboard Shortcuts: Add shortcuts (e.g., Ctrl + / for search focus) for power users.
+PWA Support: Make the app installable with offline capabilities via a service worker.
+Deliverables
+Provide a fully functional implementation with:
+Updated App.tsx for routing and layout integration.
+A reusable Navbar.tsx component with search, user info, and toggle.
+A DrawerMenu.tsx component with dynamic menu items and state management.
+Integration with existing DashboardLayout.tsx and useAuth for continuity.
+Include a mock API response structure (e.g., for user data, notifications) if no backend exists."
+Key Additions and Modifications
+Scalability: Added nested submenus, theming, and i18n for future growth.
+Robustness: Included error handling, loading states, and security measures.
+Performance: Suggested lazy loading, memoization, and caching.
+User Experience: Enhanced with animations, accessibility, and real-time features.
+Industry Practices: Added testing, analytics, and documentation requirements.
+Why This is Industry-Level
+Maintainability: TypeScript, modular components, and documentation ensure long-term support.
+User-Centric: Accessibility, responsiveness, and UX polish (e.g., animations, shortcuts) meet modern standards.
+Reliability: Error boundaries, testing, and secure APIs reduce bugs and vulnerabilities.
+Extensibility: Features like RBAC, i18n, and theming prepare for enterprise needs.
