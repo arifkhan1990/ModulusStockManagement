@@ -132,7 +132,7 @@ const routes = [
 ];
 
 //Example App.tsx (Adapt this to your actual routing setup)
-function App() {
+function DashboardApp() {
   const [location] = useLocation();
 
   const renderRoute = () => {
@@ -144,4 +144,4 @@ function App() {
   return <DashboardLayout>{renderRoute()}</DashboardLayout>;
 }
 
-export default App;
+export { DashboardApp };
