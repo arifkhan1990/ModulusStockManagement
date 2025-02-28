@@ -1,29 +1,33 @@
-
 import { Request, Response, NextFunction } from 'express';
 import FeatureToggle from '../models/feature-toggle.model';
 import { AppError } from '../utils/error';
+import mongoose from 'mongoose';
 
-// Middleware to check if a feature is enabled
+/**
+ * Middleware to check if a specific feature is enabled for a company
+ */
 export const checkFeatureEnabled = (featureName: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const companyId = req.company?._id;
-      
-      if (!companyId) {
-        return next(new AppError('Company not found', 400));
+      if (!req.company?._id) {
+        return next(new AppError('Company context not available', 400));
       }
-      
-      // Find the feature toggle
-      const feature = await FeatureToggle.findOne({ 
-        companyId, 
-        name: featureName 
+
+      const featureToggle = await FeatureToggle.findOne({
+        companyId: req.company._id,
+        feature: featureName
       });
-      
-      // If feature doesn't exist or is disabled, return error
-      if (!feature || !feature.enabled) {
-        return next(new AppError('This feature is not available', 403));
+
+      // If feature toggle doesn't exist or is disabled
+      if (!featureToggle || !featureToggle.enabled) {
+        return next(new AppError(`Feature '${featureName}' is not enabled for your company`, 403));
       }
-      
+
+      // Add feature configuration to the request if it exists
+      if (featureToggle.configuration) {
+        req.featureConfig = featureToggle.configuration;
+      }
+
       next();
     } catch (error) {
       next(error);
@@ -31,60 +35,33 @@ export const checkFeatureEnabled = (featureName: string) => {
   };
 };
 
-// Helper to create default features for a new company
-export const createDefaultFeatureToggles = async (companyId: string, userId: string) => {
-  try {
-    // Define default features
-    const defaultFeatures = [
-      {
-        name: 'invoices',
-        description: 'Enable invoice creation and management',
-        enabled: true
-      },
-      {
-        name: 'custom_invoices',
-        description: 'Allow customization of invoice templates',
-        enabled: true
-      },
-      {
-        name: 'online_payments',
-        description: 'Enable online payment processing',
-        enabled: true
-      },
-      {
-        name: 'sms_notifications',
-        description: 'Send SMS notifications to customers',
-        enabled: false
-      },
-      {
-        name: 'email_notifications',
-        description: 'Send email notifications to customers',
-        enabled: true
-      },
-      {
-        name: 'analytics',
-        description: 'Advanced analytics and reporting',
-        enabled: true
-      }
-    ];
-    
-    // Create each feature
-    const features = defaultFeatures.map(feature => ({
-      companyId,
-      name: feature.name,
-      description: feature.description,
-      enabled: feature.enabled,
-      updatedBy: userId,
-      updatedAt: new Date()
-    }));
-    
-    await FeatureToggle.insertMany(features);
-    
-    return true;
-  } catch (error) {
-    console.error('Error creating default feature toggles:', error);
-    return false;
-  }
+/**
+ * Helper function to create default feature toggles for a new company
+ */
+export const createDefaultFeatureToggles = async (companyId: mongoose.Types.ObjectId, userId: mongoose.Types.ObjectId) => {
+  // List of default features
+  const defaultFeatures = [
+    { feature: 'inventory_management', enabled: true },
+    { feature: 'order_management', enabled: true },
+    { feature: 'invoice_management', enabled: true },
+    { feature: 'pos', enabled: true },
+    { feature: 'analytics', enabled: false },
+    { feature: 'multi_location', enabled: false },
+    { feature: 'user_management', enabled: true },
+    { feature: 'customer_management', enabled: true },
+    { feature: 'invoice_customization', enabled: true },
+    { feature: 'online_payments', enabled: false }
+  ];
+
+  // Create feature toggles in bulk
+  const featureToggles = defaultFeatures.map(feature => ({
+    companyId,
+    ...feature,
+    createdBy: userId,
+    updatedBy: userId
+  }));
+
+  await FeatureToggle.insertMany(featureToggles);
 };
 
 export default {

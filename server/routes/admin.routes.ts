@@ -2,25 +2,25 @@
 import express from 'express';
 import adminController from '../controllers/admin.controller';
 import { requireAuth } from '../middleware/auth';
-import { checkPermission } from '../middleware/rbac';
+import { restrictTo } from '../middleware/rbac';
 
 const router = express.Router();
 
-// Protect all routes - require authentication and admin permission
+// All routes require authentication and admin role
 router.use(requireAuth);
-router.use(checkPermission('admin:access'));
+router.use(restrictTo('admin'));
 
-// System logs routes
+// System logs
 router.get('/logs', adminController.getSystemLogs);
-router.post('/logs/clear', adminController.clearSystemLogs);
 
-// Feature toggle routes
-router.get('/features', adminController.getFeatureToggles);
-router.post('/features', adminController.createFeatureToggle);
-router.put('/features/:id', adminController.updateFeatureToggle);
-router.delete('/features/:id', adminController.deleteFeatureToggle);
+// Feature toggles
+router.get('/feature-toggles', adminController.getFeatureToggles);
+router.put('/feature-toggles/:id', adminController.updateFeatureToggle);
 
 // Cache management
-router.post('/cache/clear', adminController.clearCache);
+router.post('/clear-cache', adminController.clearCache);
+
+// System statistics
+router.get('/statistics', adminController.getSystemStats);
 
 export default router;

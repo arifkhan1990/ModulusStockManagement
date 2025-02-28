@@ -6,26 +6,22 @@ import { AppError } from '../utils/error';
 import { successResponse } from '../utils/helpers';
 
 // Create a new customer
-export const createCustomer = async (req: Request, res: Response, next: NextFunction) => {
+export const createCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const companyId = req.company._id;
     
-    // Check if this email already exists for this company
-    if (req.body.email) {
-      const existingCustomer = await Customer.findOne({ 
-        companyId, 
-        email: req.body.email
-      });
-      
-      if (existingCustomer) {
-        return next(new AppError('Customer with this email already exists', 409));
-      }
-    }
-    
-    const customer = await Customer.create({
+    const customerData = {
       ...req.body,
-      companyId
-    });
+      companyId,
+      createdBy: req.user._id,
+      updatedBy: req.user._id
+    };
+    
+    const customer = await Customer.create(customerData);
     
     res.status(201).json(successResponse('Customer created successfully', customer));
   } catch (error) {
@@ -33,29 +29,33 @@ export const createCustomer = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-// Get all customers for a company
-export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
+// Get all customers with filtering and pagination
+export const getCustomers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const companyId = req.company._id;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
     const skip = (page - 1) * limit;
     
-    // Build query based on filters
+    // Build query filters
     const queryObj: any = { companyId };
     
-    // Filter by business size if provided
-    if (req.query.businessSize) {
-      queryObj.businessSize = req.query.businessSize;
-    }
-    
-    // Filter by customer type if provided
+    // Filter by customer type
     if (req.query.customerType) {
       queryObj.customerType = req.query.customerType;
     }
     
+    // Filter by business size
+    if (req.query.businessSize) {
+      queryObj.businessSize = req.query.businessSize;
+    }
+    
     // Filter by active status
-    if (req.query.isActive) {
+    if (req.query.isActive !== undefined) {
       queryObj.isActive = req.query.isActive === 'true';
     }
     
@@ -70,7 +70,7 @@ export const getCustomers = async (req: Request, res: Response, next: NextFuncti
       ];
     }
     
-    // Get total count
+    // Count total matching customers
     const total = await Customer.countDocuments(queryObj);
     
     // Get customers with pagination
@@ -79,22 +79,28 @@ export const getCustomers = async (req: Request, res: Response, next: NextFuncti
       .skip(skip)
       .limit(limit);
     
-    res.status(200).json(successResponse('Customers retrieved successfully', {
-      customers,
-      pagination: {
-        total,
-        page,
-        limit,
-        pages: Math.ceil(total / limit)
-      }
-    }));
+    res.status(200).json(
+      successResponse('Customers retrieved successfully', {
+        customers,
+        pagination: {
+          total,
+          page,
+          limit,
+          pages: Math.ceil(total / limit)
+        }
+      })
+    );
   } catch (error) {
     next(error);
   }
 };
 
-// Get a single customer
-export const getCustomer = async (req: Request, res: Response, next: NextFunction) => {
+// Get a single customer by ID
+export const getCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const companyId = req.company._id;
@@ -116,7 +122,11 @@ export const getCustomer = async (req: Request, res: Response, next: NextFunctio
 };
 
 // Update a customer
-export const updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
+export const updateCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const companyId = req.company._id;
@@ -125,22 +135,16 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
       return next(new AppError('Invalid customer ID', 400));
     }
     
-    // If email is changing, check for uniqueness
-    if (req.body.email) {
-      const existingCustomer = await Customer.findOne({ 
-        companyId, 
-        email: req.body.email,
-        _id: { $ne: id }
-      });
-      
-      if (existingCustomer) {
-        return next(new AppError('Customer with this email already exists', 409));
-      }
-    }
+    // Add updater info
+    const updates = {
+      ...req.body,
+      updatedBy: req.user._id,
+      updatedAt: new Date()
+    };
     
     const customer = await Customer.findOneAndUpdate(
       { _id: id, companyId },
-      { ...req.body, updatedAt: new Date() },
+      updates,
       { new: true, runValidators: true }
     );
     
@@ -155,7 +159,11 @@ export const updateCustomer = async (req: Request, res: Response, next: NextFunc
 };
 
 // Delete a customer (soft delete by setting isActive to false)
-export const deleteCustomer = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteCustomer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { id } = req.params;
     const companyId = req.company._id;
@@ -166,7 +174,11 @@ export const deleteCustomer = async (req: Request, res: Response, next: NextFunc
     
     const customer = await Customer.findOneAndUpdate(
       { _id: id, companyId },
-      { isActive: false, updatedAt: new Date() },
+      { 
+        isActive: false,
+        updatedBy: req.user._id,
+        updatedAt: new Date()
+      },
       { new: true }
     );
     
@@ -180,22 +192,49 @@ export const deleteCustomer = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-// Get customer types (unique list)
-export const getCustomerTypes = async (req: Request, res: Response, next: NextFunction) => {
+// Get customer statistics
+export const getCustomerStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const companyId = req.company._id;
     
-    // Aggregate to get unique customer types
-    const customerTypes = await Customer.aggregate([
+    // Total customers
+    const totalCustomers = await Customer.countDocuments({ companyId });
+    
+    // Active customers
+    const activeCustomers = await Customer.countDocuments({ companyId, isActive: true });
+    
+    // Customers by type
+    const customersByType = await Customer.aggregate([
       { $match: { companyId: new mongoose.Types.ObjectId(companyId.toString()) } },
-      { $group: { _id: '$customerType' } },
-      { $match: { _id: { $ne: null } } },
-      { $sort: { _id: 1 } }
+      { $group: { _id: '$customerType', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
     ]);
     
-    res.status(200).json(successResponse('Customer types retrieved successfully', 
-      customerTypes.map(item => item._id)
-    ));
+    // Customers by business size
+    const customersBySize = await Customer.aggregate([
+      { $match: { companyId: new mongoose.Types.ObjectId(companyId.toString()) } },
+      { $group: { _id: '$businessSize', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+    
+    // Recent customers
+    const recentCustomers = await Customer.find({ companyId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
+    res.status(200).json(
+      successResponse('Customer statistics retrieved successfully', {
+        totalCustomers,
+        activeCustomers,
+        customersByType,
+        customersBySize,
+        recentCustomers
+      })
+    );
   } catch (error) {
     next(error);
   }
@@ -207,5 +246,5 @@ export default {
   getCustomer,
   updateCustomer,
   deleteCustomer,
-  getCustomerTypes
+  getCustomerStats
 };

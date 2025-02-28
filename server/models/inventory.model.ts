@@ -1,145 +1,75 @@
-
 import mongoose, { Schema, Document } from 'mongoose';
-
-export interface IInventory extends Document {
-  productId: Schema.Types.ObjectId;
-  locationId: Schema.Types.ObjectId;
-  quantity: number;
-  availableQuantity?: number;
-  reservedQuantity?: number;
-  inTransitQuantity?: number;
-  batchNumber?: string;
-  lotNumber?: string;
-  serialNumbers?: string[];
-  expiryDate?: Date;
-  manufactureDate?: Date;
-  receivedDate?: Date;
-  cost?: number;
-  stockStatus?: string; // in stock, low stock, out of stock
-  lastStockTakeDate?: Date;
-  stockTakeNotes?: string;
-  shelf?: string;
-  aisle?: string;
-  bin?: string;
-  zone?: string;
-  section?: string;
-  businessSize: string; // small, medium, large
-  businessType?: string; // retail, manufacturing, distribution, etc.
-  qcStatus?: string; // passed, failed, pending
-  quarantined?: boolean;
-  quarantineReason?: string;
-  customFields?: {
-    [key: string]: any;
-  };
-  lastUpdated: Date;
-}
-
-const InventorySchema = new Schema<IInventory>({
-  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
-  quantity: { type: Number, required: true },
-  availableQuantity: { type: Number },
-  reservedQuantity: { type: Number, default: 0 },
-  inTransitQuantity: { type: Number, default: 0 },
-  batchNumber: { type: String },
-  lotNumber: { type: String },
-  serialNumbers: [{ type: String }],
-  expiryDate: { type: Date },
-  manufactureDate: { type: Date },
-  receivedDate: { type: Date },
-  cost: { type: Number },
-  stockStatus: { 
-    type: String, 
-    enum: ['in stock', 'low stock', 'out of stock'],
-    default: 'in stock'
-  },
-  lastStockTakeDate: { type: Date },
-  stockTakeNotes: { type: String },
-  shelf: { type: String },
-  aisle: { type: String },
-  bin: { type: String },
-  zone: { type: String },
-  section: { type: String },
-  businessSize: { type: String, enum: ['small', 'medium', 'large'], default: 'small' },
-  businessType: { type: String },
-  qcStatus: { 
-    type: String, 
-    enum: ['passed', 'failed', 'pending', 'not required'],
-    default: 'not required'
-  },
-  quarantined: { type: Boolean, default: false },
-  quarantineReason: { type: String },
-  customFields: { type: Map, of: Schema.Types.Mixed },
-  lastUpdated: { type: Date, default: Date.now },
-});
-
-// Compound index for faster lookups
-InventorySchema.index({ productId: 1, locationId: 1 }, { unique: true });
-InventorySchema.index({ expiryDate: 1 });
-InventorySchema.index({ stockStatus: 1 });
-
-const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
-
-export default Inventory;
-import mongoose, { Schema, Document } from "mongoose";
 
 export interface IInventory extends Document {
   companyId: Schema.Types.ObjectId;
   productId: Schema.Types.ObjectId;
   locationId: Schema.Types.ObjectId;
   quantity: number;
-  reservedQuantity: number;
   availableQuantity: number;
+  reservedQuantity: number;
+  minimumStockLevel: number;
+  maximumStockLevel: number;
+  reorderPoint: number;
+  reorderQuantity: number;
+  lastRestockDate?: Date;
+  incomingStock?: number;
+  costPerUnit?: number;
+  notes?: string;
+  status: 'in_stock' | 'low_stock' | 'out_of_stock';
+  createdBy: Schema.Types.ObjectId;
+  updatedBy?: Schema.Types.ObjectId;
+  createdAt: Date;
   updatedAt: Date;
 }
 
-const InventorySchema = new Schema<IInventory>(
-  {
-    companyId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Company',
-      required: true
-    },
-    productId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Product',
-      required: true
-    },
-    locationId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Location',
-      required: true
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      default: 0
-    },
-    reservedQuantity: {
-      type: Number,
-      default: 0
-    },
-    availableQuantity: {
-      type: Number,
-      default: 0
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
-    }
+const InventorySchema = new Schema<IInventory>({
+  companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  quantity: { type: Number, required: true, default: 0 },
+  availableQuantity: { type: Number, required: true, default: 0 },
+  reservedQuantity: { type: Number, required: true, default: 0 },
+  minimumStockLevel: { type: Number, default: 0 },
+  maximumStockLevel: { type: Number, default: 0 },
+  reorderPoint: { type: Number, default: 0 },
+  reorderQuantity: { type: Number, default: 0 },
+  lastRestockDate: { type: Date },
+  incomingStock: { type: Number, default: 0 },
+  costPerUnit: { type: Number },
+  notes: { type: String },
+  status: { 
+    type: String, 
+    enum: ['in_stock', 'low_stock', 'out_of_stock'], 
+    default: 'in_stock' 
   },
-  {
-    timestamps: true
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Compound index for fast lookups of inventory by product and location
+InventorySchema.index({ productId: 1, locationId: 1 }, { unique: true });
+InventorySchema.index({ companyId: 1 }); // For tenant isolation
+InventorySchema.index({ locationId: 1 }); // For location-based queries
+InventorySchema.index({ status: 1 }); // For status-based queries
+
+// Pre-save hook to update status based on quantity and reorderPoint
+InventorySchema.pre('save', function(next) {
+  if (this.quantity <= 0) {
+    this.status = 'out_of_stock';
+  } else if (this.quantity <= this.reorderPoint) {
+    this.status = 'low_stock';
+  } else {
+    this.status = 'in_stock';
   }
-);
 
-// Compound index for product and location uniqueness
-InventorySchema.index({ companyId: 1, productId: 1, locationId: 1 }, { unique: true });
+  // Ensure available quantity is never negative
+  this.availableQuantity = Math.max(0, this.quantity - this.reservedQuantity);
 
-// Useful indexes
-InventorySchema.index({ companyId: 1, quantity: 1 }); // For low stock queries
-InventorySchema.index({ companyId: 1, locationId: 1 });
-InventorySchema.index({ companyId: 1, productId: 1 });
+  this.updatedAt = new Date();
+  next();
+});
 
 const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
 

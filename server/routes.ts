@@ -9,18 +9,30 @@ import {
   insertProductSchema,
   insertInventorySchema,
   insertStockMovementSchema,
-  insertInvoiceSchema, // Added invoice schema import
-  insertInvoiceTemplateSchema // Added invoice template schema import
+  insertInvoiceSchema,
+  insertInvoiceTemplateSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { requireAuth } from "./middleware/auth";
-import mongoose from "mongoose";
-import { healthCheck, detailedHealthCheck, readyCheck } from './middleware/health'; // Added health check imports
-
+import { healthCheck, detailedHealthCheck, readyCheck } from './middleware/health';
+import productRoutes from './routes/product.routes';
+import inventoryRoutes from './routes/inventory.routes';
+import locationRoutes from './routes/location.routes';
+import orderRoutes from './routes/order.routes';
+import paymentRoutes from './routes/payment.routes';
+import customerRoutes from './routes/customer.routes';
+import invoiceRoutes from './routes/invoice.routes';
+import invoiceTemplateRoutes from './routes/invoice-template.routes';
+import adminRoutes from './routes/admin.routes';
+import { tenantMiddleware } from './middleware/tenant';
+import { authRateLimit } from './middleware/rate-limit';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+
+  // Apply tenant middleware
+  app.use('/api', tenantMiddleware);
 
   // Health check routes for load balancers
   app.get('/health', healthCheck);
@@ -42,11 +54,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Protected routes
+  // Authentication rate limiter
+  app.use('/api/auth', authRateLimit);
+
+  // Modular API routes
+  app.use('/api/products', productRoutes);
+  app.use('/api/inventory', inventoryRoutes);
+  app.use('/api/locations', locationRoutes);
+  app.use('/api/orders', orderRoutes);
+  app.use('/api/payments', paymentRoutes);
+  app.use('/api/customers', customerRoutes);
+  app.use('/api/invoices', invoiceRoutes);
+  app.use('/api/invoice-templates', invoiceTemplateRoutes);
+  app.use('/api/admin', adminRoutes);
+
+  // Legacy routes for backward compatibility
+  // These will be migrated to the modular structure over time
   app.use("/api/inventory", requireAuth);
 
   // Location routes
-  app.get("/api/locations", requireAuth, async (req, res) => {
+  app.get("/api/legacy/locations", requireAuth, async (req, res) => {
     try {
       const locations = await storage.getLocations();
       res.json(locations);
@@ -55,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/locations/:id", requireAuth, async (req, res) => {
+  app.get("/api/legacy/locations/:id", requireAuth, async (req, res) => {
     try {
       const location = await storage.getLocation(req.params.id);
       if (!location) {
@@ -67,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/locations", requireAuth, async (req, res) => {
+  app.post("/api/legacy/locations", requireAuth, async (req, res) => {
     try {
       const location = insertLocationSchema.parse(req.body);
       const result = await storage.createLocation(location);
@@ -81,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/locations/:id", requireAuth, async (req, res) => {
+  app.put("/api/legacy/locations/:id", requireAuth, async (req, res) => {
     try {
       const locationData = insertLocationSchema.partial().parse(req.body);
       const result = await storage.updateLocation(req.params.id, locationData);
@@ -98,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/locations/:id", requireAuth, async (req, res) => {
+  app.delete("/api/legacy/locations/:id", requireAuth, async (req, res) => {
     try {
       const result = await storage.deleteLocation(req.params.id);
       if (!result) {
@@ -110,392 +137,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Supplier routes
-  app.get("/api/suppliers", requireAuth, async (req, res) => {
-    try {
-      const suppliers = await storage.getSuppliers();
-      res.json(suppliers);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch suppliers" });
-    }
-  });
-
-  app.get("/api/suppliers/:id", requireAuth, async (req, res) => {
-    try {
-      const supplier = await storage.getSupplier(req.params.id);
-      if (!supplier) {
-        return res.status(404).json({ message: "Supplier not found" });
-      }
-      res.json(supplier);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch supplier" });
-    }
-  });
-
-  app.post("/api/suppliers", requireAuth, async (req, res) => {
-    try {
-      const supplier = insertSupplierSchema.parse(req.body);
-      const result = await storage.createSupplier(supplier);
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid supplier data", errors: err.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create supplier" });
-      }
-    }
-  });
-
-  app.put("/api/suppliers/:id", requireAuth, async (req, res) => {
-    try {
-      const supplierData = insertSupplierSchema.partial().parse(req.body);
-      const result = await storage.updateSupplier(req.params.id, supplierData);
-      if (!result) {
-        return res.status(404).json({ message: "Supplier not found" });
-      }
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid supplier data", errors: err.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update supplier" });
-      }
-    }
-  });
-
-  app.delete("/api/suppliers/:id", requireAuth, async (req, res) => {
-    try {
-      const result = await storage.deleteSupplier(req.params.id);
-      if (!result) {
-        return res.status(404).json({ message: "Supplier not found" });
-      }
-      res.json({ message: "Supplier deleted successfully" });
-    } catch (err) {
-      res.status(500).json({ message: "Failed to delete supplier" });
-    }
-  });
-
-  // Product routes
-  app.get("/api/products", requireAuth, async (req, res) => {
-    try {
-      const products = await storage.getProducts();
-      res.json(products);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch products" });
-    }
-  });
-
-  app.get("/api/products/:id", requireAuth, async (req, res) => {
-    try {
-      const product = await storage.getProduct(req.params.id);
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      res.json(product);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch product" });
-    }
-  });
-
-  app.post("/api/products", requireAuth, async (req, res) => {
-    try {
-      const product = insertProductSchema.parse(req.body);
-      const result = await storage.createProduct(product);
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid product data", errors: err.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create product" });
-      }
-    }
-  });
-
-  app.put("/api/products/:id", requireAuth, async (req, res) => {
-    try {
-      const productData = insertProductSchema.partial().parse(req.body);
-      const result = await storage.updateProduct(req.params.id, productData);
-      if (!result) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid product data", errors: err.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update product" });
-      }
-    }
-  });
-
-  app.delete("/api/products/:id", requireAuth, async (req, res) => {
-    try {
-      const result = await storage.deleteProduct(req.params.id);
-      if (!result) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      res.json({ message: "Product deleted successfully" });
-    } catch (err) {
-      res.status(500).json({ message: "Failed to delete product" });
-    }
-  });
-
-  // Inventory routes
-  app.get("/api/inventory/:locationId", requireAuth, async (req, res) => {
-    try {
-      const locationId = req.params.locationId;
-      const inventory = await storage.getInventoryByLocation(locationId);
-      res.json(inventory);
-    } catch (err) {
-      res.status(500).json({ message: "Failed to fetch inventory" });
-    }
-  });
-
-  app.post("/api/inventory", requireAuth, async (req, res) => {
-    try {
-      const inventoryData = insertInventorySchema.parse(req.body);
-      const result = await storage.createInventory(inventoryData);
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid inventory data", errors: err.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create inventory" });
-      }
-    }
-  });
-
-  app.post("/api/stock-movements", requireAuth, async (req, res) => {
-    try {
-      // Handle adjustments specially (set toLocationId to null for adjustments)
-      let movementData = { ...req.body, createdBy: req.user!.id };
-
-      if (movementData.type === 'adjustment') {
-        // For adjustments, we don't need a toLocationId
-        movementData.toLocationId = undefined;
-      }
-
-      const movement = insertStockMovementSchema.parse(movementData);
-
-      // Create the stock movement
-      const result = await storage.createStockMovement(movement);
-
-      // Update inventory based on the movement type
-      if (movement.type === 'transfer') {
-        // For transfers, reduce from source and add to destination
-        await updateInventoryForTransfer(movement);
-      } else if (movement.type === 'adjustment') {
-        // For adjustments, just reduce from the source
-        await updateInventoryForAdjustment(movement);
-      }
-
-      res.json(result);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        res.status(400).json({ message: "Invalid stock movement data", errors: err.errors });
-      } else {
-        console.error(err);
-        res.status(500).json({ message: "Failed to create stock movement" });
-      }
-    }
-  });
-
-  // Get all stock movements or filter by product
-  app.get("/api/stock-movements", requireAuth, async (req, res) => {
-    try {
-      const productId = req.query.productId ? String(req.query.productId) : undefined;
-      const movements = productId
-        ? await storage.getStockMovements(productId)
-        : await storage.getAllStockMovements();
-      res.json(movements);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Failed to fetch stock movements" });
-    }
-  });
-
-  // Helper function to update inventory for transfers
-  async function updateInventoryForTransfer(movement) {
-    const { productId, fromLocationId, toLocationId, quantity } = movement;
-
-    // Check if we have enough stock at the source location
-    const sourceInventory = await storage.getInventory(productId, fromLocationId);
-
-    if (!sourceInventory || sourceInventory.quantity < quantity) {
-      throw new Error("Insufficient stock at source location");
-    }
-
-    // Reduce from source location
-    await storage.updateInventory(sourceInventory.id, {
-      quantity: sourceInventory.quantity - quantity
-    });
-
-    // Add to destination location
-    const destInventory = await storage.getInventory(productId, toLocationId);
-
-    if (destInventory) {
-      // Update existing inventory
-      await storage.updateInventory(destInventory.id, {
-        quantity: destInventory.quantity + quantity
-      });
-    } else {
-      // Create new inventory record
-      await storage.createInventory({
-        productId,
-        locationId: toLocationId,
-        quantity
-      });
-    }
-  }
-
-  // Helper function to update inventory for adjustments
-  async function updateInventoryForAdjustment(movement) {
-    const { productId, fromLocationId, quantity } = movement;
-
-    // Check if we have enough stock at the source location
-    const inventory = await storage.getInventory(productId, fromLocationId);
-
-    if (!inventory) {
-      throw new Error("No inventory found for the product at the specified location");
-    }
-
-    // Update inventory
-    await storage.updateInventory(inventory.id, {
-      quantity: inventory.quantity - quantity
-    });
-  }
-
-  //Invoice routes
-  app.post("/api/invoices", requireAuth, async (req, res) => {
-    try {
-      const invoice = insertInvoiceSchema.parse(req.body);
-      const result = await storage.createInvoice(invoice);
-      res.json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create invoice" });
-      }
-    }
-  });
-
-  app.get("/api/invoices", requireAuth, async (req, res) => {
-    try {
-      const invoices = await storage.getInvoices();
-      res.json(invoices);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch invoices" });
-    }
-  });
-
-  app.get("/api/invoices/:id", requireAuth, async (req, res) => {
-    try {
-      const invoice = await storage.getInvoice(req.params.id);
-      if (!invoice) {
-        return res.status(404).json({ message: "Invoice not found" });
-      }
-      res.json(invoice);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch invoice" });
-    }
-  });
-
-  app.put("/api/invoices/:id", requireAuth, async (req, res) => {
-    try {
-      const invoiceData = insertInvoiceSchema.partial().parse(req.body);
-      const result = await storage.updateInvoice(req.params.id, invoiceData);
-      if (!result) {
-        return res.status(404).json({ message: "Invoice not found" });
-      }
-      res.json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update invoice" });
-      }
-    }
-  });
-
-  app.delete("/api/invoices/:id", requireAuth, async (req, res) => {
-    try {
-      const result = await storage.deleteInvoice(req.params.id);
-      if (!result) {
-        return res.status(404).json({ message: "Invoice not found" });
-      }
-      res.json({ message: "Invoice deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete invoice" });
-    }
-  });
-
-  //Invoice Template Routes
-  app.post("/api/invoice-templates", requireAuth, async (req, res) => {
-    try {
-      const invoiceTemplate = insertInvoiceTemplateSchema.parse(req.body);
-      const result = await storage.createInvoiceTemplate(invoiceTemplate);
-      res.json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({ message: "Invalid invoice template data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create invoice template" });
-      }
-    }
-  });
-
-  app.get("/api/invoice-templates", requireAuth, async (req, res) => {
-    try {
-      const invoiceTemplates = await storage.getInvoiceTemplates();
-      res.json(invoiceTemplates);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch invoice templates" });
-    }
-  });
-
-  app.get("/api/invoice-templates/:id", requireAuth, async (req, res) => {
-    try {
-      const invoiceTemplate = await storage.getInvoiceTemplate(req.params.id);
-      if (!invoiceTemplate) {
-        return res.status(404).json({ message: "Invoice template not found" });
-      }
-      res.json(invoiceTemplate);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch invoice template" });
-    }
-  });
-
-
-  app.put("/api/invoice-templates/:id", requireAuth, async (req, res) => {
-    try {
-      const invoiceTemplateData = insertInvoiceTemplateSchema.partial().parse(req.body);
-      const result = await storage.updateInvoiceTemplate(req.params.id, invoiceTemplateData);
-      if (!result) {
-        return res.status(404).json({ message: "Invoice template not found" });
-      }
-      res.json(result);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        res.status(400).json({ message: "Invalid invoice template data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update invoice template" });
-      }
-    }
-  });
-
-  app.delete("/api/invoice-templates/:id", requireAuth, async (req, res) => {
-    try {
-      const result = await storage.deleteInvoiceTemplate(req.params.id);
-      if (!result) {
-        return res.status(404).json({ message: "Invoice template not found" });
-      }
-      res.json({ message: "Invoice template deleted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete invoice template" });
-    }
-  });
-
-
+  // Create HTTP server instance
   return createServer(app);
 }

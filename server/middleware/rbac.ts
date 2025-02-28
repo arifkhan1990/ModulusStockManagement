@@ -1,140 +1,144 @@
+
 import { Request, Response, NextFunction } from 'express';
-import { IUser } from '../models/user.model';
+import { AppError } from '../utils/error';
 
-// Define permission types
-export type Permission = string;
-
-// Define permission sets for different roles
-export const PERMISSIONS = {
-  // Admin can do everything
-  admin: [
-    'user:create', 'user:read', 'user:update', 'user:delete',
-    'product:create', 'product:read', 'product:update', 'product:delete',
-    'inventory:create', 'inventory:read', 'inventory:update', 'inventory:delete',
-    'supplier:create', 'supplier:read', 'supplier:update', 'supplier:delete',
-    'order:create', 'order:read', 'order:update', 'order:delete',
-    'payment:create', 'payment:read', 'payment:update', 'payment:delete',
-    'report:create', 'report:read', 'report:export',
-    'settings:read', 'settings:update',
-    'invoice:create', 'invoice:read', 'invoice:update', 'invoice:delete',
-    'admin:access'
-  ],
-  // Manager has most permissions except user management and settings
-  manager: [
-    'user:read',
-    'product:create', 'product:read', 'product:update',
-    'inventory:create', 'inventory:read', 'inventory:update',
-    'supplier:create', 'supplier:read', 'supplier:update',
-    'order:create', 'order:read', 'order:update',
-    'payment:create', 'payment:read', 'payment:update',
-    'report:create', 'report:read', 'report:export',
-    'invoice:create', 'invoice:read', 'invoice:update',
-  ],
-  // Staff has limited permissions
-  staff: [
-    'product:read',
-    'inventory:read', 'inventory:update',
-    'supplier:read',
-    'order:create', 'order:read', 'order:update',
-    'payment:create', 'payment:read',
-    'report:read',
-    'invoice:create', 'invoice:read',
-  ],
-  // Viewers can only read data
-  viewer: [
-    'product:read',
-    'inventory:read',
-    'supplier:read',
-    'order:read',
-    'payment:read',
-    'report:read',
-    'invoice:read'
-  ],
-  // Customers have very limited access
-  customer: [
-    'order:create', 'order:read',
-    'payment:create', 'payment:read',
-    'invoice:read'
-  ],
-  // Suppliers can only manage their products
-  supplier: [
-    'product:read',
-    'inventory:read',
-  ],
+// Define roles and their hierarchy
+export const roles = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  STAFF: 'staff',
+  CASHIER: 'cashier',
+  VIEWER: 'viewer'
 };
 
-// Get permissions for a specific role
-export const getRolePermissions = (role: string): Permission[] => {
-  return PERMISSIONS[role as keyof typeof PERMISSIONS] || [];
+// Role hierarchy and permissions
+const roleHierarchy = {
+  [roles.ADMIN]: [roles.ADMIN, roles.MANAGER, roles.STAFF, roles.CASHIER, roles.VIEWER],
+  [roles.MANAGER]: [roles.MANAGER, roles.STAFF, roles.CASHIER, roles.VIEWER],
+  [roles.STAFF]: [roles.STAFF, roles.CASHIER, roles.VIEWER],
+  [roles.CASHIER]: [roles.CASHIER, roles.VIEWER],
+  [roles.VIEWER]: [roles.VIEWER]
 };
 
-// Get all permissions for a user including custom permissions
-export const getUserPermissions = (user: IUser): Permission[] => {
-  const rolePermissions = getRolePermissions(user.role);
-  return [...rolePermissions, ...(user.permissions || [])];
+// Resource permissions by role
+const resourcePermissions = {
+  products: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['create', 'read', 'update'],
+    [roles.STAFF]: ['read', 'update'],
+    [roles.CASHIER]: ['read'],
+    [roles.VIEWER]: ['read']
+  },
+  inventory: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['create', 'read', 'update'],
+    [roles.STAFF]: ['read', 'update'],
+    [roles.CASHIER]: ['read'],
+    [roles.VIEWER]: ['read']
+  },
+  invoices: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['create', 'read', 'update'],
+    [roles.STAFF]: ['create', 'read', 'update'],
+    [roles.CASHIER]: ['create', 'read'],
+    [roles.VIEWER]: ['read']
+  },
+  orders: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['create', 'read', 'update'],
+    [roles.STAFF]: ['create', 'read', 'update'],
+    [roles.CASHIER]: ['create', 'read'],
+    [roles.VIEWER]: ['read']
+  },
+  users: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['read'],
+    [roles.STAFF]: ['read'],
+    [roles.CASHIER]: ['read'],
+    [roles.VIEWER]: ['read']
+  },
+  customers: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['create', 'read', 'update'],
+    [roles.STAFF]: ['create', 'read', 'update'],
+    [roles.CASHIER]: ['read'],
+    [roles.VIEWER]: ['read']
+  },
+  settings: {
+    [roles.ADMIN]: ['create', 'read', 'update', 'delete'],
+    [roles.MANAGER]: ['read'],
+    [roles.STAFF]: [],
+    [roles.CASHIER]: [],
+    [roles.VIEWER]: []
+  },
+  reports: {
+    [roles.ADMIN]: ['read'],
+    [roles.MANAGER]: ['read'],
+    [roles.STAFF]: ['read'],
+    [roles.CASHIER]: [],
+    [roles.VIEWER]: ['read']
+  }
 };
 
-// Check if a user has a specific permission
-export const hasPermission = (user: IUser, permission: Permission): boolean => {
-  if (user.role === 'admin') return true; // Admin has all permissions
-
-  const permissions = getUserPermissions(user);
-  return permissions.includes(permission);
+/**
+ * Check if a role has access to a specific resource and action
+ */
+const hasPermission = (role: string, resource: string, action: string): boolean => {
+  if (!roleHierarchy[role]) return false;
+  if (!resourcePermissions[resource]) return false;
+  
+  // Check each role in the hierarchy
+  for (const r of roleHierarchy[role]) {
+    if (
+      resourcePermissions[resource][r] && 
+      resourcePermissions[resource][r].includes(action)
+    ) {
+      return true;
+    }
+  }
+  
+  return false;
 };
 
-// Middleware to check if a user has the required permission
-export const requirePermission = (permission: Permission) => {
+/**
+ * Middleware to check if a user has permission to access a resource
+ */
+export const requirePermission = (resource: string, action: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized: User not authenticated' });
+    // Check if user exists and has a role
+    if (!req.user || !req.user.role) {
+      return next(new AppError('Unauthorized access', 401));
     }
 
-    if (hasPermission(req.user as IUser, permission)) {
+    // Check if user has permission
+    if (hasPermission(req.user.role, resource, action)) {
       return next();
     }
 
-    return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
+    // If not, return forbidden error
+    return next(new AppError('You do not have permission to perform this action', 403));
   };
 };
 
-// Middleware to restrict access based on business size
-export const restrictByBusinessSize = (minSize: 'small' | 'medium' | 'large') => {
-  const sizeOrder = { small: 1, medium: 2, large: 3 };
-
+/**
+ * Middleware to restrict access to specific roles
+ */
+export const restrictTo = (...allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized: User not authenticated' });
+    if (!req.user || !req.user.role) {
+      return next(new AppError('Unauthorized access', 401));
     }
 
-    const user = req.user as IUser;
-    const userSizeValue = sizeOrder[user.businessSize as keyof typeof sizeOrder] || 0;
-    const minSizeValue = sizeOrder[minSize];
-
-    if (userSizeValue >= minSizeValue || user.role === 'admin') {
+    if (allowedRoles.includes(req.user.role)) {
       return next();
     }
 
-    return res.status(403).json({ 
-      message: `This feature is only available for ${minSize} or larger business subscriptions` 
-    });
+    return next(new AppError('You do not have permission to perform this action', 403));
   };
 };
 
-// Middleware to restrict access based on business type
-export const restrictByBusinessType = (allowedTypes: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized: User not authenticated' });
-    }
-
-    const user = req.user as IUser;
-
-    if (allowedTypes.includes(user.businessType || '') || user.role === 'admin') {
-      return next();
-    }
-
-    return res.status(403).json({ 
-      message: `This feature is only available for ${allowedTypes.join(', ')} business types` 
-    });
-  };
+export default {
+  roles,
+  requirePermission,
+  restrictTo
 };
