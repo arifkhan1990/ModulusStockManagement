@@ -1,8 +1,6 @@
-
 import mongoose from 'mongoose';
 import { 
   User, 
-  DemoRequest,
   Location,
   Supplier,
   Product,
@@ -128,11 +126,11 @@ export const createProduct = async (productData: InsertProduct) => {
 
 export const updateProduct = async (id: string, productData: Partial<InsertProduct>) => {
   const updateData = { ...productData, updatedAt: new Date() };
-  
+
   if (productData.supplierId) {
     updateData.supplierId = new mongoose.Types.ObjectId(productData.supplierId);
   }
-  
+
   return await Product.findByIdAndUpdate(id, updateData, { new: true });
 };
 
@@ -222,7 +220,7 @@ export const getPayment = async (id: string) => {
 export const createPayment = async (paymentData: any) => {
   const payment = new Payment(paymentData);
   await payment.save();
-  
+
   // Update order payment status
   const order = await Order.findById(payment.orderId);
   if (order) {
@@ -230,19 +228,19 @@ export const createPayment = async (paymentData: any) => {
       orderId: order._id, 
       status: 'completed' 
     });
-    
+
     const totalPaid = orderPayments.reduce((sum, p) => sum + p.amount, 0);
-    
+
     let paymentStatus = 'pending';
     if (totalPaid >= order.total) {
       paymentStatus = 'paid';
     } else if (totalPaid > 0) {
       paymentStatus = 'partially paid';
     }
-    
+
     await Order.findByIdAndUpdate(payment.orderId, { paymentStatus });
   }
-  
+
   return payment;
 };
 
@@ -252,7 +250,7 @@ export const updatePaymentStatus = async (id: string, status: string, updatedBy:
     { status, updatedBy },
     { new: true }
   );
-  
+
   if (payment) {
     // Update order payment status
     const order = await Order.findById(payment.orderId);
@@ -261,19 +259,19 @@ export const updatePaymentStatus = async (id: string, status: string, updatedBy:
         orderId: order._id, 
         status: 'completed' 
       });
-      
+
       const totalPaid = orderPayments.reduce((sum, p) => sum + p.amount, 0);
-      
+
       let paymentStatus = 'pending';
       if (totalPaid >= order.total) {
         paymentStatus = 'paid';
       } else if (totalPaid > 0) {
         paymentStatus = 'partially paid';
       }
-      
+
       await Order.findByIdAndUpdate(payment.orderId, { paymentStatus });
     }
   }
-  
+
   return payment;
 };

@@ -1,62 +1,65 @@
-// User and authentication
-export { default as User } from './user.model';
-
-// Company and subscription
-export { default as Company } from './company.model';
-export { default as SubscriptionTier } from './subscription-tier.model';
-export { default as CompanyPreference } from './company-preference.model';
-
-// Feature management
-export { default as Feature } from './feature.model';
-export { default as FeatureToggle } from './feature-toggle.model';
-
-// Product and inventory
-export { default as Product } from './product.model';
-export { default as Inventory } from './inventory.model';
-export { default as Location } from './location.model';
-export { default as StockMovement } from './stock-movement.model';
-export { default as Supplier } from './supplier.model';
-
-// Sales and orders
-export { default as Order } from './order.model';
-export { default as Payment } from './payment.model';
-export { default as Customer } from './customer.model';
-export { default as Invoice } from './invoice.model';
-export { default as InvoiceTemplate } from './invoice-template.model';
-
-// Content management
-export { default as Page } from './page.model';
-
-// Support and communication
-export { default as SupportTicket } from './support-ticket.model';
-export { default as Notification } from './notification.model';
-export { default as NotificationPreference } from './notification-preference.model';
-
-// Sharing and integrations
-export { default as Sharing } from './sharing.model';
-export { default as Integration } from './integration.model';
-
-// System and analytics
-export { default as SystemLog } from './system-log.model';
-export { default as Backup } from './backup.model';
-export { default as Analytics } from './analytics.model';
-export { default as AuditLog } from './audit-log.model';
-export { default as Role } from './role.model';
-export { default as Download } from './download.model';
-
-//stock-movement.model.ts
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
+import User from './user.model';
+import Location from './location.model';
+import Supplier from './supplier.model';
+import Product from './product.model';
+import Inventory from './inventory.model';
+import StockMovement from './stock-movement.model';
+import DemoRequest from './demoRequest.model';
+import Company from './company.model';
+import SubscriptionTier from './subscription-tier.model';
+import CompanyPreference from './company-preference.model';
+import Feature from './feature.model';
+import FeatureToggle from './feature-toggle.model';
+import Order from './order.model';
+import Payment from './payment.model';
+import Customer from './customer.model';
+import Invoice from './invoice.model';
+import InvoiceTemplate from './invoice-template.model';
+import Page from './page.model';
+import SupportTicket from './support-ticket.model';
+import Notification from './notification.model';
+import NotificationPreference from './notification-preference.model';
+import Sharing from './sharing.model';
+import Integration from './integration.model';
+import SystemLog from './system-log.model';
+import Backup from './backup.model';
+import Analytics from './analytics.model';
+import AuditLog from './audit-log.model';
+import Role from './role.model';
+import Download from './download.model';
 
 
-const stockMovementSchema = new Schema({
-  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
-  quantity: { type: Number, required: true },
-  type: { type: String, enum: ['in', 'out'], required: true },
-  timestamp: { type: Date, default: Date.now },
-  userId: { type: Schema.Types.ObjectId, ref: 'User' }, //optional user who made the movement
-  notes: { type: String }
-});
+export {
+  User,
+  Location,
+  Supplier,
+  Product,
+  Inventory,
+  StockMovement,
+  DemoRequest,
+  Company,
+  SubscriptionTier,
+  CompanyPreference,
+  Feature,
+  FeatureToggle,
+  Order,
+  Payment,
+  Customer,
+  Invoice,
+  InvoiceTemplate,
+  Page,
+  SupportTicket,
+  Notification,
+  NotificationPreference,
+  Sharing,
+  Integration,
+  SystemLog,
+  Backup,
+  Analytics,
+  AuditLog,
+  Role,
+  Download
+};
 
-
-export default model('StockMovement', stockMovementSchema);
+export default mongoose;
