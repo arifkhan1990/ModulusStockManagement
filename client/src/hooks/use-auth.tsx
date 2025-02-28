@@ -195,3 +195,155 @@ export function useRegisterMutation() {
     },
   });
 }
+import React, { createContext, useContext } from "react";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { useToast } from "./use-toast";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/utils/api";
+import { type User } from "@shared/schema";
+import { 
+  AuthContext, 
+  AuthContextType, 
+  LoginData, 
+  InsertUser 
+} from "@/contexts/AuthContext";
+
+// Auth provider component
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  // Use React Query to fetch the current user
+  const { 
+    data: user, 
+    isLoading,
+    error 
+  } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/user");
+      if (!response.ok) {
+        if (response.status === 401) {
+          return null; // Not authenticated
+        }
+        throw new Error("Failed to fetch user");
+      }
+      return response.json();
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginData) => {
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Login successful",
+        description: "You are now logged in",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: async (data: InsertUser) => {
+      const response = await apiRequest("POST", "/api/auth/register", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Registration failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Registration successful",
+        description: "You have been registered and logged in",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/logout");
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Logout successful",
+        description: "You have been logged out",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const contextValue: AuthContextType = {
+    user: user || null,
+    isLoading,
+    error: error instanceof Error ? error : null,
+    login: loginMutation.mutate,
+    logout: logoutMutation.mutate,
+    register: registerMutation.mutate,
+    isLoggingIn: loginMutation.isPending,
+    isLoggingOut: logoutMutation.isPending,
+    isRegistering: registerMutation.isPending,
+  };
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Auth hook for components to use
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  
+  return context;
+}
+
+// Export the individual mutation hooks for more granular use
+export { useLoginMutation, useRegisterMutation, useLogoutMutation } from "./use-auth.ts";
