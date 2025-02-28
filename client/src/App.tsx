@@ -1,24 +1,22 @@
+
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
+
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Auth from "@/pages/auth";
-import DashboardLayout from "@/components/layouts/dashboard-layout";
-import RootLayout from "@/components/layouts/root-layout";
+import Dashboard from "@/pages/dashboard";
 import ProductsPage from "@/pages/dashboard/products";
 import StockMovementsPage from "@/pages/dashboard/stock-movements";
 import LocationsPage from "@/pages/dashboard/locations";
-import Dashboard from "@/pages/dashboard";
 import Products from "@/pages/products";
 import Stock from "@/pages/stock";
 
-import { AuthProvider } from "@/providers/auth-provider";
-import { useAuth } from "@/hooks/use-auth";
-import Navbar from "@/components/navbar";
-import LoadingLayout from "@/components/layouts/loading-layout";
-import { useEffect } from "react";
+import { AuthProvider, useAuth } from "@/providers/auth-provider";
+import RootLayout from "@/components/layouts/root-layout";
 
 // Auth check component that redirects if not authenticated
 function ProtectedRoute({ component: Component, ...rest }) {
@@ -31,7 +29,6 @@ function ProtectedRoute({ component: Component, ...rest }) {
     }
   }, [user, isLoading, setLocation]);
 
-  // The actual layout rendering is now handled by RootLayout
   if (isLoading || !user) {
     return null; // RootLayout will handle showing LoadingLayout
   }
@@ -79,7 +76,7 @@ function AppRouter() {
   );
 }
 
-export default function App() {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -91,3 +88,5 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
+export default App;

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query"; // Import useQueryClient here
+import { useMutation, useQueryClient } from "@tanstack/react-query"; 
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/api";
@@ -20,99 +20,97 @@ export type InsertUser = {
   name: string;
 };
 
-// Hook for login mutation
+// Hook exports
 export function useLoginMutation() {
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient(); // Real hook from @tanstack/react-query
 
   return useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Login failed");
+    mutationFn: async (data: LoginData) => {
+      const response = await apiRequest("POST", "/api/login", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to login");
       }
-      return res.json(); // Assumes this returns a User
+      return response.json();
     },
-    onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/dashboard");
       toast({
         title: "Success",
-        description: "Successfully logged in!",
+        description: "You have successfully logged in",
       });
-      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to login",
         variant: "destructive",
       });
     },
   });
 }
 
-// Hook for logout mutation
 export function useLogoutMutation() {
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient(); // Real hook
 
   return useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/logout");
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Logout failed");
+      const response = await apiRequest("POST", "/api/logout");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to logout");
       }
-      return res.json(); // Could return nothing or a success message
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/");
       toast({
         title: "Success",
-        description: "Successfully logged out!",
+        description: "You have successfully logged out",
       });
-      setLocation("/");
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to logout",
         variant: "destructive",
       });
     },
   });
 }
 
-// Hook for registration mutation
 export function useRegisterMutation() {
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient(); // Real hook
 
   return useMutation({
     mutationFn: async (data: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", data);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Registration failed");
+      const response = await apiRequest("POST", "/api/register", data);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to register");
       }
-      return res.json(); // Assumes this returns a User
+      return response.json();
     },
-    onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setLocation("/dashboard");
       toast({
         title: "Success",
-        description: "Account created successfully!",
+        description: "You have successfully registered",
       });
-      setLocation("/dashboard");
     },
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to register",
         variant: "destructive",
       });
     },
