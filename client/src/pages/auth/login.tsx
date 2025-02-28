@@ -92,3 +92,21 @@ export default function Login() {
     </div>
   );
 }
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+export default function Login() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 max-w-md w-full">
+        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
+        <p className="text-center text-muted-foreground">Login form will be implemented here</p>
+        <div className="mt-4 text-center">
+          <Link to="/" className="text-sm text-primary hover:underline">
+            Back to Home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

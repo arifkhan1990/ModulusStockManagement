@@ -197,3 +197,69 @@ const StockPage = lazy(() => import("@/pages/dashboard/stock"));
 const StockMovementsPage = lazy(() => import("@/pages/dashboard/stock/movements"));
 const SuppliersPage = lazy(() => import("@/pages/dashboard/suppliers"));
 const SettingsPage = lazy(() => import("@/pages/dashboard/settings"));
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Lazy-loaded components
+const HomePage = lazy(() => import('./pages/home'));
+const Dashboard = lazy(() => import('./pages/dashboard'));
+const StockPage = lazy(() => import('./pages/dashboard/stock'));
+const Login = lazy(() => import('./pages/auth/login'));
+const Signup = lazy(() => import('./pages/auth/signup'));
+const NotFound = lazy(() => import('./pages/not-found'));
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+// Loading component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <motion.div
+      animate={{ 
+        rotate: 360,
+        scale: [1, 1.2, 1],
+      }}
+      transition={{ 
+        rotate: { repeat: Infinity, duration: 1, ease: "linear" },
+        scale: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
+      }}
+      className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full"
+    />
+  </div>
+);
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AnimatePresence mode="wait">
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/stock" element={<StockPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/404" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
+          </Suspense>
+        </AnimatePresence>
+      </Router>
+      <Toaster position="top-right" />
+    </QueryClientProvider>
+  );
+}
+
+export default App;

@@ -140,3 +140,16 @@ export default function StockPage() {
     </div>
   );
 }
+import React from 'react';
+import MainLayout from '../../../components/layout/MainLayout';
+
+export default function StockPage() {
+  return (
+    <MainLayout>
+      <h1 className="text-2xl font-bold tracking-tight mb-6">Stock Management</h1>
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+        <p className="text-center text-muted-foreground">Stock management interface will be implemented here</p>
+      </div>
+    </MainLayout>
+  );
+}
