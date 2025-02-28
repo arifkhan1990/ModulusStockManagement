@@ -149,3 +149,60 @@ export async function downloadFile(
     throw error;
   }
 }
+import { useState } from 'react';
+
+// Assuming this file already has the apiRequest function
+// If not, we're adding it here
+export const apiRequest = async (method = 'GET', url: string, data?: any) => {
+  const options: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  };
+
+  if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    options.body = JSON.stringify(data);
+  }
+
+  return fetch(url, options);
+};
+
+// Add the useApi hook that was missing
+export const useApi = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const request = async <T>(method: string, url: string, data?: any): Promise<T> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiRequest(method, url, data);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'API request failed');
+      }
+      
+      const responseData = await response.json();
+      return responseData as T;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    get: <T>(url: string) => request<T>('GET', url),
+    post: <T>(url: string, data: any) => request<T>('POST', url, data),
+    put: <T>(url: string, data: any) => request<T>('PUT', url, data),
+    patch: <T>(url: string, data: any) => request<T>('PATCH', url, data),
+    delete: <T>(url: string) => request<T>('DELETE', url),
+    loading,
+    error
+  };
+};
