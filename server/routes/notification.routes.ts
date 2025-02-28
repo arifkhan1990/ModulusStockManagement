@@ -1,7 +1,6 @@
-
 import express from 'express';
 import { requireAuth } from '../middleware/auth';
-import { t } from '../middleware/tenant';
+import { tenantMiddleware } from '../middleware/tenant';
 import notificationController from '../controllers/notification.controller';
 import notificationValidator from '../validators/notification.validator';
 
@@ -9,7 +8,7 @@ const router = express.Router();
 
 // Apply middleware
 router.use(requireAuth);
-router.use(requireCompany);
+router.use(tenantMiddleware);
 
 // Create a new notification
 router.post(
