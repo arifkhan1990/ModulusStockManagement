@@ -236,14 +236,14 @@ const StockMovementSchema = new Schema<IStockMovement>({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Create and export models
-export const User = mongoose.model<IUser>('User', UserSchema);
-export const DemoRequest = mongoose.model<IDemoRequest>('DemoRequest', DemoRequestSchema);
-export const Location = mongoose.model<ILocation>('Location', LocationSchema);
-export const Supplier = mongoose.model<ISupplier>('Supplier', SupplierSchema);
-export const Product = mongoose.model<IProduct>('Product', ProductSchema);
-export const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
-export const StockMovement = mongoose.model<IStockMovement>('StockMovement', StockMovementSchema);
+// Create and export models - checking if they exist first
+export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export const DemoRequest = mongoose.models.DemoRequest || mongoose.model<IDemoRequest>('DemoRequest', DemoRequestSchema);
+export const Location = mongoose.models.Location || mongoose.model<ILocation>('Location', LocationSchema);
+export const Supplier = mongoose.models.Supplier || mongoose.model<ISupplier>('Supplier', SupplierSchema);
+export const Product = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+export const Inventory = mongoose.models.Inventory || mongoose.model<IInventory>('Inventory', InventorySchema);
+export const StockMovement = mongoose.models.StockMovement || mongoose.model<IStockMovement>('StockMovement', StockMovementSchema);
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertDemoRequest = z.infer<typeof insertDemoRequestSchema>;
