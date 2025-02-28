@@ -2,7 +2,7 @@
 import express from 'express';
 import billingController from '../controllers/billing.controller';
 import { requireAuth } from '../middleware/auth';
-import { requireAdminRole } from '../middleware/rbac';
+import { requireSystemAdmin, requireCompanyAdmin } from '../middleware/rbac';
 import billingValidator from '../validators/billing.validator';
 
 const router = express.Router();
