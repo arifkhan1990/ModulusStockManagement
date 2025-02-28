@@ -1,0 +1,90 @@
+"I need you to design and enhance the existing subscription-based business management platform into a full-fledged SaaS system. The SaaS company (platform provider) will manage and maintain all features centrally, while each subscriber company can enable, disable, prioritize, and customize features based on their importance and business needs. The platform already includes stock management, POS, invoice system, customer management, notifications (email, push, SMS, Messenger, Discord, etc.), sharing options (Facebook, X, LinkedIn, etc.), and download capabilities. Below are the detailed requirements for this dual-control SaaS architecture. Please generate a modular, secure, and production-ready codebase with explanations of the implementation and suggested technologies (e.g., React for frontend, Node.js/Express for backend, MongoDB for database).
+
+Project Overview:
+The SaaS system serves multiple subscriber companies, each with a personalized URL (e.g., companyname.saasdomain.com). The SaaS provider controls the global feature set, updates, and infrastructure, while subscribers (business owners) manage how these features are used within their own instance—enabling/disabling features, setting priorities, and customizing them. The system must be scalable, secure, and flexible to accommodate diverse business types (e.g., e-commerce, retail, services).
+
+Detailed Features:
+1. SaaS Company (Provider) Control
+Feature Management:
+Centralized dashboard for the SaaS provider to add, update, or remove features (e.g., stock management, POS, notifications).
+Enable/disable features globally across all subscribers (e.g., turn off a beta feature).
+Roll out updates incrementally (e.g., to 10% of subscribers first).
+Subscription Tiers:
+Define tiers (e.g., Basic, Pro, Enterprise) with different feature sets and limits (e.g., max users, storage).
+Assign subscribers to tiers via an admin panel.
+Global Settings:
+Set default configurations for all features (e.g., default notification channels, invoice templates).
+Enforce mandatory features (e.g., Privacy Policy compliance) that subscribers cannot disable.
+Analytics & Monitoring:
+View usage stats across all subscribers (e.g., most-used features, total invoices generated).
+Monitor system health (e.g., server uptime, notification failures) with alerts.
+Billing & Payments:
+Integrate a payment gateway (e.g., Stripe) for subscription billing (monthly/yearly).
+Handle upgrades/downgrades and proration.
+2. Subscriber Company Control
+Feature Toggle:
+Each subscriber can enable/disable available features (e.g., turn off Discord notifications, enable POS).
+UI to toggle features with descriptions and dependencies (e.g., “POS requires stock management”).
+Feature Prioritization:
+Subscribers can rank features by importance (e.g., drag-and-drop list in settings).
+Prioritized features appear prominently in their dashboard (e.g., top menu items).
+Customization:
+Customize enabled features (e.g., invoice design, notification templates, stock alert thresholds).
+Save settings per company instance, overriding SaaS defaults where allowed.
+User Roles & Permissions:
+Subscriber admin (company owner) can assign roles (e.g., manager, cashier) with granular permissions (e.g., “Manager can view logs, cashier cannot”).
+Limit feature access by role (e.g., only admin can toggle features).
+Branding:
+Apply company branding (logo, colors) across all enabled features (e.g., POS receipts, landing pages).
+3. Feature Integration
+Stock Management:
+SaaS provider: Controls core functionality (e.g., add product fields).
+Subscriber: Enables/disables, customizes (e.g., add custom fields like ‘size’), prioritizes in UI.
+POS System:
+SaaS provider: Manages payment gateway integrations.
+Subscriber: Toggles online payments, sets tax rates, prioritizes in workflow.
+Invoice System:
+SaaS provider: Provides design tools and payment options.
+Subscriber: Customizes templates, enables partial payments, prioritizes visibility.
+Notifications:
+SaaS provider: Integrates channels (email, SMS, Discord, etc.).
+Subscriber: Chooses active channels, edits templates, sets event triggers.
+Sharing & Downloads:
+SaaS provider: Manages API integrations (e.g., Facebook, X).
+Subscriber: Enables specific platforms, customizes share messages.
+4. Dual-Layer Dashboard
+SaaS Provider Dashboard:
+Manage subscribers (add, suspend, delete accounts).
+View global analytics (e.g., total active users, revenue).
+Deploy updates and hotfixes.
+Subscriber Dashboard:
+Dynamic layout based on prioritized features (e.g., stock management at the top if ranked #1).
+Settings page for toggles, customizations, and user management.
+Reflects only features enabled by both SaaS provider and subscriber.
+5. Production-Grade Requirements
+Multi-Tenancy:
+Isolate subscriber data (e.g., separate MongoDB collections or database schemas per tenant).
+Route requests via subdomains (e.g., companyname.saasdomain.com).
+Scalability:
+Use microservices or serverless architecture (e.g., AWS Lambda) for feature modules.
+Load balancing and caching (e.g., Redis) for high traffic.
+Security:
+Encrypt tenant data at rest (e.g., AES-256).
+OAuth2 for API access, SSO for subscriber logins (e.g., Google, Okta).
+Audit logs for both SaaS provider and subscriber actions.
+Performance:
+Lazy-load disabled features to reduce resource usage.
+Optimize database queries for multi-tenant access.
+Compliance:
+GDPR/CCPA support (e.g., data export/deletion for subscribers’ customers).
+Terms of Service enforced by SaaS provider.
+6. Additional Features
+Onboarding:
+SaaS provider: Guides new subscribers with setup wizard.
+Subscriber: Custom onboarding based on prioritized features.
+Support:
+SaaS provider: Manages ticketing system for subscribers.
+Subscriber: Submits tickets, views status within their dashboard.
+API Access:
+SaaS provider: Exposes RESTful APIs for all features.
+Subscriber: Uses APIs for custom integrations (e.g., Zapier).
