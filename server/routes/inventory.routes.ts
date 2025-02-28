@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, restrictTo } from "../middleware/auth";
-import cacheResponse from "../middleware/cache";
+import { cacheMiddleware } from "../middleware/cache"; // Corrected import
 import * as inventoryController from "../controllers/inventory.controller";
 
 const router = Router();
@@ -11,12 +11,12 @@ router.use(requireAuth);
 // Inventory routes
 router.get(
   "/low-stock",
-  cacheResponse(300),
+  cacheMiddleware(300), // Corrected function call
   inventoryController.getLowStockInventory,
 );
 router.get(
   "/product/:productId",
-  cacheResponse(60),
+  cacheMiddleware(60), // Corrected function call
   inventoryController.getProductInventory,
 );
 router.put(
