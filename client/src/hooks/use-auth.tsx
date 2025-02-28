@@ -1,9 +1,8 @@
-import { useContext } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query"; 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/api";
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Auth type definitions
 type User = {
@@ -36,12 +35,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const checkAuthStatus = async () => {
       try {
         // Simulate checking auth status
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem("user");
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
       } catch (err) {
-        console.error('Auth status check failed:', err);
+        console.error("Auth status check failed:", err);
       } finally {
         setIsLoading(false);
       }
@@ -58,23 +57,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Simulated API call
       // In a real app, you would make an API request to your auth endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mock successful login
-      if (email === 'user@example.com' && password === 'password') {
+      if (email === "user@example.com" && password === "password") {
         const userData = {
-          id: '1',
-          name: 'Demo User',
-          email: 'user@example.com'
+          id: "1",
+          name: "Demo User",
+          email: "user@example.com",
         };
 
         setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem("user", JSON.stringify(userData));
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error("Invalid credentials");
       }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Login failed'));
+      setError(err instanceof Error ? err : new Error("Login failed"));
       throw err;
     } finally {
       setIsLoading(false);
@@ -88,19 +87,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Simulated API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Mock successful registration
       const userData = {
         id: Date.now().toString(),
         name,
-        email
+        email,
       };
 
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData));
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Registration failed'));
+      setError(err instanceof Error ? err : new Error("Registration failed"));
       throw err;
     } finally {
       setIsLoading(false);
@@ -109,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     setUser(null);
   };
 
@@ -122,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
-        error
+        error,
       }}
     >
       {children}
@@ -135,7 +134,7 @@ export function useAuth() {
   const context = useContext(AuthContext);
 
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
 
   return context;

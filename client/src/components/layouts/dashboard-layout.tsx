@@ -7,29 +7,31 @@ import { useAuth } from "@/hooks/use-auth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SkeletonPage } from "@/components/ui/skeleton";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { isLoading, user } = useAuth();
   const { isOpen, toggle } = useSidebar();
-  
+
   // Redirect to login if not authenticated
   if (!isLoading && !user) {
     return <Redirect to="/auth" />;
   }
-  
+
   // Show skeleton loader while checking auth
   if (isLoading) {
     return <SkeletonPage />;
   }
-  
+
   return (
     <ErrorBoundary>
       <div className="flex min-h-screen flex-col">
         <Navbar toggleSidebar={toggle} />
         <div className="flex flex-1 flex-col md:flex-row">
           <DrawerMenu isOpen={isOpen} toggleSidebar={toggle} />
-          <main className="flex-1 p-6">
-            {children}
-          </main>
+          <main className="flex-1 p-6">{children}</main>
         </div>
       </div>
     </ErrorBoundary>
@@ -57,57 +59,6 @@ const sidebarItems = [
     label: "Stock Movements",
   },
 ];
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [location] = useLocation();
-  const { logout } = useAuth();
-
-  return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-sm">
-        <div className="flex flex-col h-full">
-          <div className="p-4 border-b">
-            <h2 className="text-xl font-semibold">Stock Manager</h2>
-          </div>
-          <nav className="p-4 flex-grow">
-            <ul className="space-y-2">
-              {sidebarItems.map((item) => (
-                <li key={item.href}>
-                  <Button
-                    variant={location === item.href ? "secondary" : "ghost"}
-                    className="w-full justify-start"
-                    onClick={() => (window.location.href = item.href)}
-                  >
-                    {item.icon && <item.icon className="w-5 h-5 mr-2" />}
-                    {item.label}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div className="p-4 border-t mt-auto">
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => logout()}
-            >
-              <LogOut className="w-5 h-5 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 overflow-auto p-6">{children}</main>
-    </div>
-  );
-}
 
 // Custom component to handle navigation items
 const NavItem = ({ href, icon: Icon, children, isActive }) => {
