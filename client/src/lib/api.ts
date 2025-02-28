@@ -1,30 +1,17 @@
-
 /**
- * API utility function for making requests to the server
+ * Helper function to make API requests
  */
 export async function apiRequest(
-  method: string, 
-  endpoint: string, 
-  data?: any
+  method: string,
+  url: string,
+  data?: unknown | undefined,
 ): Promise<Response> {
-  const url = endpoint.startsWith('http') ? endpoint : `${import.meta.env.VITE_API_URL || ''}${endpoint}`;
-  
-  const options: RequestInit = {
+  const res = await fetch(url, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include', // Include cookies for authentication
-  };
-  
-  if (data && method !== 'GET') {
-    options.body = JSON.stringify(data);
-  }
-  
-  try {
-    return await fetch(url, options);
-  } catch (error) {
-    console.error('API request error:', error);
-    throw new Error('Network error. Please check your connection and try again.');
-  }
+    headers: data ? { "Content-Type": "application/json" } : {},
+    body: data ? JSON.stringify(data) : undefined,
+    credentials: "include",
+  });
+
+  return res;
 }
