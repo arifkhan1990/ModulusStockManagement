@@ -9,11 +9,14 @@ import {
   insertProductSchema,
   insertInventorySchema,
   insertStockMovementSchema,
+  insertInvoiceSchema, // Added invoice schema import
+  insertInvoiceTemplateSchema // Added invoice template schema import
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { requireAuth } from "./middleware/auth";
 import mongoose from "mongoose";
 import { healthCheck, detailedHealthCheck, readyCheck } from './middleware/health'; // Added health check imports
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -361,6 +364,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
       quantity: inventory.quantity - quantity
     });
   }
+
+  //Invoice routes
+  app.post("/api/invoices", requireAuth, async (req, res) => {
+    try {
+      const invoice = insertInvoiceSchema.parse(req.body);
+      const result = await storage.createInvoice(invoice);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create invoice" });
+      }
+    }
+  });
+
+  app.get("/api/invoices", requireAuth, async (req, res) => {
+    try {
+      const invoices = await storage.getInvoices();
+      res.json(invoices);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.get("/api/invoices/:id", requireAuth, async (req, res) => {
+    try {
+      const invoice = await storage.getInvoice(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(invoice);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch invoice" });
+    }
+  });
+
+  app.put("/api/invoices/:id", requireAuth, async (req, res) => {
+    try {
+      const invoiceData = insertInvoiceSchema.partial().parse(req.body);
+      const result = await storage.updateInvoice(req.params.id, invoiceData);
+      if (!result) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Invalid invoice data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update invoice" });
+      }
+    }
+  });
+
+  app.delete("/api/invoices/:id", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.deleteInvoice(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      res.json({ message: "Invoice deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete invoice" });
+    }
+  });
+
+  //Invoice Template Routes
+  app.post("/api/invoice-templates", requireAuth, async (req, res) => {
+    try {
+      const invoiceTemplate = insertInvoiceTemplateSchema.parse(req.body);
+      const result = await storage.createInvoiceTemplate(invoiceTemplate);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Invalid invoice template data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to create invoice template" });
+      }
+    }
+  });
+
+  app.get("/api/invoice-templates", requireAuth, async (req, res) => {
+    try {
+      const invoiceTemplates = await storage.getInvoiceTemplates();
+      res.json(invoiceTemplates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch invoice templates" });
+    }
+  });
+
+  app.get("/api/invoice-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const invoiceTemplate = await storage.getInvoiceTemplate(req.params.id);
+      if (!invoiceTemplate) {
+        return res.status(404).json({ message: "Invoice template not found" });
+      }
+      res.json(invoiceTemplate);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch invoice template" });
+    }
+  });
+
+
+  app.put("/api/invoice-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const invoiceTemplateData = insertInvoiceTemplateSchema.partial().parse(req.body);
+      const result = await storage.updateInvoiceTemplate(req.params.id, invoiceTemplateData);
+      if (!result) {
+        return res.status(404).json({ message: "Invoice template not found" });
+      }
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        res.status(400).json({ message: "Invalid invoice template data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update invoice template" });
+      }
+    }
+  });
+
+  app.delete("/api/invoice-templates/:id", requireAuth, async (req, res) => {
+    try {
+      const result = await storage.deleteInvoiceTemplate(req.params.id);
+      if (!result) {
+        return res.status(404).json({ message: "Invoice template not found" });
+      }
+      res.json({ message: "Invoice template deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete invoice template" });
+    }
+  });
+
 
   return createServer(app);
 }

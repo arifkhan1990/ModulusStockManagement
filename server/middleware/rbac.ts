@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from '../models/user.model';
 
@@ -17,6 +16,8 @@ export const PERMISSIONS = {
     'payment:create', 'payment:read', 'payment:update', 'payment:delete',
     'report:create', 'report:read', 'report:export',
     'settings:read', 'settings:update',
+    'invoice:create', 'invoice:read', 'invoice:update', 'invoice:delete',
+    'admin:access'
   ],
   // Manager has most permissions except user management and settings
   manager: [
@@ -27,6 +28,7 @@ export const PERMISSIONS = {
     'order:create', 'order:read', 'order:update',
     'payment:create', 'payment:read', 'payment:update',
     'report:create', 'report:read', 'report:export',
+    'invoice:create', 'invoice:read', 'invoice:update',
   ],
   // Staff has limited permissions
   staff: [
@@ -36,6 +38,7 @@ export const PERMISSIONS = {
     'order:create', 'order:read', 'order:update',
     'payment:create', 'payment:read',
     'report:read',
+    'invoice:create', 'invoice:read',
   ],
   // Viewers can only read data
   viewer: [
@@ -45,11 +48,13 @@ export const PERMISSIONS = {
     'order:read',
     'payment:read',
     'report:read',
+    'invoice:read'
   ],
   // Customers have very limited access
   customer: [
     'order:create', 'order:read',
     'payment:create', 'payment:read',
+    'invoice:read'
   ],
   // Suppliers can only manage their products
   supplier: [
@@ -72,7 +77,7 @@ export const getUserPermissions = (user: IUser): Permission[] => {
 // Check if a user has a specific permission
 export const hasPermission = (user: IUser, permission: Permission): boolean => {
   if (user.role === 'admin') return true; // Admin has all permissions
-  
+
   const permissions = getUserPermissions(user);
   return permissions.includes(permission);
 };
@@ -95,20 +100,20 @@ export const requirePermission = (permission: Permission) => {
 // Middleware to restrict access based on business size
 export const restrictByBusinessSize = (minSize: 'small' | 'medium' | 'large') => {
   const sizeOrder = { small: 1, medium: 2, large: 3 };
-  
+
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized: User not authenticated' });
     }
-    
+
     const user = req.user as IUser;
     const userSizeValue = sizeOrder[user.businessSize as keyof typeof sizeOrder] || 0;
     const minSizeValue = sizeOrder[minSize];
-    
+
     if (userSizeValue >= minSizeValue || user.role === 'admin') {
       return next();
     }
-    
+
     return res.status(403).json({ 
       message: `This feature is only available for ${minSize} or larger business subscriptions` 
     });
@@ -121,13 +126,13 @@ export const restrictByBusinessType = (allowedTypes: string[]) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized: User not authenticated' });
     }
-    
+
     const user = req.user as IUser;
-    
+
     if (allowedTypes.includes(user.businessType || '') || user.role === 'admin') {
       return next();
     }
-    
+
     return res.status(403).json({ 
       message: `This feature is only available for ${allowedTypes.join(', ')} business types` 
     });

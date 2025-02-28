@@ -16,6 +16,10 @@ import Alert from './alert.model';
 import Payment from './payment.model';
 import Company from './company.model';
 import LandingPage from './landing-page.model';
+import Invoice from './invoice.model';
+import InvoiceTemplate from './invoice-template.model';
+import SystemLog from './system-log.model';
+import FeatureToggle from './feature-toggle.model';
 
 export {
   User,
@@ -35,5 +39,9 @@ export {
   Alert,
   Payment,
   Company,
-  LandingPage
+  LandingPage,
+  Invoice,
+  InvoiceTemplate,
+  SystemLog,
+  FeatureToggle
 };
