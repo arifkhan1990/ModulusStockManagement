@@ -8,7 +8,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import { ArrowRightLeft, LayoutGrid, Package, Warehouse } from "lucide-react";
 
-export default function DashboardLayout({
+export default function DashboardPage({
   children,
 }: {
   children: React.ReactNode;
@@ -102,7 +102,7 @@ const routes = [
 ];
 
 //Example App.tsx (Adapt this to your actual routing setup)
-function DashboardApp() {
+function DashboardLayout() {
   const [location] = useLocation();
 
   const renderRoute = () => {
@@ -111,7 +111,7 @@ function DashboardApp() {
     );
     return currentRoute ? <currentRoute.component /> : <div>404 Not Found</div>;
   };
-  return <DashboardLayout>{renderRoute()}</DashboardLayout>;
+  return <DashboardPage>{renderRoute()}</DashboardPage>;
 }
 
-export { DashboardApp };
+export { DashboardLayout };
