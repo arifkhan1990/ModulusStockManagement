@@ -1,4 +1,3 @@
-
 /**
  * API utilities for making requests to the backend
  */
@@ -17,7 +16,7 @@ interface ApiRequestOptions {
 
 /**
  * Make an API request to the server
- * 
+ *
  * @param method HTTP method (GET, POST, PUT, PATCH, DELETE)
  * @param endpoint API endpoint (e.g., "/api/products")
  * @param data Optional request body data for POST, PUT, PATCH
@@ -28,18 +27,18 @@ export async function apiRequest(
   method: string,
   endpoint: string,
   data?: any,
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
 ): Promise<ApiResponse> {
   try {
     const headers = {
-      ...(options.isBinary ? {} : { 'Content-Type': 'application/json' }),
+      ...(options.isBinary ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     };
 
     const config: RequestInit = {
       method,
       headers,
-      credentials: 'include', // Include cookies for authentication
+      credentials: "include", // Include cookies for authentication
     };
 
     if (data) {
@@ -52,13 +51,13 @@ export async function apiRequest(
 
     const response = await fetch(endpoint, config);
     const responseHeaders = response.headers;
-    const contentType = responseHeaders.get('Content-Type') || '';
+    const contentType = responseHeaders.get("Content-Type") || "";
 
     // Parse response based on content type
     let responseData;
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       responseData = await response.json();
-    } else if (contentType.includes('text/')) {
+    } else if (contentType.includes("text/")) {
       responseData = await response.text();
     } else {
       // Handle binary responses
@@ -83,7 +82,7 @@ export async function apiRequest(
   } catch (error) {
     // Handle network errors or exceptions during fetch
     return {
-      error: (error as Error).message || 'Network error',
+      error: (error as Error).message || "Network error",
       status: 0, // 0 indicates network error or other fetch failure
       headers: new Headers(),
     };
@@ -92,7 +91,7 @@ export async function apiRequest(
 
 /**
  * Upload a file to the server
- * 
+ *
  * @param endpoint API endpoint
  * @param file File to upload
  * @param additionalData Additional form data to include
@@ -101,102 +100,52 @@ export async function apiRequest(
 export async function uploadFile(
   endpoint: string,
   file: File,
-  additionalData?: Record<string, string>
+  additionalData?: Record<string, string>,
 ): Promise<ApiResponse> {
   const formData = new FormData();
-  formData.append('file', file);
-  
+  formData.append("file", file);
+
   if (additionalData) {
     Object.entries(additionalData).forEach(([key, value]) => {
       formData.append(key, value);
     });
   }
-  
-  return apiRequest('POST', endpoint, formData, { isBinary: true });
+
+  return apiRequest("POST", endpoint, formData, { isBinary: true });
 }
 
 /**
  * Download a file from the server
- * 
- * @param endpoint API endpoint 
+ *
+ * @param endpoint API endpoint
  * @param filename Suggested filename for the download
  */
-export async function downloadFile(endpoint: string, filename: string): Promise<void> {
+export async function downloadFile(
+  endpoint: string,
+  filename: string,
+): Promise<void> {
   try {
-    const response = await apiRequest('GET', endpoint);
-    
+    const response = await apiRequest("GET", endpoint);
+
     if (response.error) {
       throw new Error(response.error);
     }
-    
+
     // Create a download link and click it
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
+    const a = document.createElement("a");
+    a.style.display = "none";
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
-    
+
     // Clean up
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
   } catch (error) {
-    console.error('Failed to download file', error);
+    console.error("Failed to download file", error);
     throw error;
   }
-}
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-
-interface RequestOptions {
-  headers?: Record<string, string>;
-  params?: Record<string, string>;
-}
-
-export async function apiRequest<T = any>(
-  method: HttpMethod,
-  endpoint: string,
-  data?: any,
-  options: RequestOptions = {}
-): Promise<{ data: T; status: number }> {
-  const url = new URL(endpoint, window.location.origin);
-  
-  // Add query parameters if provided
-  if (options.params) {
-    Object.entries(options.params).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
-    });
-  }
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...options.headers,
-  };
-
-  const config: RequestInit = {
-    method,
-    headers,
-    credentials: "include", // Include cookies for authentication
-  };
-
-  if (data && method !== "GET") {
-    config.body = JSON.stringify(data);
-  }
-
-  const response = await fetch(url.toString(), config);
-  
-  // Handle API errors
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: "An unknown error occurred" }));
-    throw new Error(errorData.message || `Request failed with status ${response.status}`);
-  }
-
-  // Parse JSON response or return empty object if no content
-  const responseData = response.status !== 204 ? await response.json() : {};
-  
-  return {
-    data: responseData,
-    status: response.status,
-  };
 }
