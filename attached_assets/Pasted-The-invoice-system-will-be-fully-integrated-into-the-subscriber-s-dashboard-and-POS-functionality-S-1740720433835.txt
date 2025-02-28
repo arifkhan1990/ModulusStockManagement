@@ -1,0 +1,55 @@
+The invoice system will be fully integrated into the subscriber’s dashboard and POS functionality. Subscribers can create invoices dynamically for any transaction, customize their design, and manage payment options (full, partial, or none; cash or online). A separate admin-only page will track logs, and the admin can toggle features on/off or clear caches as needed.
+
+Detailed Features:
+1. Invoice Creation and Integration
+POS Integration:
+Generate an invoice automatically from a POS transaction (e.g., after adding items to the cart and processing payment).
+Option to create standalone invoices without POS (e.g., for bulk sales or purchases).
+Invoice Fields:
+Auto-populated: Invoice number (unique, sequential), date, company logo/name, client details (name, email, phone), itemized list (product name, quantity, unit price, subtotal).
+Editable: Tax rate, discount, additional notes, payment terms.
+Transaction Flexibility: Support invoices for both buying (from suppliers) and selling (to customers).
+Multi-Currency: Allow subscribers to select currency (e.g., USD, EUR) with conversion rates (optional API integration, e.g., ExchangeRate-API).
+2. Customizable Invoice Design
+Design Tool:
+Provide a drag-and-drop editor to customize invoice layout (e.g., move logo, adjust table placement, add footer).
+Pre-built templates (e.g., modern, classic, minimal) as starting points.
+Branding: Allow upload of company logo, custom fonts, and color schemes.
+Dynamic Fields: Option to add/remove fields (e.g., VAT number, terms of service).
+Preview: Real-time preview of the invoice design before saving.
+Save Templates: Subscribers can save multiple custom templates and choose one per invoice.
+3. Payment Options
+Payment Statuses:
+Full Payment: Mark invoice as fully paid.
+Partial Payment: Record partial amounts paid and show remaining balance.
+No Payment: Mark as unpaid (e.g., for credit sales).
+Payment Methods:
+Cash: Manual entry of amount received.
+Online: Integrate with payment gateways (e.g., Stripe, PayPal) for card/UPI payments.
+Payment Tracking:
+Display payment history for each invoice (date, amount, method).
+Send payment reminders via email (manual or automated).
+Receipt Generation: Option to issue a receipt alongside or instead of an invoice.
+4. Invoice Management
+Dashboard:
+List all invoices with filters (e.g., paid, unpaid, overdue, date range).
+Search by invoice number, client name, or amount.
+Actions: Edit, delete, duplicate, or download invoices (PDF/Excel).
+Status Updates: Mark invoices as draft, sent, paid, or canceled.
+Bulk Actions: Send or download multiple invoices at once.
+5. Admin-Only Logs and Controls
+Active Logs Page:
+Accessible only to the company owner (admin role).
+Log all system activities (e.g., invoice creation, payment updates, feature toggles) with timestamps and user IDs.
+Filter logs by date, action type, or user.
+Cache Management:
+Option to dynamically clear system cache (e.g., for performance optimization).
+Confirmation prompt before clearing.
+Feature Toggle:
+Admin can enable/disable specific features (e.g., invoice customization, online payments, logs) for their account.
+Toggle settings saved per subscriber and reflected instantly.
+6. Additional Features
+Email/SMS Integration: Send invoices to clients via email or SMS (e.g., Twilio API for SMS).
+Analytics: Show invoice-related metrics (e.g., total invoiced amount, unpaid invoices) on the dashboard.
+Backup: Export all invoices and logs as a backup (CSV, JSON).
+Offline Support: Allow invoice creation offline with sync when online (for POS compatibility).
