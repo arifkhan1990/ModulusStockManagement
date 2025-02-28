@@ -40,11 +40,17 @@ export function DrawerMenu({ isOpen, setIsOpen, onLogout }: DrawerMenuProps) {
               <Link href="/dashboard/products" className="text-sm font-medium hover:underline">
                 Products
               </Link>
+              <Link href="/dashboard/stock" className="text-sm font-medium hover:underline">
+                Stock
+              </Link>
+              <Link href="/dashboard/suppliers" className="text-sm font-medium hover:underline">
+                Suppliers
+              </Link>
               <Link href="/dashboard/locations" className="text-sm font-medium hover:underline">
                 Locations
               </Link>
-              <Link href="/profile" className="text-sm font-medium hover:underline">
-                Profile
+              <Link href="/dashboard/settings" className="text-sm font-medium hover:underline">
+                Settings
               </Link>
               {onLogout && (
                 <Button onClick={onLogout} variant="outline" size="sm">
