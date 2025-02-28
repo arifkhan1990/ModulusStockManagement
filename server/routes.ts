@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -14,10 +13,16 @@ import {
 import { ZodError } from "zod";
 import { requireAuth } from "./middleware/auth";
 import mongoose from "mongoose";
+import { healthCheck, detailedHealthCheck, readyCheck } from './middleware/health'; // Added health check imports
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+
+  // Health check routes for load balancers
+  app.get('/health', healthCheck);
+  app.get('/health/detailed', detailedHealthCheck);
+  app.get('/health/ready', readyCheck);
 
   // Demo request route
   app.post("/api/demo-request", async (req, res) => {
@@ -261,17 +266,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Handle adjustments specially (set toLocationId to null for adjustments)
       let movementData = { ...req.body, createdBy: req.user!.id };
-      
+
       if (movementData.type === 'adjustment') {
         // For adjustments, we don't need a toLocationId
         movementData.toLocationId = undefined;
       }
-      
+
       const movement = insertStockMovementSchema.parse(movementData);
-      
+
       // Create the stock movement
       const result = await storage.createStockMovement(movement);
-      
+
       // Update inventory based on the movement type
       if (movement.type === 'transfer') {
         // For transfers, reduce from source and add to destination
@@ -280,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // For adjustments, just reduce from the source
         await updateInventoryForAdjustment(movement);
       }
-      
+
       res.json(result);
     } catch (err) {
       if (err instanceof ZodError) {
@@ -291,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
-  
+
   // Get all stock movements or filter by product
   app.get("/api/stock-movements", requireAuth, async (req, res) => {
     try {
@@ -305,26 +310,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch stock movements" });
     }
   });
-  
+
   // Helper function to update inventory for transfers
   async function updateInventoryForTransfer(movement) {
     const { productId, fromLocationId, toLocationId, quantity } = movement;
-    
+
     // Check if we have enough stock at the source location
     const sourceInventory = await storage.getInventory(productId, fromLocationId);
-    
+
     if (!sourceInventory || sourceInventory.quantity < quantity) {
       throw new Error("Insufficient stock at source location");
     }
-    
+
     // Reduce from source location
     await storage.updateInventory(sourceInventory.id, {
       quantity: sourceInventory.quantity - quantity
     });
-    
+
     // Add to destination location
     const destInventory = await storage.getInventory(productId, toLocationId);
-    
+
     if (destInventory) {
       // Update existing inventory
       await storage.updateInventory(destInventory.id, {
@@ -339,18 +344,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   }
-  
+
   // Helper function to update inventory for adjustments
   async function updateInventoryForAdjustment(movement) {
     const { productId, fromLocationId, quantity } = movement;
-    
+
     // Check if we have enough stock at the source location
     const inventory = await storage.getInventory(productId, fromLocationId);
-    
+
     if (!inventory) {
       throw new Error("No inventory found for the product at the specified location");
     }
-    
+
     // Update inventory
     await storage.updateInventory(inventory.id, {
       quantity: inventory.quantity - quantity

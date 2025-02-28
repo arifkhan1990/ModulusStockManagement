@@ -1,15 +1,41 @@
 import express, { type Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import config from "./config";
 import { initDatabase } from "./db";
+import { globalRateLimit, apiRateLimit } from "./middleware/rate-limit";
+import { cacheMiddleware } from "./middleware/cache";
+import { tenantMiddleware } from "./middleware/tenant";
 
 // Create Express app
 const app = express();
 
-// Middleware setup
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: config.isDev ? false : undefined,
+  crossOriginEmbedderPolicy: false,
+}));
+
+// Compression middleware for reducing payload size
+app.use(compression());
+
+// Apply global rate limiting
+app.use(globalRateLimit);
+
+// API-specific rate limiting
+app.use('/api', apiRateLimit);
+
+// Body parsers
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// Multi-tenancy middleware for SaaS
+app.use('/api', tenantMiddleware);
+
+// Apply caching for GET requests (3600s = 1 hour)
+app.use('/api', cacheMiddleware(3600));
 
 // Request logging middleware
 app.use((req, res, next) => {

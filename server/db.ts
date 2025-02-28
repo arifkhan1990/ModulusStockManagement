@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import config from './config';
 import { 
@@ -25,33 +24,57 @@ import {
  */
 export async function initDatabase() {
   try {
-    if (!config.database.url) {
-      throw new Error("DATABASE_URL env var is not set");
-    }
-    
-    // Configure mongoose for high traffic with pooling
-    mongoose.set('strictQuery', true);
-    
-    // Connection options optimized for scaling
-    const options = {
-      maxPoolSize: 100, // Increase connection pool for high concurrency
-      minPoolSize: 10,  // Minimum connections to maintain
-      socketTimeoutMS: 45000, // Prevent long-running operations from timing out
-      serverSelectionTimeoutMS: 5000, // Quick server selection for faster recovery
-      heartbeatFrequencyMS: 10000, // Frequent heartbeats to detect issues
-      retryWrites: true, // Retry write operations if they fail
-      writeConcern: { w: 'majority' }, // Ensure writes are acknowledged by majority
-      readPreference: 'secondaryPreferred', // Prefer reading from secondaries to distribute load
-    };
-    
-    // Connect to MongoDB
-    await mongoose.connect(config.database.url, options);
-    console.log("Connected to MongoDB successfully");
+    mongoose.set('debug', config.isDev);
+
+    // Advanced options for performance and reliability
+    await mongoose.connect(config.database.url, {
+      maxPoolSize: config.database.poolSize || 10,
+      minPoolSize: 2,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      retryWrites: true,
+      retryReads: true,
+      readPreference: 'secondaryPreferred', // Read from secondaries when available
+      readConcern: { level: 'majority' }, // Read consistent data
+      writeConcern: { w: 'majority' }, // Write with majority acknowledgment
+    });
+
+    // Add connection monitoring
+    mongoose.connection.on('disconnected', () => {
+      console.warn('MongoDB disconnected. Attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('MongoDB reconnected successfully');
+    });
+
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
+
+    console.log('MongoDB connected successfully');
   } catch (error) {
-    console.error("MongoDB connection error:", error);
-    throw error;
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
   }
 }
+
+// Utility function to check database health
+export const checkDatabaseHealth = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    return { status: 'error', connection: 'disconnected' };
+  }
+
+  try {
+    // Ping the database
+    await mongoose.connection.db.admin().ping();
+    return { status: 'healthy', connection: 'connected' };
+  } catch (error) {
+    console.error('Database health check failed:', error);
+    return { status: 'error', connection: 'unhealthy' };
+  }
+};
 
 // Database middleware for tenant isolation
 export const tenantIsolationMiddleware = async (req, res, next) => {
