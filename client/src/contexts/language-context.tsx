@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Language = 'en' | 'es' | 'fr' | 'de' | 'zh';
@@ -12,19 +11,49 @@ interface Translations {
 // Sample translations
 const translations: Translations = {
   en: {
-    dashboard: 'Dashboard',
-    products: 'Products',
-    locations: 'Locations',
-    suppliers: 'Suppliers',
-    customers: 'Customers',
-    reports: 'Reports',
-    settings: 'Settings',
-    profile: 'Profile',
-    stock: 'Stock',
-    notifications: 'Notifications',
-    logout: 'Logout',
-    login: 'Login',
-    register: 'Register',
+    // Navigation
+    'about': 'About',
+    'features': 'Features',
+    'pricing': 'Pricing',
+    'login': 'Login',
+    'register': 'Register',
+    'logout': 'Logout',
+    'dashboard': 'Dashboard',
+
+    // Dashboard
+    'totalProducts': 'Total Products',
+    'productsInInventory': 'Products in inventory',
+    'locations': 'Locations',
+    'activeLocations': 'Active locations',
+    'suppliers': 'Suppliers',
+    'activeSuppliers': 'Active suppliers',
+    'recentStockMovements': 'Recent Stock Movements',
+    'latestInventoryTransactions': 'Latest inventory transactions across all locations',
+    'viewAllMovements': 'View all movements',
+    'noStockMovementsYet': 'No stock movements yet',
+    'stockMovementsWillAppearHere': 'Stock movements will appear here as they occur',
+    'lowStockItems': 'Low Stock Items',
+    'productsRequiringAttention': 'Products requiring attention due to low stock levels',
+    'lowStockItemsList': 'Low stock items will be displayed here',
+    'comingSoon': 'Coming soon',
+
+    // Stock Movements
+    'stockMovements': 'Stock Movements',
+    'stockMovementHistory': 'Stock Movement History',
+    'viewAllStockMovementsAcrossLocations': 'View all stock movements across locations',
+    'filterByProduct': 'Filter by product',
+    'allProducts': 'All products',
+    'export': 'Export',
+    'date': 'Date',
+    'product': 'Product',
+    'type': 'Type',
+    'from': 'From',
+    'to': 'To',
+    'quantity': 'Quantity',
+    'reference': 'Reference',
+    'transfer': 'Transfer',
+    'adjustment': 'Adjustment',
+    'noStockMovementsFound': 'No stock movements found',
   },
   es: {
     dashboard: 'Panel',

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -27,112 +27,124 @@ import {
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "@/lib/api";
 import { ArrowRightLeft, FileBarChart } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
 
-// Mock data until API is implemented
-const mockMovements = [
-  {
-    id: 1,
-    date: new Date(),
-    type: "Transfer",
-    productName: "Wireless Headphones",
-    fromLocation: "Main Warehouse",
-    toLocation: "Online Store",
-    quantity: 25,
-    reference: "TRF-001",
-    createdBy: "John Smith",
-  },
-  {
-    id: 2,
-    date: new Date(Date.now() - 86400000),
-    type: "Adjustment",
-    productName: "Smart Watch",
-    fromLocation: "Main Warehouse",
-    toLocation: "-",
-    quantity: -5,
-    reference: "ADJ-002",
-    createdBy: "Jane Doe",
-  },
-];
+export default function StockMovements() {
+  const { t } = useLanguage();
+  const [productFilter, setProductFilter] = useState<string | null>(null);
 
-export default function StockMovementsPage() {
-  const [productFilter, setProductFilter] = useState("");
+  // Fetch stock movements
+  const { data: movements, isLoading } = useQuery({
+    queryKey: ['stockMovements', productFilter],
+    queryFn: async () => {
+      const url = productFilter 
+        ? `/api/stock-movements?productId=${productFilter}` 
+        : '/api/stock-movements';
+      const response = await apiRequest(url);
+      return response;
+    }
+  });
+
+  // Fetch products for filter dropdown
+  const { data: products } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const response = await apiRequest('/api/products');
+      return response;
+    }
+  });
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Stock Movements</h1>
-          <p className="text-muted-foreground">
-            Track and manage all stock movements between locations
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button>
-            <ArrowRightLeft className="h-4 w-4 mr-2" />
-            New Movement
-          </Button>
-          <Button variant="outline">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">{t('stockMovements')}</h1>
+        
+        <div className="flex items-center gap-2">
+          {products?.length > 0 && (
+            <Select
+              value={productFilter || ""}
+              onValueChange={(value) => setProductFilter(value || null)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={t('filterByProduct')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">{t('allProducts')}</SelectItem>
+                {products.map((product) => (
+                  <SelectItem key={product._id} value={product._id}>
+                    {product.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          
+          <Button variant="outline" size="sm">
             <FileBarChart className="h-4 w-4 mr-2" />
-            Export
+            {t('export')}
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Stock Movements</CardTitle>
+          <CardTitle>{t('stockMovementHistory')}</CardTitle>
           <CardDescription>
-            View history of all stock transfers and adjustments
+            {t('viewAllStockMovementsAcrossLocations')}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-            <div className="w-full md:w-64">
-              <Select value={productFilter} onValueChange={setProductFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by product" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Products</SelectItem>
-                  <SelectItem value="1">Wireless Headphones</SelectItem>
-                  <SelectItem value="2">Smart Watch</SelectItem>
-                </SelectContent>
-              </Select>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
-          </div>
-
-          <div className="rounded-md border">
+          ) : movements?.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead>Created By</TableHead>
+                  <TableHead>{t('date')}</TableHead>
+                  <TableHead>{t('product')}</TableHead>
+                  <TableHead>{t('type')}</TableHead>
+                  <TableHead>{t('from')}</TableHead>
+                  <TableHead>{t('to')}</TableHead>
+                  <TableHead>{t('quantity')}</TableHead>
+                  <TableHead>{t('reference')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockMovements.map((movement) => (
-                  <TableRow key={movement.id}>
+                {movements.map((movement) => (
+                  <TableRow key={movement._id}>
                     <TableCell>
-                      {format(movement.date, "MMM d, yyyy h:mm a")}
+                      {format(new Date(movement.createdAt), 'PPP')}
                     </TableCell>
-                    <TableCell>{movement.type}</TableCell>
-                    <TableCell>{movement.productName}</TableCell>
-                    <TableCell>{movement.fromLocation}</TableCell>
-                    <TableCell>{movement.toLocation}</TableCell>
-                    <TableCell className="text-right">{movement.quantity}</TableCell>
-                    <TableCell>{movement.reference}</TableCell>
-                    <TableCell>{movement.createdBy}</TableCell>
+                    <TableCell>{movement.product?.name || 'Unknown'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <ArrowRightLeft className="h-4 w-4" />
+                        {movement.type === 'transfer' ? t('transfer') : t('adjustment')}
+                      </div>
+                    </TableCell>
+                    <TableCell>{movement.fromLocation?.name || 'Unknown'}</TableCell>
+                    <TableCell>
+                      {movement.type === 'transfer' 
+                        ? movement.toLocation?.name || 'Unknown'  
+                        : '-'}
+                    </TableCell>
+                    <TableCell>{movement.quantity}</TableCell>
+                    <TableCell>{movement.reference || '-'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <ArrowRightLeft className="h-10 w-10 mb-3 opacity-20" />
+              <p>{t('noStockMovementsFound')}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {t('stockMovementsWillAppearHere')}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
