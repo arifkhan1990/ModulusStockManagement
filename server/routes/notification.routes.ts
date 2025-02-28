@@ -1,8 +1,8 @@
-import express from 'express';
-import { requireAuth } from '../middleware/auth';
-import { tenantMiddleware } from '../middleware/tenant';
-import notificationController from '../controllers/notification.controller';
-import notificationValidator from '../validators/notification.validator';
+import express from "express";
+import { requireAuth } from "../middleware/auth";
+import { tenantMiddleware } from "../middleware/tenant";
+import notificationController from "../controllers/notification.controller";
+import notificationValidator from "../validators/notification.validator";
 
 const router = express.Router();
 
@@ -12,69 +12,63 @@ router.use(tenantMiddleware);
 
 // Create a new notification
 router.post(
-  '/',
+  "/",
   notificationValidator.createNotificationValidator,
-  notificationController.createNotification
+  notificationController.createNotification,
 );
 
 // Get all notifications with pagination and filters
 router.get(
-  '/',
+  "/",
   notificationValidator.getNotificationsValidator,
-  notificationController.getNotifications
+  notificationController.getNotifications,
 );
 
 // Get a single notification
 router.get(
-  '/:id',
+  "/:id",
   notificationValidator.markAsReadValidator, // Reuse ID validator
-  notificationController.getNotification
+  notificationController.getNotification,
 );
 
 // Mark notification as read
 router.patch(
-  '/:id/read',
+  "/:id/read",
   notificationValidator.markAsReadValidator,
-  notificationController.markAsRead
+  notificationController.markAsRead,
 );
 
 // Mark multiple notifications as read
 router.post(
-  '/read',
+  "/read",
   notificationValidator.markMultipleAsReadValidator,
-  notificationController.markMultipleAsRead
+  notificationController.markMultipleAsRead,
 );
 
 // Delete a notification
 router.delete(
-  '/:id',
+  "/:id",
   notificationValidator.markAsReadValidator, // Reuse ID validator
-  notificationController.deleteNotification
+  notificationController.deleteNotification,
 );
 
 // Get notification preferences
-router.get(
-  '/preferences',
-  notificationController.getNotificationPreferences
-);
+router.get("/preferences", notificationController.getNotificationPreferences);
 
 // Update notification preferences
 router.patch(
-  '/preferences/:id',
+  "/preferences/:id",
   notificationValidator.updateNotificationPreferenceValidator,
-  notificationController.updateNotificationPreferences
+  notificationController.updateNotificationPreferences,
 );
 
 // Create default notification preferences
 router.post(
-  '/preferences/default',
-  notificationController.createDefaultPreferences
+  "/preferences/default",
+  notificationController.createDefaultPreferences,
 );
 
 // Get notification statistics
-router.get(
-  '/statistics',
-  notificationController.getNotificationStatistics
-);
+router.get("/statistics", notificationController.getNotificationStatistics);
 
 export default router;
