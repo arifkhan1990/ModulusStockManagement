@@ -4,38 +4,94 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface INotification extends Document {
   companyId: Schema.Types.ObjectId;
   userId: Schema.Types.ObjectId;
-  type: string; // e.g., 'low_stock', 'new_ticket', 'invoice_overdue'
+  recipientType: string; // 'subscriber', 'customer', 'employee'
+  recipientId: Schema.Types.ObjectId;
+  recipientEmail?: string;
+  recipientPhone?: string;
+  channel: string; // 'email', 'push', 'sms', 'messenger', 'discord', 'whatsapp', 'telegram'
+  eventType: string; // 'product_added', 'order_placed', 'payment_due', etc.
   title: string;
-  message: string;
+  content: string;
+  status: string; // 'pending', 'sent', 'delivered', 'failed'
+  errorMessage?: string;
+  retryCount: number;
+  metadata: any;
+  referenceId?: Schema.Types.ObjectId; // reference to order, invoice, etc.
+  referenceType?: string; // 'order', 'invoice', 'product', etc.
   isRead: boolean;
-  actionUrl?: string;
-  resourceId?: Schema.Types.ObjectId;
-  resourceType?: string;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  readAt?: Date;
   createdAt: Date;
-  expiresAt?: Date;
-  metadata?: Record<string, any>;
+  updatedAt: Date;
 }
 
 const NotificationSchema = new Schema<INotification>({
   companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  type: { type: String, required: true },
+  recipientType: { 
+    type: String, 
+    required: true, 
+    enum: ['subscriber', 'customer', 'employee'] 
+  },
+  recipientId: { type: Schema.Types.ObjectId, required: true },
+  recipientEmail: { type: String },
+  recipientPhone: { type: String },
+  channel: { 
+    type: String, 
+    required: true,
+    enum: ['email', 'push', 'sms', 'messenger', 'discord', 'whatsapp', 'telegram'] 
+  },
+  eventType: { 
+    type: String, 
+    required: true,
+    enum: [
+      'product_added', 
+      'order_placed', 
+      'order_shipped',
+      'order_delivered',
+      'payment_received',
+      'payment_due',
+      'payment_overdue',
+      'invoice_created',
+      'invoice_shared',
+      'report_generated',
+      'report_shared',
+      'low_stock',
+      'support_ticket_created',
+      'support_ticket_resolved',
+      'custom'
+    ]
+  },
   title: { type: String, required: true },
-  message: { type: String, required: true },
+  content: { type: String, required: true },
+  status: { 
+    type: String, 
+    required: true, 
+    enum: ['pending', 'sent', 'delivered', 'failed'],
+    default: 'pending'
+  },
+  errorMessage: { type: String },
+  retryCount: { type: Number, default: 0 },
+  metadata: { type: Schema.Types.Mixed, default: {} },
+  referenceId: { type: Schema.Types.ObjectId },
+  referenceType: { type: String },
   isRead: { type: Boolean, default: false },
-  actionUrl: { type: String },
-  resourceId: { type: Schema.Types.ObjectId },
-  resourceType: { type: String },
+  sentAt: { type: Date },
+  deliveredAt: { type: Date },
+  readAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
-  expiresAt: { type: Date },
-  metadata: { type: Map, of: Schema.Types.Mixed }
+  updatedAt: { type: Date, default: Date.now }
 });
 
 // Indexes for faster lookups
-NotificationSchema.index({ userId: 1, isRead: 1 });
-NotificationSchema.index({ userId: 1, createdAt: -1 });
-NotificationSchema.index({ companyId: 1, type: 1 });
-NotificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // TTL index for automatic cleanup
+NotificationSchema.index({ companyId: 1, userId: 1 });
+NotificationSchema.index({ companyId: 1, recipientId: 1 });
+NotificationSchema.index({ companyId: 1, eventType: 1 });
+NotificationSchema.index({ companyId: 1, status: 1 });
+NotificationSchema.index({ companyId: 1, channel: 1 });
+NotificationSchema.index({ companyId: 1, createdAt: 1 });
+NotificationSchema.index({ referenceId: 1, referenceType: 1 });
 
 const Notification = mongoose.model<INotification>('Notification', NotificationSchema);
 

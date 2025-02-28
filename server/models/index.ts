@@ -24,7 +24,10 @@ import Page from './page.model';
 import SupportTicket from './support-ticket.model';
 import Backup from './backup.model';
 import Notification from './notification.model';
+import NotificationPreference from './notification-preference.model';
 import Integration from './integration.model';
+import Sharing from './sharing.model';
+import Download from './download.model';
 
 export {
   User,
@@ -53,5 +56,8 @@ export {
   SupportTicket,
   Backup,
   Notification,
-  Integration
+  NotificationPreference,
+  Integration,
+  Sharing,
+  Download
 };
