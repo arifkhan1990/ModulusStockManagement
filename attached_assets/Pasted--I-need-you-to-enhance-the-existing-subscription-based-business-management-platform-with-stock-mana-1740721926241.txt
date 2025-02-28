@@ -1,0 +1,77 @@
+"I need you to enhance the existing subscription-based business management platform (with stock management, POS, and invoice system) by adding essential pages such as 'About Us,' 'Terms & Conditions,' 'Privacy Policy,' and other critical features to improve usability, compliance, and professionalism. The system should remain modular, scalable, and user-friendly. Below are the detailed requirements for these new additions and other important features. Please generate a comprehensive codebase with explanations of the structure and suggested technologies (e.g., React for frontend, Node.js/Express for backend, MongoDB for database). Ensure seamless integration with the existing system.
+
+Project Overview:
+The platform already includes stock management, a POS system, and an invoice system with customization options. Now, I want to add informational pages ('About Us,' 'Terms & Conditions,' 'Privacy Policy') editable by subscribers, along with critical features like customer management, support ticketing, audit trails, and compliance tools. Each subscriber’s dashboard should reflect these additions under their personalized URL (e.g., companyname.platformdomain.com).
+
+Detailed Features:
+1. Informational Pages
+About Us Page:
+Editable by subscribers via a rich text editor (e.g., TinyMCE, CKEditor).
+Fields: Company description, mission, vision, contact details, team info (optional).
+Accessible via the subscriber’s landing page or dashboard footer.
+Terms & Conditions Page:
+Pre-populated default terms (editable by subscribers).
+Option to enforce acceptance by clients (e.g., checkbox on POS checkout or invoice payment).
+Version history to track changes.
+Privacy Policy Page:
+Editable template covering data collection, usage, and protection (GDPR/CCPA compliant by default).
+Subscribers can customize based on their business needs.
+Linkable to invoices and landing pages.
+Frontend Display:
+Pages are publicly accessible under the subscriber’s subdomain (e.g., companyname.platformdomain.com/about).
+Responsive design with subscriber branding (logo, colors).
+2. Customer Management
+Customer Database:
+Add/edit/delete customers with fields: name, email, phone, address, purchase history.
+Link customers to POS transactions and invoices.
+Customer Profiles:
+View all transactions (POS sales, invoices) associated with a customer.
+Option to tag customers (e.g., VIP, regular).
+Import/Export: Bulk upload customers via CSV or manual entry.
+Search/Filter: Search customers by name, email, or phone; filter by tags or purchase history.
+3. Support Ticketing System
+Ticket Creation:
+Subscribers can create tickets for platform issues (e.g., bugs, feature requests) from their dashboard.
+Fields: Subject, description, priority (low, medium, high), optional file upload (screenshots, docs).
+Ticket Management:
+View open/closed tickets with status updates (e.g., pending, in progress, resolved).
+Admin (platform owner) can respond to tickets via a separate admin panel.
+Notifications: Email Alerts for ticket creation and updates.
+4. Audit Trails
+Activity Logging:
+Extend the existing logs page to include detailed audit trails (e.g., who edited stock, created an invoice, toggled a feature).
+Fields: User ID, action type, timestamp, IP address, before/after values (for edits).
+Admin Access:
+Only the company owner (admin) can view/export audit trails.
+Filter by user, date, or action type.
+Export: Download logs as CSV or PDF.
+5. Compliance and Legal Tools
+Tax Compliance:
+Add tax calculation options to POS and invoices (e.g., VAT, GST) based on subscriber’s region.
+Store tax rates and generate tax reports.
+Data Backup:
+Manual or scheduled backups of stock, invoices, customers, and logs (stored securely, e.g., AWS S3).
+Restore option for admins.
+GDPR/CCPA Compliance:
+Consent management for customer data (e.g., opt-in for marketing).
+Right to delete/export customer data upon request.
+6. Feature Toggle and Admin Controls (Enhanced)
+Granular Control:
+Admin can enable/disable individual features (e.g., About Us page, customer management, tax calculation) per subscriber account.
+UI for toggling features with descriptions.
+Reset Options:
+Clear cache, reset specific modules (e.g., stock, invoices), or full system reset (with confirmation).
+Permission Levels:
+Extend RBAC to include roles like ‘editor’ (can edit pages) and ‘viewer’ (read-only).
+7. Additional Important Features
+Multi-Language Support:
+Allow subscribers to set a default language (e.g., English, Spanish) for their dashboard, invoices, and pages.
+Use a localization library (e.g., i18n).
+Analytics Dashboard:
+Add a section for stock analytics (e.g., top-selling products, stock turnover rate).
+Include customer and invoice analytics (e.g., repeat customers, overdue invoices).
+Notifications Center:
+Centralized hub for all alerts (e.g., low stock, unpaid invoices, new tickets).
+Customizable notification preferences (email, in-app, SMS).
+Integration Hub:
+Allow connections to third-party tools (e.g., QuickBooks for accounting, Mailchimp for marketing) via APIs.
