@@ -189,3 +189,10 @@ function useToast() {
 }
 
 export { useToast, toast }
+import { toast } from "../components/ui/toast";
+
+export const useToast = () => {
+  return {
+    toast,
+  };
+};

@@ -164,3 +164,79 @@ export function useAuth() {
     refreshAuth: checkAuthStatus,
   };
 }
+import { useState, useEffect } from "react";
+import { api } from "../utils/api";
+
+export const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/auth/me");
+        setUser(response.data);
+      } catch (err) {
+        setError(err);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/login", { email, password });
+      setUser(response.data);
+      return response.data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (userData) => {
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/register", userData);
+      setUser(response.data);
+      return response.data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      setLoading(true);
+      await api.post("/auth/logout");
+      setUser(null);
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    user,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    isAuthenticated: !!user,
+  };
+};
