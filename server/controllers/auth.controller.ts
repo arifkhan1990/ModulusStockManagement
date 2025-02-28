@@ -1,4 +1,3 @@
-
 import { Request, Response } from 'express';
 import User from '../models/user.model';
 import bcrypt from 'bcryptjs';
@@ -142,11 +141,11 @@ export const logout = (req: Request, res: Response) => {
 export const getCurrentUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     return res.status(200).json(user);
   } catch (error) {
     console.error('Get current user error:', error);
@@ -161,7 +160,7 @@ export const getCurrentUser = async (req: Request, res: Response) => {
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { name, email, phone, position, department, avatar, preferences } = req.body;
-    
+
     // Find user and update
     const user = await User.findByIdAndUpdate(
       req.user.id,
@@ -178,11 +177,11 @@ export const updateProfile = async (req: Request, res: Response) => {
       },
       { new: true }
     ).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     return res.status(200).json(user);
   } catch (error) {
     console.error('Update profile error:', error);
@@ -197,25 +196,25 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const changePassword = async (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    
+
     // Find user
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Current password is incorrect' });
     }
-    
+
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
-    
+
     await user.save();
-    
+
     return res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Change password error:', error);
@@ -295,7 +294,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const { name, email, username, role, permissions, status, businessSize, businessType } = req.body;
-    
+
     // Find user and update
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -313,11 +312,11 @@ export const updateUser = async (req: Request, res: Response) => {
       },
       { new: true }
     ).select('-password');
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     return res.status(200).json(user);
   } catch (error) {
     console.error('Update user error:', error);
@@ -332,11 +331,11 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
+
     return res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);
