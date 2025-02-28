@@ -1,13 +1,12 @@
-
 import { Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { 
-  Layers, 
-  Settings, 
-  Users, 
-  CreditCard, 
-  BarChart3, 
-  Bell, 
+import {
+  Layers,
+  Settings,
+  Users,
+  CreditCard,
+  BarChart3,
+  Bell,
   LogOut,
   Menu,
   X,
@@ -173,7 +172,7 @@ const AdminLayout = () => {
         {/* Main content */}
         <main className={cn(
           "flex-1 overflow-y-auto bg-muted transition-all duration-200 ease-in-out",
-          isSidebarOpen ? "md:ml-0" : "md:ml-0"
+          isSidebarOpen ? "md:ml-64" : "md:ml-0"
         )}>
           <Outlet />
         </main>

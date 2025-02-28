@@ -1,6 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { queryClient } from "@/lib/query";
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
@@ -50,6 +50,11 @@ const AdminDashboard = lazy(() => import("@/pages/admin")); // Added
 const AdminFeaturesPage = lazy(() => import("@/pages/admin/features")); // Added
 const CompaniesPage = lazy(() => import("@/pages/admin/companies")); // Added
 const SubscriptionTiersPage = lazy(() => import("@/pages/admin/subscription-tiers")); // Added
+const AdminCompaniesDetailPage = lazy(() => import('@/pages/admin/companies/detail')); // Added
+const AdminCompaniesNewPage = lazy(() => import('@/pages/admin/companies/new')); // Added
+const AdminAnalyticsPage = lazy(() => import('@/pages/admin/analytics')); // Added
+const AdminUsersPage = lazy(() => import('@/pages/admin/users')); // Added
+const PosPage = lazy(() => import('@/pages/dashboard/pos')); // Added
 
 
 export default function App() {
@@ -83,6 +88,7 @@ export default function App() {
                         <Route path="notifications" element={<NotificationsPage />} />
                         <Route path="sharing" element={<SharingPage />} />
                         <Route path="downloads" element={<DownloadsPage />} />
+                        <Route path="pos" element={<PosPage />} />
                         <Route path="profile" element={<div>Profile Page</div>} /> {/* Placeholder */}
                         <Route path="customers" element={<div>Customers Page</div>} /> {/* Placeholder */}
                         <Route path="reports" element={<div>Reports Page</div>} /> {/* Placeholder */}
@@ -92,14 +98,19 @@ export default function App() {
                       <Route path="/admin" element={<ProtectedRoute><AdminLayout><Outlet /></AdminLayout></ProtectedRoute>}> {/* Added ProtectedRoute */}
                         <Route index element={<AdminDashboard />} />
                         <Route path="features" element={<AdminFeaturesPage />} />
-                        <Route path="companies" element={<CompaniesPage />} />
                         <Route path="subscription-tiers" element={<SubscriptionTiersPage />} />
+                        <Route path="companies" element={<CompaniesPage />} />
+                        <Route path="companies/:id" element={<AdminCompaniesDetailPage />} />
+                        <Route path="companies/new" element={<AdminCompaniesNewPage />} />
+                        <Route path="analytics" element={<AdminAnalyticsPage />} />
+                        <Route path="users" element={<AdminUsersPage />} />
                       </Route>
 
                       <Route path="*" element={<LandingLayout><NotFoundPage /></LandingLayout>} />
                     </Routes>
                   </Router>
                   <Toaster />
+                </Suspense>
               </AuthProvider>
             </CurrencyProvider>
           </LanguageProvider>

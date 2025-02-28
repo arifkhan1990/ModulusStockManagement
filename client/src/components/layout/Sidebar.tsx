@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,7 +37,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const { user } = useAuth();
-  
+
   // Track open menu sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     stock: true,
@@ -92,7 +91,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
         { label: t('orders'), path: '/dashboard/sales/orders' },
         { label: t('invoices'), path: '/dashboard/sales/invoices' },
         { label: t('payments'), path: '/dashboard/sales/payments' },
-        { label: t('pos'), path: '/dashboard/sales/pos' },
+        { label: t('pos'), path: '/dashboard/sales/pos' }, // Added POS link
       ],
     },
     {
@@ -169,7 +168,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               </div>
               <span className="text-xl">Modulus</span>
             </Link>
-            
+
             <Button 
               variant="ghost" 
               size="icon" 
@@ -179,7 +178,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
-          
+
           <ScrollArea className="h-[calc(100vh-4rem)]">
             <div className="px-3 py-2">
               <div className="mb-4 px-4 py-2">
@@ -187,7 +186,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
                   {user?.company?.name || 'Your Company'}
                 </p>
               </div>
-              
+
               <nav className="space-y-1 px-1">
                 {menuItems.map((item) => {
                   // If the item has a feature flag, wrap it with FeatureToggle
@@ -250,7 +249,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
                       )}
                     </div>
                   );
-                  
+
                   return item.feature ? (
                     <FeatureToggle key={item.id} featureId={item.feature}>
                       {menuItem}

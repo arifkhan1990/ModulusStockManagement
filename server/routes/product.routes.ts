@@ -1,46 +1,57 @@
 
 import express from 'express';
+import { body } from 'express-validator';
 import * as productController from '../controllers/product.controller';
-import { validateProductCreation, validateProductUpdate } from '../validators/product.validator';
-import { authenticate } from '../middleware/auth';
+import { validateRequest } from '../middleware/validate-request';
+import { requireAuth } from '../middleware/auth';
 import { checkFeatureEnabled } from '../middleware/feature-toggle';
 
 const router = express.Router();
 
-// Public routes
-router.get('/public/:companyId', productController.getPublicProducts);
+// Apply auth middleware to all routes
+router.use(requireAuth);
 
-// Protected routes
-router.use(authenticate);
-
-// Basic product operations
-router.get('/', productController.getProducts);
-router.get('/:id', productController.getProductById);
-router.post('/', validateProductCreation, productController.createProduct);
-router.put('/:id', validateProductUpdate, productController.updateProduct);
-router.delete('/:id', productController.deleteProduct);
-
-// Stock management routes
-router.post('/transfer', 
+// Get all products
+router.get('/', 
   checkFeatureEnabled('inventory_management'),
-  productController.transferStock
+  productController.getAllProducts
 );
 
-// Bulk operations - require specific features
-router.post('/bulk-import', 
-  checkFeatureEnabled('import_export'),
-  productController.bulkImportProducts
+// Get a single product
+router.get('/:id', 
+  checkFeatureEnabled('inventory_management'),
+  productController.getProductById
 );
 
-router.get('/export/all', 
-  checkFeatureEnabled('import_export'),
-  productController.exportProducts
+// Create a new product
+router.post('/',
+  checkFeatureEnabled('inventory_management'),
+  [
+    body('name').trim().notEmpty().withMessage('Product name is required'),
+    body('sku').trim().notEmpty().withMessage('SKU is required'),
+    body('price').isNumeric().withMessage('Price must be a number'),
+    body('stockQuantity').isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
+  ],
+  validateRequest,
+  productController.createProduct
 );
 
-// Product batch operations
-router.post('/batch/update-prices',
-  checkFeatureEnabled('batch_operations'),
-  productController.batchUpdatePrices
+// Update a product
+router.put('/:id',
+  checkFeatureEnabled('inventory_management'),
+  [
+    body('name').optional().trim().notEmpty().withMessage('Product name is required'),
+    body('price').optional().isNumeric().withMessage('Price must be a number'),
+    body('stockQuantity').optional().isInt({ min: 0 }).withMessage('Stock quantity must be a non-negative integer'),
+  ],
+  validateRequest,
+  productController.updateProduct
+);
+
+// Delete a product
+router.delete('/:id',
+  checkFeatureEnabled('inventory_management'),
+  productController.deleteProduct
 );
 
 export default router;
