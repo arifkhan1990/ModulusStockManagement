@@ -1,54 +1,64 @@
 
 export class AppError extends Error {
-  status: number;
-  
-  constructor(message: string, status: number = 500) {
+  statusCode: number;
+  isOperational: boolean;
+
+  constructor(message: string, statusCode: number = 500) {
     super(message);
-    this.name = this.constructor.name;
-    this.status = status;
+    this.statusCode = statusCode;
+    this.isOperational = true;
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
 export const errorHandler = (err: any, req: any, res: any, next: any) => {
-  console.error("Error:", err);
-  
-  if (err instanceof AppError) {
-    return res.status(err.status).json({
-      error: {
-        message: err.message,
-        status: err.status,
-      },
-    });
+  err.statusCode = err.statusCode || 500;
+  err.message = err.message || "Internal Server Error";
+
+  // Log error in development
+  if (process.env.NODE_ENV === "development") {
+    console.error(err);
   }
-  
-  // Handle mongoose validation errors
+
+  // MongoDB validation errors
   if (err.name === "ValidationError") {
+    const messages = Object.values(err.errors).map((val: any) => val.message);
     return res.status(400).json({
-      error: {
-        message: "Validation Error",
-        details: Object.values(err.errors).map((e: any) => e.message),
-        status: 400,
-      },
+      error: "Validation Error",
+      message: messages.join(", "),
     });
   }
-  
-  // Handle mongoose duplicate key errors
+
+  // MongoDB duplicate key
   if (err.code === 11000) {
-    return res.status(409).json({
-      error: {
-        message: "Duplicate Error",
-        details: `${Object.keys(err.keyValue)} already exists`,
-        status: 409,
-      },
+    const field = Object.keys(err.keyValue)[0];
+    return res.status(400).json({
+      error: "Duplicate Field Error",
+      message: `${field} already exists`,
     });
   }
-  
-  // Default server error
-  return res.status(500).json({
-    error: {
-      message: "Internal Server Error",
-      status: 500,
-    },
+
+  // JWT errors
+  if (err.name === "JsonWebTokenError") {
+    return res.status(401).json({
+      error: "Invalid Token",
+      message: "You are not authorized to access this resource",
+    });
+  }
+
+  // JWT expired
+  if (err.name === "TokenExpiredError") {
+    return res.status(401).json({
+      error: "Token Expired",
+      message: "Your session has expired. Please log in again",
+    });
+  }
+
+  // Send error response
+  res.status(err.statusCode).json({
+    error: err.name,
+    message: err.message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };

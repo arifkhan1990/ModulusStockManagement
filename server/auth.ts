@@ -1,25 +1,28 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Express } from "express";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import { Express, Request } from "express";
 import session from "express-session";
-import { storage } from "./storage";
-import { IUser } from "@shared/schema";
+import MongoStore from "connect-mongo";
+import User from "./models/user.model";
+import Company from "./models/company.model";
 import config from "./config";
-import { comparePasswords } from "./controllers/auth.controller";
-
-declare global {
-  namespace Express {
-    interface User extends IUser {}
-  }
-}
+import mongoose from "mongoose";
+import { comparePassword } from "./utils/password";
 
 export function setupAuth(app: Express) {
-  // Configure session
+  // Configure session with MongoDB store
   const sessionSettings: session.SessionOptions = {
     secret: config.session.secret,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: config.database.url,
+      ttl: 14 * 24 * 60 * 60, // 14 days
+      autoRemove: 'native',
+      collectionName: 'sessions',
+    }),
     cookie: {
       secure: config.session.secureCookies,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
@@ -35,19 +38,59 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure local strategy
+  // Configure local strategy with email
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      try {
-        const user = await storage.getUserByUsername(username);
-        if (!user || !user.password || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: "Invalid credentials" });
+    new LocalStrategy(
+      { usernameField: 'email' },
+      async (email, password, done) => {
+        try {
+          const user = await User.findOne({ email }).select('+password');
+          
+          if (!user || !(await comparePassword(password, user.password))) {
+            return done(null, false, { message: "Invalid credentials" });
+          }
+          
+          // Check if user's company subscription is active
+          const company = await Company.findById(user.companyId);
+          if (!company || !company.isActive || company.subscriptionStatus === 'expired') {
+            return done(null, false, { message: "Subscription expired or inactive" });
+          }
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error);
         }
-        return done(null, user);
-      } catch (error) {
-        return done(error);
       }
-    }),
+    )
+  );
+
+  // JWT strategy for API access
+  passport.use(
+    new JwtStrategy(
+      {
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: config.jwt.secret,
+      },
+      async (payload, done) => {
+        try {
+          const user = await User.findById(payload.id);
+          
+          if (!user) {
+            return done(null, false);
+          }
+          
+          // Check if user's company subscription is active
+          const company = await Company.findById(user.companyId);
+          if (!company || !company.isActive || company.subscriptionStatus === 'expired') {
+            return done(null, false);
+          }
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
   );
 
   // Configure Google OAuth strategy if available
@@ -61,36 +104,63 @@ export function setupAuth(app: Express) {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            let user = await storage.getUserByProviderId("google", profile.id);
+            let user = await User.findOne({ 
+              provider: "google", 
+              providerId: profile.id 
+            });
+
+            if (!user && profile.emails && profile.emails.length > 0) {
+              // Check if user exists with this email
+              user = await User.findOne({ email: profile.emails[0].value });
+              
+              if (user) {
+                // Update existing user with Google provider info
+                user.provider = "google";
+                user.providerId = profile.id;
+                await user.save();
+              } else {
+                // Create new user
+                // Note: This would need to be modified to include company registration
+                // for a complete implementation
+                return done(null, false, { 
+                  message: "Please register with email first to connect your Google account" 
+                });
+              }
+            }
 
             if (!user) {
-              user = await storage.createUser({
-                username: profile.emails![0].value,
-                email: profile.emails![0].value,
-                name: profile.displayName,
-                provider: "google",
-                providerId: profile.id,
+              return done(null, false, { 
+                message: "No account found with this Google account" 
               });
+            }
+
+            // Check subscription status
+            const company = await Company.findById(user.companyId);
+            if (!company || !company.isActive || company.subscriptionStatus === 'expired') {
+              return done(null, false, { message: "Subscription expired or inactive" });
             }
 
             done(null, user);
           } catch (error) {
             done(error);
           }
-        },
-      ),
+        }
+      )
     );
   }
 
   // Configure passport serialization
-  passport.serializeUser((user, done) => {
-    // Use _id which is the MongoDB document ID
-    done(null, user._id ? user._id.toString() : user.id);
+  passport.serializeUser((user: any, done) => {
+    done(null, user._id.toString());
   });
 
   passport.deserializeUser(async (id: string, done) => {
     try {
-      const user = await storage.getUser(id);
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return done(null, false);
+      }
+      
+      const user = await User.findById(id);
       done(null, user);
     } catch (error) {
       done(error);

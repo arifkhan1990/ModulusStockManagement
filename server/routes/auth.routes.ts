@@ -1,55 +1,49 @@
 
 import { Router } from "express";
-import { 
-  register, 
-  login, 
-  logout, 
-  getCurrentUser 
-} from "../controllers/auth.controller";
-import { isAuthenticated } from "../middleware/auth.middleware";
-
-const router = Router();
-
-// Auth routes
-router.post("/register", register);
-router.post("/login", login);
-router.post("/logout", logout);
-router.get("/me", isAuthenticated, getCurrentUser);
-
-export default router;
-import { Router } from 'express';
-import passport from 'passport';
-import { authController } from '../controllers';
-import config from '../config';
+import * as authController from "../controllers/auth.controller";
+import passport from "passport";
+import { isAuthenticated } from "../middleware/auth";
 
 const router = Router();
 
 // Registration route
-router.post('/register', authController.register);
+router.post("/register", authController.register);
 
 // Login route
-router.post('/login', passport.authenticate('local'), authController.login);
+router.post("/login", authController.login);
 
 // Logout route
-router.post('/logout', authController.logout);
+router.post("/logout", authController.logout);
 
 // Get current user route
-router.get('/user', authController.getCurrentUser);
+router.get("/me", isAuthenticated, authController.getCurrentUser);
 
-// Google OAuth routes (if configured)
-if (config.auth.googleClientId && config.auth.googleClientSecret) {
-  router.get(
-    '/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
+// Password reset
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
 
-  router.get(
-    '/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/auth' }),
-    (req, res) => {
-      res.redirect('/');
-    }
-  );
-}
+// Profile update
+router.put("/profile", isAuthenticated, authController.updateProfile);
+
+// Password change
+router.post("/change-password", isAuthenticated, authController.changePassword);
+
+// Google OAuth routes
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { 
+    failureRedirect: "/auth/login",
+    session: true
+  }),
+  (req, res) => {
+    // Successful authentication, redirect to dashboard or home
+    res.redirect("/dashboard");
+  }
+);
 
 export default router;
