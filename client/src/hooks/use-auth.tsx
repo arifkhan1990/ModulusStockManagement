@@ -3,16 +3,149 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/api";
-import { AuthContext } from "@/contexts/AuthContext";
-import { type User } from "@shared/schema";
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// Type definition for login data
+// Auth type definitions
+type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+  error: Error | null;
+};
+
+// Create auth context
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Auth provider component
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        // Simulate checking auth status
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (err) {
+        console.error('Auth status check failed:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  // Login function
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Simulated API call
+      // In a real app, you would make an API request to your auth endpoint
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Mock successful login
+      if (email === 'user@example.com' && password === 'password') {
+        const userData = {
+          id: '1',
+          name: 'Demo User',
+          email: 'user@example.com'
+        };
+
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Login failed'));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Register function
+  const register = async (name: string, email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Mock successful registration
+      const userData = {
+        id: Date.now().toString(),
+        name,
+        email
+      };
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Registration failed'));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Logout function
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated: !!user,
+        login,
+        register,
+        logout,
+        error
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Auth hook for components to use
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  return context;
+}
+
 export type LoginData = {
   username: string;
   password: string;
 };
 
-// Type definition for user registration
 export type InsertUser = {
   username: string;
   email: string;
@@ -20,7 +153,6 @@ export type InsertUser = {
   name: string;
 };
 
-// Hook exports
 export function useLoginMutation() {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -116,183 +248,3 @@ export function useRegisterMutation() {
     },
   });
 }
-
-// Main auth hook
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-
-interface User {
-  id: string;
-  username: string;
-  name: string;
-  email: string;
-  role: string;
-  avatarUrl?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  error: Error | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  signup: (userData: SignupData) => Promise<void>;
-}
-
-interface SignupData {
-  username: string;
-  password: string;
-  name: string;
-  email: string;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [, navigate] = useLocation();
-
-  // Check if user is already logged in
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const response = await fetch('/api/user', {
-          credentials: 'include',
-        });
-        
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        }
-      } catch (err) {
-        console.error('Failed to load user:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    
-    loadUser();
-  }, []);
-
-  const login = async (username: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
-      
-      const userData = await response.json();
-      setUser(userData);
-      
-      // Redirect to dashboard after successful login
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const logout = async () => {
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch('/api/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Logout failed');
-      }
-      
-      setUser(null);
-      navigate('/auth');
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const signup = async (userData: SignupData) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Signup failed');
-      }
-      
-      const user = await response.json();
-      setUser(user);
-      
-      // Redirect to dashboard after successful signup
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An unknown error occurred'));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        error,
-        login,
-        logout,
-        signup,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-};
