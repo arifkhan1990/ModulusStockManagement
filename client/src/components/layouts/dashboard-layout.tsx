@@ -6,6 +6,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import { ArrowRightLeft, LayoutGrid, Package, Warehouse } from "lucide-react";
 
 export default function DashboardLayout({
   children,
