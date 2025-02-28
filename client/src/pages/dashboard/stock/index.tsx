@@ -65,55 +65,20 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '../../../utils/api';
 import { FeatureToggle } from '../../../components/saas/FeatureToggle';
 
-export default function StockPage() {
+export default function StockManagement() {
   const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-
-  // Mock data - would be replaced with actual API calls
-  const { data: stockData = { products: [], pagination: { total: 0, pages: 1 } }, isLoading } = useQuery({
-    queryKey: ['products', currentPage, searchQuery, selectedCategory],
+  
+  // Fetch stock data
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['stock-items'],
     queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', 
-          `/api/products?page=${currentPage}&search=${searchQuery}${selectedCategory !== 'all' ? `&category=${selectedCategory}` : ''}`
-        );
-        return response.data || { products: [], pagination: { total: 0, pages: 1 } };
-      } catch (error) {
-        console.error('Failed to fetch products', error);
-        return { products: [], pagination: { total: 0, pages: 1 } };
-      }
+      const response = await apiRequest('GET', '/api/stock');
+      return response.data;
     },
-    placeholderData: {
-      products: Array(10).fill(0).map((_, i) => ({
-        _id: `product-${i}`,
-        name: `Product ${i + 1}`,
-        sku: `SKU-${1000 + i}`,
-        price: (Math.random() * 100 + 10).toFixed(2),
-        category: i % 3 === 0 ? 'Electronics' : i % 3 === 1 ? 'Clothing' : 'Food',
-        stock: Math.floor(Math.random() * 100),
-        lowStockThreshold: 10,
-      })),
-      pagination: { total: 87, pages: 9, page: 1, limit: 10 }
-    }
   });
 
-  // Mock data for categories
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      try {
-        const response = await apiRequest('GET', '/api/categories');
-        return response.data || [];
-      } catch (error) {
-        console.error('Failed to fetch categories', error);
-        return [];
-      }
-    },
-    placeholderData: ['Electronics', 'Clothing', 'Food', 'Office Supplies', 'Furniture']
-  });
+  const stockData = data || { items: [], pagination: { total: 0, page: 1, pageSize: 10, totalPages: 1 } };
 
   return (
     <MainLayout>
@@ -162,19 +127,12 @@ export default function StockPage() {
                         <SelectValue placeholder={t('selectCategory')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((category: string) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
+                        <SelectItem value="electronics">{t('electronics')}</SelectItem>
+                        <SelectItem value="clothing">{t('clothing')}</SelectItem>
+                        <SelectItem value="food">{t('food')}</SelectItem>
+                        <SelectItem value="other">{t('other')}</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label htmlFor="price" className="text-right">
-                      {t('price')}
-                    </label>
-                    <Input id="price" type="number" step="0.01" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label htmlFor="stock" className="text-right">
@@ -283,163 +241,220 @@ export default function StockPage() {
             </TabsList>
             
             <TabsContent value="products" className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="w-full md:w-64">
-                  <Input
-                    placeholder={t('searchProducts')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full"
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder={t('search')} 
+                    className="w-[300px]" 
                   />
-                </div>
-                
-                <div className="flex flex-col md:flex-row gap-2 md:ml-auto">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder={t('filterByCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t('allCategories')}</SelectItem>
-                      {categories.map((category: string) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
                   <Button variant="outline" size="icon">
                     <Filter className="h-4 w-4" />
                   </Button>
                 </div>
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={t('allLocations')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allLocations')}</SelectItem>
+                    <SelectItem value="warehouse">{t('warehouse')}</SelectItem>
+                    <SelectItem value="store">{t('store')}</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
-              <Card>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('productName')}</TableHead>
+                      <TableHead>{t('sku')}</TableHead>
+                      <TableHead>{t('category')}</TableHead>
+                      <TableHead className="text-right">{t('price')}</TableHead>
+                      <TableHead className="text-right">{t('stock')}</TableHead>
+                      <TableHead>{t('status')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
                       <TableRow>
-                        <TableHead>{t('name')}</TableHead>
-                        <TableHead>{t('sku')}</TableHead>
-                        <TableHead>{t('category')}</TableHead>
-                        <TableHead className="text-right">{t('price')}</TableHead>
-                        <TableHead className="text-right">{t('stockLevel')}</TableHead>
-                        <TableHead className="text-right">{t('status')}</TableHead>
-                        <TableHead className="text-right">{t('actions')}</TableHead>
+                        <TableCell colSpan={6} className="text-center py-4">{t('loading')}</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {isLoading ? (
-                        Array(5).fill(0).map((_, i) => (
-                          <TableRow key={i} className="animate-pulse">
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                            <TableCell className="h-12 bg-gray-100 rounded"></TableCell>
-                          </TableRow>
-                        ))
-                      ) : stockData.products.map((product: any) => (
-                        <TableRow key={product._id}>
-                          <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell>{product.sku}</TableCell>
-                          <TableCell>{product.category}</TableCell>
-                          <TableCell className="text-right">${parseFloat(product.price).toFixed(2)}</TableCell>
-                          <TableCell className="text-right">{product.stock}</TableCell>
-                          <TableCell className="text-right">
-                            {product.stock <= product.lowStockThreshold ? (
-                              <Badge variant="destructive">{t('lowStock')}</Badge>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-4 text-red-500">{t('errorLoading')}</TableCell>
+                      </TableRow>
+                    ) : stockData.items.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-4">{t('noProductsFound')}</TableCell>
+                      </TableRow>
+                    ) : (
+                      stockData.items.map((item: any) => (
+                        <TableRow key={item._id}>
+                          <TableCell className="font-medium">{item.name}</TableCell>
+                          <TableCell>{item.sku}</TableCell>
+                          <TableCell>{item.category}</TableCell>
+                          <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                          <TableCell className="text-right">{item.stock}</TableCell>
+                          <TableCell>
+                            {item.stock <= item.lowStockThreshold ? (
+                              <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                                {t('lowStock')}
+                              </Badge>
+                            ) : item.stock === 0 ? (
+                              <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-100">
+                                {t('outOfStock')}
+                              </Badge>
                             ) : (
-                              <Badge variant="outline">{t('inStock')}</Badge>
+                              <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                                {t('inStock')}
+                              </Badge>
                             )}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
-                              <a href={`/dashboard/stock/product/${product._id}`}>{t('view')}</a>
-                            </Button>
-                          </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <div className="p-4 border-t">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious 
-                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                          className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                        />
-                      </PaginationItem>
-                      {Array.from({ length: Math.min(5, stockData.pagination.pages) }, (_, i) => {
-                        const pageNumber = currentPage <= 3
-                          ? i + 1
-                          : currentPage >= stockData.pagination.pages - 2
-                            ? stockData.pagination.pages - 4 + i
-                            : currentPage - 2 + i;
-                        
-                        if (pageNumber <= 0 || pageNumber > stockData.pagination.pages) {
-                          return null;
-                        }
-                        
-                        return (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              onClick={() => setCurrentPage(pageNumber)}
-                              isActive={currentPage === pageNumber}
-                            >
-                              {pageNumber}
-                            </PaginationLink>
-                          </PaginationItem>
-                        );
-                      })}
-                      <PaginationItem>
-                        <PaginationNext 
-                          onClick={() => setCurrentPage(Math.min(stockData.pagination.pages, currentPage + 1))}
-                          className={currentPage === stockData.pagination.pages ? 'pointer-events-none opacity-50' : ''}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" />
+                  </PaginationItem>
+                  {Array.from({ length: stockData.pagination.totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink href="#" isActive={stockData.pagination.page === i + 1}>
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext href="#" />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </TabsContent>
+            
+            <TabsContent value="movements" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder={t('search')} 
+                    className="w-[300px]" 
+                  />
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
                 </div>
-              </Card>
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={t('allMovementTypes')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allMovementTypes')}</SelectItem>
+                    <SelectItem value="transfer">{t('transfer')}</SelectItem>
+                    <SelectItem value="adjustment">{t('adjustment')}</SelectItem>
+                    <SelectItem value="sale">{t('sale')}</SelectItem>
+                    <SelectItem value="purchase">{t('purchase')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('date')}</TableHead>
+                      <TableHead>{t('productName')}</TableHead>
+                      <TableHead>{t('type')}</TableHead>
+                      <TableHead>{t('fromLocation')}</TableHead>
+                      <TableHead>{t('toLocation')}</TableHead>
+                      <TableHead className="text-right">{t('quantity')}</TableHead>
+                      <TableHead>{t('reference')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-4">{t('loadingMovements')}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" isActive>1</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext href="#" />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </TabsContent>
             
-            <TabsContent value="movements">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('stockMovementsHistory')}</CardTitle>
-                  <CardDescription>{t('trackAllStockMovements')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center h-80 border rounded-md">
-                    <div className="text-center">
-                      <Package className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                      <p>{t('stockMovementsTableWillBeDisplayed')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="levels">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('currentStockLevels')}</CardTitle>
-                  <CardDescription>{t('viewCurrentStockLevels')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center h-80 border rounded-md">
-                    <div className="text-center">
-                      <AlertTriangle className="h-10 w-10 mx-auto mb-3 opacity-20" />
-                      <p>{t('lowStockItemsListWillBeDisplayed')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="levels" className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Input 
+                    placeholder={t('search')} 
+                    className="w-[300px]" 
+                  />
+                  <Button variant="outline" size="icon">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={t('allLocations')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('allLocations')}</SelectItem>
+                    <SelectItem value="warehouse">{t('warehouse')}</SelectItem>
+                    <SelectItem value="store">{t('store')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('location')}</TableHead>
+                      <TableHead>{t('productName')}</TableHead>
+                      <TableHead>{t('sku')}</TableHead>
+                      <TableHead className="text-right">{t('currentStock')}</TableHead>
+                      <TableHead className="text-right">{t('minimumLevel')}</TableHead>
+                      <TableHead className="text-right">{t('maximumLevel')}</TableHead>
+                      <TableHead>{t('status')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-4">{t('loadingStockLevels')}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+              
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious href="#" />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationLink href="#" isActive>1</PaginationLink>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext href="#" />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </TabsContent>
           </Tabs>
         </div>
