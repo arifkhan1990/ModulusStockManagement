@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
   Package,
+  LogOut,
   Warehouse,
   Users,
   TrendingUp,
