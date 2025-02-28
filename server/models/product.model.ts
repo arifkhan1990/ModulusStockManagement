@@ -129,3 +129,146 @@ ProductSchema.index({ businessSize: 1, businessType: 1 });
 const Product = mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface IProduct extends Document {
+  companyId: Schema.Types.ObjectId;
+  name: string;
+  sku: string;
+  description?: string;
+  price: number;
+  costPrice?: number;
+  stockQuantity: number;
+  lowStockThreshold?: number;
+  category?: string;
+  subcategory?: string;
+  imageUrl?: string;
+  tags?: string[];
+  attributes?: Map<string, any>;
+  barcode?: string;
+  weight?: number;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+    unit?: string;
+  };
+  taxRate?: number;
+  status: string; // active, inactive, discontinued
+  locationIds?: Schema.Types.ObjectId[];
+  isDigital: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ProductSchema = new Schema<IProduct>(
+  {
+    companyId: { 
+      type: Schema.Types.ObjectId, 
+      ref: 'Company', 
+      required: true 
+    },
+    name: { 
+      type: String, 
+      required: true,
+      trim: true
+    },
+    sku: { 
+      type: String, 
+      required: true,
+      trim: true 
+    },
+    description: { 
+      type: String 
+    },
+    price: { 
+      type: Number, 
+      required: true,
+      min: 0 
+    },
+    costPrice: { 
+      type: Number,
+      min: 0 
+    },
+    stockQuantity: { 
+      type: Number, 
+      required: true,
+      default: 0 
+    },
+    lowStockThreshold: { 
+      type: Number,
+      default: 5 
+    },
+    category: { 
+      type: String 
+    },
+    subcategory: { 
+      type: String 
+    },
+    imageUrl: { 
+      type: String 
+    },
+    tags: [{ 
+      type: String 
+    }],
+    attributes: {
+      type: Map,
+      of: Schema.Types.Mixed
+    },
+    barcode: { 
+      type: String 
+    },
+    weight: { 
+      type: Number 
+    },
+    dimensions: {
+      length: { type: Number },
+      width: { type: Number },
+      height: { type: Number },
+      unit: { type: String, default: 'cm' }
+    },
+    taxRate: { 
+      type: Number,
+      default: 0 
+    },
+    status: { 
+      type: String, 
+      enum: ['active', 'inactive', 'discontinued'],
+      default: 'active' 
+    },
+    locationIds: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Location' 
+    }],
+    isDigital: { 
+      type: Boolean,
+      default: false 
+    },
+    createdAt: { 
+      type: Date, 
+      default: Date.now 
+    },
+    updatedAt: { 
+      type: Date, 
+      default: Date.now 
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+// Ensure compound index for company + SKU uniqueness
+ProductSchema.index({ companyId: 1, sku: 1 }, { unique: true });
+
+// Other useful indexes
+ProductSchema.index({ companyId: 1, name: 1 });
+ProductSchema.index({ companyId: 1, category: 1 });
+ProductSchema.index({ companyId: 1, status: 1 });
+ProductSchema.index({ companyId: 1, stockQuantity: 1 }); // For low stock queries
+ProductSchema.index({ companyId: 1, tags: 1 });
+ProductSchema.index({ barcode: 1 });
+
+const Product = mongoose.model<IProduct>('Product', ProductSchema);
+
+export default Product;

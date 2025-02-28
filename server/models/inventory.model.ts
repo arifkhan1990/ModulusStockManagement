@@ -81,3 +81,66 @@ InventorySchema.index({ stockStatus: 1 });
 const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
 
 export default Inventory;
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface IInventory extends Document {
+  companyId: Schema.Types.ObjectId;
+  productId: Schema.Types.ObjectId;
+  locationId: Schema.Types.ObjectId;
+  quantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
+  updatedAt: Date;
+}
+
+const InventorySchema = new Schema<IInventory>(
+  {
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true
+    },
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true
+    },
+    locationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Location',
+      required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    reservedQuantity: {
+      type: Number,
+      default: 0
+    },
+    availableQuantity: {
+      type: Number,
+      default: 0
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+// Compound index for product and location uniqueness
+InventorySchema.index({ companyId: 1, productId: 1, locationId: 1 }, { unique: true });
+
+// Useful indexes
+InventorySchema.index({ companyId: 1, quantity: 1 }); // For low stock queries
+InventorySchema.index({ companyId: 1, locationId: 1 });
+InventorySchema.index({ companyId: 1, productId: 1 });
+
+const Inventory = mongoose.model<IInventory>('Inventory', InventorySchema);
+
+export default Inventory;

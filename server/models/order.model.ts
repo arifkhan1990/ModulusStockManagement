@@ -167,3 +167,193 @@ OrderSchema.index({ locationId: 1 });
 const Order = mongoose.model<IOrder>('Order', OrderSchema);
 
 export default Order;
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface IOrderItem {
+  productId: Schema.Types.ObjectId;
+  name: string;
+  sku: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  taxAmount: number;
+  taxRate: number;
+  discount: number;
+  locationId: Schema.Types.ObjectId;
+}
+
+export interface IOrder extends Document {
+  companyId: Schema.Types.ObjectId;
+  orderNumber: string;
+  customerId?: Schema.Types.ObjectId;
+  items: IOrderItem[];
+  subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  total: number;
+  paymentStatus: string; // pending, paid, partially_paid, refunded
+  paymentMethod: string; // cash, card, online
+  paymentDetails?: {
+    transactionId?: string;
+    cardType?: string;
+    lastFourDigits?: string;
+    receiptUrl?: string;
+  };
+  notes?: string;
+  status: string; // draft, processing, completed, cancelled
+  createdBy: Schema.Types.ObjectId;
+  locationId: Schema.Types.ObjectId;
+  refundedAmount?: number;
+  source: string; // pos, online, marketplace
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const OrderSchema = new Schema<IOrder>(
+  {
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true
+    },
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    customerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Customer'
+    },
+    items: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true
+        },
+        name: {
+          type: String,
+          required: true
+        },
+        sku: {
+          type: String,
+          required: true
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1
+        },
+        unitPrice: {
+          type: Number,
+          required: true
+        },
+        totalPrice: {
+          type: Number,
+          required: true
+        },
+        taxAmount: {
+          type: Number,
+          default: 0
+        },
+        taxRate: {
+          type: Number,
+          default: 0
+        },
+        discount: {
+          type: Number,
+          default: 0
+        },
+        locationId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Location',
+          required: true
+        }
+      }
+    ],
+    subtotal: {
+      type: Number,
+      required: true
+    },
+    taxAmount: {
+      type: Number,
+      default: 0
+    },
+    discountAmount: {
+      type: Number,
+      default: 0
+    },
+    total: {
+      type: Number,
+      required: true
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'partially_paid', 'refunded'],
+      default: 'pending'
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['cash', 'card', 'online', 'other'],
+      required: true
+    },
+    paymentDetails: {
+      transactionId: String,
+      cardType: String,
+      lastFourDigits: String,
+      receiptUrl: String
+    },
+    notes: {
+      type: String
+    },
+    status: {
+      type: String,
+      enum: ['draft', 'processing', 'completed', 'cancelled'],
+      default: 'draft'
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    locationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Location',
+      required: true
+    },
+    refundedAmount: {
+      type: Number,
+      default: 0
+    },
+    source: {
+      type: String,
+      enum: ['pos', 'online', 'marketplace'],
+      default: 'pos'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+// Indexes for queries
+OrderSchema.index({ companyId: 1, orderNumber: 1 });
+OrderSchema.index({ companyId: 1, customerId: 1 });
+OrderSchema.index({ companyId: 1, createdAt: -1 });
+OrderSchema.index({ companyId: 1, status: 1 });
+OrderSchema.index({ companyId: 1, paymentStatus: 1 });
+OrderSchema.index({ companyId: 1, source: 1 });
+OrderSchema.index({ companyId: 1, locationId: 1 });
+
+const Order = mongoose.model<IOrder>('Order', OrderSchema);
+
+export default Order;
