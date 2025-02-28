@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import {
   Card,
@@ -26,59 +27,59 @@ import {
 import { Plus, FileText } from "lucide-react";
 
 // Mock data - replace with actual API calls
-const mockCustomers = [
+const mockSuppliers = [
   {
     id: "1",
-    name: "Acme Corporation",
-    contact: "Jane Doe",
-    email: "jane@acme.com",
-    phone: "555-111-2222",
-    type: "wholesale",
+    name: "Tech Distributors Inc.",
+    contact: "John Smith",
+    email: "john@techdist.com",
+    phone: "555-123-4567",
+    status: "active",
   },
   {
     id: "2",
-    name: "TechStart Inc.",
-    contact: "Robert Johnson",
-    email: "robert@techstart.com",
-    phone: "555-333-4444",
-    type: "retail",
+    name: "Global Electronics Supply",
+    contact: "Sarah Johnson",
+    email: "sarah@globalelec.com",
+    phone: "555-987-6543",
+    status: "active",
   },
   {
     id: "3",
-    name: "Global Enterprises",
-    contact: "Emily Chen",
-    email: "emily@globalent.com",
-    phone: "555-555-6666",
-    type: "wholesale",
+    name: "Premium Parts Co.",
+    contact: "Mike Williams",
+    email: "mike@premiumparts.com",
+    phone: "555-456-7890",
+    status: "inactive",
   },
   {
     id: "4",
-    name: "City Electronics",
-    contact: "Michael Brown",
-    email: "michael@cityelectronics.com",
-    phone: "555-777-8888",
-    type: "retail",
+    name: "Wholesale Warehouse",
+    contact: "Lisa Brown",
+    email: "lisa@wholesalewh.com",
+    phone: "555-789-0123",
+    status: "active",
   },
   {
     id: "5",
-    name: "Modern Solutions Ltd.",
-    contact: "Sophia Martinez",
-    email: "sophia@modernsolutions.com",
-    phone: "555-999-0000",
-    type: "wholesale",
+    name: "Quality Components Ltd.",
+    contact: "David Lee",
+    email: "david@qualitycomp.com",
+    phone: "555-234-5678",
+    status: "active",
   },
 ];
 
-export default function CustomersPage() {
+export default function SuppliersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Suppliers</h1>
           <p className="text-muted-foreground">
-            Manage customer accounts and relationships
+            Manage supplier information and relationships
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2">
@@ -86,19 +87,19 @@ export default function CustomersPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Customer
+                Add Supplier
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
-                <DialogTitle>Add New Customer</DialogTitle>
+                <DialogTitle>Add New Supplier</DialogTitle>
                 <DialogDescription>
-                  Enter the details for the new customer
+                  Enter the details for the new supplier
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
                 <p className="text-center text-muted-foreground">
-                  Customer form will go here
+                  Supplier form will go here
                 </p>
               </div>
             </DialogContent>
@@ -112,9 +113,9 @@ export default function CustomersPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Customer Directory</CardTitle>
+          <CardTitle>Supplier Directory</CardTitle>
           <CardDescription>
-            View and manage all customer accounts
+            View and manage all product suppliers
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -126,26 +127,26 @@ export default function CustomersPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockCustomers.map((customer) => (
-                  <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>{customer.contact}</TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.phone}</TableCell>
+                {mockSuppliers.map((supplier) => (
+                  <TableRow key={supplier.id}>
+                    <TableCell className="font-medium">{supplier.name}</TableCell>
+                    <TableCell>{supplier.contact}</TableCell>
+                    <TableCell>{supplier.email}</TableCell>
+                    <TableCell>{supplier.phone}</TableCell>
                     <TableCell>
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          customer.type === "wholesale"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-purple-100 text-purple-800"
+                          supplier.status === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {customer.type}
+                        {supplier.status}
                       </span>
                     </TableCell>
                     <TableCell>

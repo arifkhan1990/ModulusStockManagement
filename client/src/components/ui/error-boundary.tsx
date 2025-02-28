@@ -1,20 +1,21 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
-  children: ReactNode;
+  children?: ReactNode;
   fallback?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -22,27 +23,28 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error("Uncaught error:", error, errorInfo);
   }
+
+  private handleReload = () => {
+    window.location.reload();
+  };
 
   public render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="flex h-screen flex-col items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-            <h2 className="mb-4 text-2xl font-bold text-destructive">Something went wrong</h2>
-            <p className="mb-4 text-muted-foreground">
-              {this.state.error?.message || 'An unexpected error occurred'}
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
+      return (
+        <div className="flex items-center justify-center min-h-screen p-6 bg-background">
+          <div className="text-center max-w-md mx-auto">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
+            <p className="text-muted-foreground mb-6">
+              {this.state.error?.message || "An unexpected error occurred."}
             </p>
-            <pre className="mb-4 max-h-40 overflow-auto rounded bg-muted p-2 text-xs">
-              {this.state.error?.stack}
-            </pre>
-            <button
-              className="rounded bg-primary px-4 py-2 text-primary-foreground"
-              onClick={() => window.location.reload()}
-            >
-              Refresh the page
-            </button>
+            <Button onClick={this.handleReload}>Reload Page</Button>
           </div>
         </div>
       );

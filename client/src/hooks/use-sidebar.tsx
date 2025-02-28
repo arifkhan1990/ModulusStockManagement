@@ -1,25 +1,16 @@
 
-import { useState, useEffect } from 'react';
+import { create } from "zustand";
 
-// Define sidebar state management hook
-export function useSidebar() {
-  const [isOpen, setIsOpen] = useState(() => {
-    // Load user preference from localStorage if available
-    const saved = localStorage.getItem('sidebar-state');
-    return saved ? saved === 'open' : window.innerWidth > 1024;
-  });
-
-  // Save preference to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('sidebar-state', isOpen ? 'open' : 'closed');
-  }, [isOpen]);
-
-  // Toggle sidebar state
-  const toggle = () => setIsOpen(!isOpen);
-
-  return {
-    isOpen,
-    setIsOpen,
-    toggle
-  };
+interface SidebarState {
+  isOpen: boolean;
+  toggle: () => void;
+  open: () => void;
+  close: () => void;
 }
+
+export const useSidebar = create<SidebarState>((set) => ({
+  isOpen: false,
+  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
+  open: () => set({ isOpen: true }),
+  close: () => set({ isOpen: false }),
+}));

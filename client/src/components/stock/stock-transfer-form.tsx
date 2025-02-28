@@ -1,8 +1,7 @@
-
 import { useState } from "react";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,8 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -22,14 +19,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 
-// Mock data for demo purposes
+// Mock data - replace with real API calls
 const mockProducts = [
   { id: "1", name: "Wireless Headphones" },
-  { id: "2", name: "Smartphone Charger" },
-  { id: "3", name: "Bluetooth Speaker" },
+  { id: "2", name: "Bluetooth Speaker" },
+  { id: "3", name: "Smartphone Charger" },
   { id: "4", name: "Desk Lamp" },
   { id: "5", name: "Coffee Mug" },
 ];
@@ -39,80 +39,70 @@ const mockLocations = [
   { id: "2", name: "Downtown Store" },
   { id: "3", name: "West Coast Distribution" },
   { id: "4", name: "South Fulfillment" },
-  { id: "5", name: "Pop-up Shop" },
 ];
 
-// Define schema for form validation
 const formSchema = z.object({
-  type: z.enum(["transfer", "adjustment"]),
-  productId: z.string().min(1, "Please select a product"),
-  fromLocationId: z.string().min(1, "Please select a source location"),
+  type: z.enum(["transfer", "adjustment"], {
+    required_error: "Please select a movement type",
+  }),
+  productId: z.string({
+    required_error: "Please select a product",
+  }),
+  fromLocationId: z.string({
+    required_error: "Please select a source location",
+  }),
   toLocationId: z.string().optional(),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
+  quantity: z.coerce
+    .number()
+    .int()
+    .positive({
+      message: "Quantity must be a positive number",
+    }),
   reference: z.string().optional(),
-  reason: z.string().optional(),
+  notes: z.string().optional(),
 });
 
-// Type for form values
-type MovementFormValues = z.infer<typeof formSchema>;
-
-interface StockTransferFormProps {
-  onSuccess?: () => void;
-}
-
-export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
+export function StockTransferForm({ onSuccess }: { onSuccess?: () => void }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-  const [movementType, setMovementType] = useState("transfer");
 
-  const defaultValues = {
-    productId: "",
-    fromLocationId: "",
-    toLocationId: "",
-    quantity: 1,
-    type: "transfer",
-    reference: "",
-    reason: "",
-  };
 
-  const form = useForm<MovementFormValues>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: {
+      type: "transfer",
+      quantity: 1,
+    },
   });
 
-  // Update form when movement type changes
-  const watchedType = form.watch("type");
-  if (watchedType !== movementType) {
-    setMovementType(watchedType);
-    // Clear destination location if movement type is adjustment
-    if (watchedType === "adjustment") {
-      form.setValue("toLocationId", "");
-    }
-  }
+  const movementType = form.watch("type");
 
-  async function onSubmit(values: MovementFormValues) {
-    setIsLoading(true);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsSubmitting(true);
+      // Mock API call - replace with real implementation
+      console.log("Submitting stock movement:", values);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API delay
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Stock movement values:", values);
-      
       toast({
         title: values.type === "transfer" ? "Stock Transferred" : "Stock Adjusted",
         description: "The stock movement has been recorded successfully.",
       });
-      
-      form.reset(defaultValues);
-      if (onSuccess) onSuccess();
-      
-      setIsLoading(false);
-    }, 1000);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error("Error creating stock movement:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="type"
@@ -122,7 +112,6 @@ export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -130,12 +119,12 @@ export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="transfer">Transfer (Between Locations)</SelectItem>
-                  <SelectItem value="adjustment">Adjustment (Add/Remove Stock)</SelectItem>
+                  <SelectItem value="transfer">Transfer</SelectItem>
+                  <SelectItem value="adjustment">Adjustment</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                Choose whether you're transferring stock between locations or adjusting quantity
+                Transfer moves stock between locations, adjustment changes stock levels
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -151,11 +140,10 @@ export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isLoading}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select product" />
+                    <SelectValue placeholder="Select a product" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -171,23 +159,48 @@ export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <FormField
+          control={form.control}
+          name="fromLocationId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>From Location</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select source location" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {mockLocations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {movementType === "transfer" && (
           <FormField
             control={form.control}
-            name="fromLocationId"
+            name="toLocationId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  {movementType === "transfer" ? "From Location" : "Location"}
-                </FormLabel>
+                <FormLabel>To Location</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={isLoading}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder="Select destination location" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -202,113 +215,69 @@ export function StockTransferForm({ onSuccess }: StockTransferFormProps) {
               </FormItem>
             )}
           />
-
-          {movementType === "transfer" && (
-            <FormField
-              control={form.control}
-              name="toLocationId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>To Location</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select destination" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {mockLocations.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-
-          <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantity</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Enter quantity"
-                    disabled={isLoading}
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormDescription>
-                  {movementType === "adjustment" && (
-                    <>Use negative numbers to remove stock</>
-                  )}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="reference"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Reference</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Order number, invoice, etc."
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Optional reference number or identifier
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        )}
 
         <FormField
           control={form.control}
-          name="reason"
+          name="quantity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Reason</FormLabel>
+              <FormLabel>Quantity</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Reason for the stock movement"
-                  disabled={isLoading}
+                <Input
+                  type="number"
+                  min={1}
                   {...field}
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="reference"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reference (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="REF-001" {...field} />
+              </FormControl>
               <FormDescription>
-                {movementType === "adjustment"
-                  ? "Explain why this adjustment is needed (e.g., damaged goods, stocktake correction)"
-                  : "Optional notes about this transfer"}
+                Add a reference number for tracking purposes
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Processing..." : "Submit Stock Movement"}
-        </Button>
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes (Optional)</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Add any additional information about this stock movement"
+                  rows={3}
+                  {...field} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Record Movement
+          </Button>
+        </div>
       </form>
     </Form>
   );
