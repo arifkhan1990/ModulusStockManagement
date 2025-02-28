@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from 'path';
+import { resolve } from "path";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { fileURLToPath } from "url";
@@ -14,13 +14,13 @@ export default defineConfig({
     runtimeErrorOverlay(),
     // themePlugin(), // Removed as not directly related to path aliases
     ...(process.env.NODE_ENV !== "production" &&
-      process.env.REPL_ID !== undefined
-        ? [
-            await import("@replit/vite-plugin-cartographer").then((m) =>
-              m.cartographer(),
-            ),
-          ]
-        : []),
+    process.env.REPL_ID !== undefined
+      ? [
+          await import("@replit/vite-plugin-cartographer").then((m) =>
+            m.cartographer(),
+          ),
+        ]
+      : []),
   ],
   resolve: {
     alias: {
@@ -34,12 +34,16 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     port: 3000,
     strictPort: true,
     hmr: {
-      clientPort: 443
+      clientPort: 443,
     },
-    allowedHosts: 'all'
-  }
+    allowedHosts: [
+      "6518eacd-285a-4a12-8e0f-10c1d5858f28-00-1r3dbzdzv4kw5.pike.replit.dev",
+      "6518eacd-285a-4a12-8e0f-10c1d5858f28-00-1r3dbzdzv4kw5.pike.replit.dev",
+      "localhost", // Optional: Keep localhost for local development
+    ],
+  },
 });
