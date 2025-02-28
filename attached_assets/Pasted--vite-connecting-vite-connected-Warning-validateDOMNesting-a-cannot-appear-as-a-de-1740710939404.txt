@@ -1,0 +1,34 @@
+[vite] connecting...
+[vite] connected.
+Warning: validateDOMNesting(...): <a> cannot appear as a descendant of &lt;a&gt;.
+    at a
+    at a
+    at https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=16a90be3:337:18
+    at div
+    at div
+    at header
+    at Navbar (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/src/components/navbar.tsx:34:39)
+    at div
+    at LandingLayout (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/src/components/layouts/landing-layout.tsx:21:33)
+    at Route (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=16a90be3:323:16)
+    at Switch (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=16a90be3:379:17)
+    at AuthProvider (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/src/hooks/use-auth.tsx:24:32)
+    at QueryClientProvider (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=16a90be3:2844:3)
+    at App
+Cannot convert object to primitive value
+Cannot convert object to primitive value
+The above error occurred in one of your React components:
+
+    at Lazy
+    at Suspense
+    at main
+    at div
+    at LandingLayout (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/src/components/layouts/landing-layout.tsx:21:33)
+    at Route (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=16a90be3:323:16)
+    at Switch (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=16a90be3:379:17)
+    at AuthProvider (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/src/hooks/use-auth.tsx:24:32)
+    at QueryClientProvider (https://4d7c62c7-0241-4370-a808-5a8c7e1fe9ff-00-1m5hqgd2fol8e.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=16a90be3:2844:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
