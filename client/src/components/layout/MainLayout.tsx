@@ -1,5 +1,5 @@
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
@@ -9,24 +9,32 @@ interface MainLayoutProps {
   children: ReactNode;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+export default function MainLayout({ children }: MainLayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Navbar />
-      <div className="flex flex-1">
-        <Sidebar />
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+
+      {/* Main Content */}
+      <div className="flex flex-col flex-1 w-full overflow-hidden">
+        <Navbar toggleSidebar={toggleSidebar} />
+
         <motion.main 
-          className="flex-1 p-6 md:p-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="flex-1 overflow-y-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
         >
           {children}
+          <Footer />
         </motion.main>
       </div>
-      <Footer />
     </div>
   );
-};
-
-export default MainLayout;
+}

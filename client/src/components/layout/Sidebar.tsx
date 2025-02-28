@@ -1,145 +1,267 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import { cn } from '../../utils/cn';
+import { Button } from '../ui/button';
+import { ScrollArea } from '../ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { SheetContent, SheetTrigger } from '../ui/sheet';
+import { FeatureToggle } from '../saas/FeatureToggle';
+import { useAuth } from '../../hooks/use-auth';
 import { 
-  LayoutDashboard, 
+  ChevronRight, 
+  Home, 
   Package, 
   ShoppingCart, 
   Users, 
-  BarChart2, 
-  Settings, 
-  Bell, 
   FileText, 
-  Share2, 
-  Download, 
-  ChevronDown, 
-  ChevronRight 
+  Settings, 
+  BarChart,
+  LayoutDashboard,
+  CreditCard,
+  Bell,
+  Share2,
+  Download,
+  Store,
+  FileBarChart,
+  ChevronDown
 } from 'lucide-react';
 
-type NavItem = {
-  name: string;
-  href: string;
-  icon: React.ElementType;
-  subItems?: { name: string; href: string }[];
-};
+interface SidebarProps {
+  isOpen: boolean;
+  toggleSidebar: () => void;
+}
 
-const navItems: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { 
-    name: 'Stock', 
-    href: '/dashboard/stock', 
-    icon: Package,
-    subItems: [
-      { name: 'Inventory', href: '/dashboard/stock/inventory' },
-      { name: 'Movements', href: '/dashboard/stock/movements' },
-      { name: 'Adjustments', href: '/dashboard/stock/adjustments' },
-    ]
-  },
-  { name: 'Orders', href: '/dashboard/orders', icon: ShoppingCart },
-  { name: 'Customers', href: '/dashboard/customers', icon: Users },
-  { name: 'Reports', href: '/dashboard/reports', icon: BarChart2 },
-  { name: 'Invoices', href: '/dashboard/invoices', icon: FileText },
-  { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { name: 'Share', href: '/dashboard/share', icon: Share2 },
-  { name: 'Downloads', href: '/dashboard/downloads', icon: Download },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-];
-
-const Sidebar: React.FC = () => {
+export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const { user } = useAuth();
   
-  const toggleExpand = (name: string) => {
-    if (expanded === name) {
-      setExpanded(null);
-    } else {
-      setExpanded(name);
-    }
-  };
-  
-  return (
-    <motion.aside
-      className="hidden md:flex w-64 flex-col border-r bg-background"
-      initial={{ x: -280 }}
-      animate={{ x: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
-      <div className="flex flex-col gap-2 p-4">
-        <p className="text-xs font-semibold text-muted-foreground px-2 py-1">MAIN</p>
-        <nav className="grid gap-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.href || 
-                            (location.pathname.startsWith(item.href) && item.href !== '/dashboard');
-            const hasSubItems = item.subItems && item.subItems.length > 0;
-            const isExpanded = expanded === item.name;
-            
-            return (
-              <div key={item.name}>
-                <motion.div
-                  whileHover={{ x: 4 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {hasSubItems ? (
-                    <button
-                      onClick={() => toggleExpand(item.name)}
-                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm
-                      ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-accent'}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <item.icon size={18} />
-                        <span>{item.name}</span>
-                      </div>
-                      {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    </button>
-                  ) : (
-                    <Link
-                      to={item.href}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm 
-                      ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-accent'}`}
-                    >
-                      <item.icon size={18} />
-                      <span>{item.name}</span>
-                    </Link>
-                  )}
-                </motion.div>
-                
-                {hasSubItems && isExpanded && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="ml-6 mt-1 grid gap-1"
-                  >
-                    {item.subItems!.map((subItem) => {
-                      const isSubActive = location.pathname === subItem.href;
-                      
-                      return (
-                        <motion.div
-                          key={subItem.name}
-                          whileHover={{ x: 4 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Link
-                            to={subItem.href}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm
-                            ${isSubActive ? 'text-primary font-medium' : 'text-muted-foreground hover:bg-accent'}`}
-                          >
-                            <span>{subItem.name}</span>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </div>
-            );
-          })}
-        </nav>
-      </div>
-    </motion.aside>
-  );
-};
+  // Track open menu sections
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    stock: true,
+    sales: false,
+    customers: false,
+    reports: false,
+    settings: false,
+  });
 
-export default Sidebar;
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const isLinkActive = (path: string) => {
+    return location.pathname === path;
+  };
+
+  const sidebarVariants = {
+    open: { width: 260, transition: { duration: 0.2 } },
+    closed: { width: 0, transition: { duration: 0.2 } }
+  };
+
+  const menuItems = [
+    {
+      id: 'dashboard',
+      label: t('dashboard'),
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      path: '/dashboard',
+    },
+    {
+      id: 'stock',
+      label: t('stockManagement'),
+      icon: <Package className="h-5 w-5" />,
+      path: '/dashboard/stock',
+      submenu: [
+        { label: t('products'), path: '/dashboard/stock' },
+        { label: t('stockMovements'), path: '/dashboard/stock/movements' },
+        { label: t('categories'), path: '/dashboard/stock/categories' },
+        { label: t('locations'), path: '/dashboard/stock/locations' },
+      ],
+    },
+    {
+      id: 'sales',
+      label: t('sales'),
+      icon: <ShoppingCart className="h-5 w-5" />,
+      path: '/dashboard/sales',
+      submenu: [
+        { label: t('orders'), path: '/dashboard/sales/orders' },
+        { label: t('invoices'), path: '/dashboard/sales/invoices' },
+        { label: t('payments'), path: '/dashboard/sales/payments' },
+        { label: t('pos'), path: '/dashboard/sales/pos' },
+      ],
+    },
+    {
+      id: 'customers',
+      label: t('customers'),
+      icon: <Users className="h-5 w-5" />,
+      path: '/dashboard/customers',
+      submenu: [
+        { label: t('customerList'), path: '/dashboard/customers' },
+        { label: t('segments'), path: '/dashboard/customers/segments' },
+      ],
+    },
+    {
+      feature: 'reports',
+      id: 'reports',
+      label: t('reports'),
+      icon: <FileBarChart className="h-5 w-5" />,
+      path: '/dashboard/reports',
+      submenu: [
+        { label: t('salesReports'), path: '/dashboard/reports/sales' },
+        { label: t('inventoryReports'), path: '/dashboard/reports/inventory' },
+        { label: t('financialReports'), path: '/dashboard/reports/financial' },
+      ],
+    },
+    {
+      feature: 'notifications',
+      id: 'notifications',
+      label: t('notifications'),
+      icon: <Bell className="h-5 w-5" />,
+      path: '/dashboard/notifications',
+    },
+    {
+      feature: 'sharing',
+      id: 'sharing',
+      label: t('sharing'),
+      icon: <Share2 className="h-5 w-5" />,
+      path: '/dashboard/sharing',
+    },
+    {
+      id: 'settings',
+      label: t('settings'),
+      icon: <Settings className="h-5 w-5" />,
+      path: '/dashboard/settings',
+      submenu: [
+        { label: t('profile'), path: '/dashboard/settings/profile' },
+        { label: t('companySettings'), path: '/dashboard/settings/company' },
+        { label: t('users'), path: '/dashboard/settings/users' },
+        { label: t('features'), path: '/dashboard/settings/features' },
+      ],
+    },
+    {
+      feature: 'billing',
+      id: 'billing',
+      label: t('billing'),
+      icon: <CreditCard className="h-5 w-5" />,
+      path: '/dashboard/billing',
+    },
+  ];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.aside
+          initial={{ width: 0 }}
+          animate="open"
+          exit="closed"
+          variants={sidebarVariants}
+          className="border-r dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden z-20 fixed md:relative h-full left-0 top-0"
+        >
+          <div className="flex h-16 items-center border-b px-4 dark:border-gray-800">
+            <Link to="/" className="flex items-center gap-2 font-semibold">
+              <div className="size-8 rounded-full bg-primary flex items-center justify-center text-white">
+                <span className="text-lg font-bold">M</span>
+              </div>
+              <span className="text-xl">Modulus</span>
+            </Link>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleSidebar}
+              className="ml-auto md:hidden"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <ScrollArea className="h-[calc(100vh-4rem)]">
+            <div className="px-3 py-2">
+              <div className="mb-4 px-4 py-2">
+                <p className="text-xs text-muted-foreground uppercase font-medium tracking-wider">
+                  {user?.company?.name || 'Your Company'}
+                </p>
+              </div>
+              
+              <nav className="space-y-1 px-1">
+                {menuItems.map((item) => {
+                  // If the item has a feature flag, wrap it with FeatureToggle
+                  const menuItem = (
+                    <div key={item.id} className="mb-1">
+                      {item.submenu ? (
+                        <Collapsible
+                          open={openSections[item.id]}
+                          onOpenChange={() => toggleSection(item.id)}
+                        >
+                          <CollapsibleTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-between font-normal h-10",
+                                (item.submenu && item.submenu.some(subitem => isLinkActive(subitem.path))) && 
+                                "bg-muted text-primary font-medium"
+                              )}
+                            >
+                              <div className="flex items-center">
+                                {item.icon}
+                                <span className="ml-3">{item.label}</span>
+                              </div>
+                              <ChevronDown className={cn(
+                                "h-4 w-4 transition-transform",
+                                openSections[item.id] && "transform rotate-180"
+                              )} />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent className="pl-9 space-y-1 mt-1">
+                            {item.submenu.map((subitem) => (
+                              <Button
+                                key={subitem.path}
+                                variant="ghost"
+                                asChild
+                                className={cn(
+                                  "w-full justify-start font-normal h-9",
+                                  isLinkActive(subitem.path) && "bg-muted text-primary font-medium"
+                                )}
+                              >
+                                <Link to={subitem.path}>{subitem.label}</Link>
+                              </Button>
+                            ))}
+                          </CollapsibleContent>
+                        </Collapsible>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          asChild
+                          className={cn(
+                            "w-full justify-start font-normal h-10",
+                            isLinkActive(item.path) && "bg-muted text-primary font-medium"
+                          )}
+                        >
+                          <Link to={item.path}>
+                            {item.icon}
+                            <span className="ml-3">{item.label}</span>
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+                  );
+                  
+                  return item.feature ? (
+                    <FeatureToggle key={item.id} featureId={item.feature}>
+                      {menuItem}
+                    </FeatureToggle>
+                  ) : menuItem;
+                })}
+              </nav>
+            </div>
+          </ScrollArea>
+        </motion.aside>
+      )}
+    </AnimatePresence>
+  );
+}

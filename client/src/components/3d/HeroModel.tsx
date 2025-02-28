@@ -78,3 +78,145 @@ function DataPoints() {
     </>
   );
 }
+import React, { useRef, useEffect } from 'react';
+import { useTheme } from '../../hooks/use-theme';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+export default function HeroModel() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Create scene
+    const scene = new THREE.Scene();
+    const backgroundColor = theme === 'dark' ? '#1a1a2e' : '#f5f5f7';
+    scene.background = new THREE.Color(backgroundColor);
+    
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
+    camera.position.z = 5;
+    
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    containerRef.current.appendChild(renderer.domElement);
+    
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1;
+    
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(2, 2, 5);
+    scene.add(directionalLight);
+    
+    // Create geometry - a cluster of animated cubes
+    const cubeGroup = new THREE.Group();
+    scene.add(cubeGroup);
+    
+    const primaryColor = theme === 'dark' ? 0x6366f1 : 0x4f46e5; // Indigo
+    const accentColor = theme === 'dark' ? 0xec4899 : 0xdb2777; // Pink
+    
+    // Create multiple cubes with varying sizes and positions
+    for (let i = 0; i < 15; i++) {
+      const size = Math.random() * 0.5 + 0.3;
+      const geometry = new THREE.BoxGeometry(size, size, size);
+      
+      // Alternate between materials
+      const material = new THREE.MeshStandardMaterial({
+        color: i % 2 === 0 ? primaryColor : accentColor,
+        metalness: 0.3,
+        roughness: 0.4,
+      });
+      
+      const cube = new THREE.Mesh(geometry, material);
+      
+      // Position cubes in an interesting pattern
+      const radius = 2;
+      const angle = (i / 15) * Math.PI * 2;
+      cube.position.x = Math.cos(angle) * radius * (0.8 + Math.random() * 0.4);
+      cube.position.y = Math.sin(angle) * radius * (0.8 + Math.random() * 0.4);
+      cube.position.z = (Math.random() - 0.5) * 2;
+      
+      // Random rotation
+      cube.rotation.x = Math.random() * Math.PI;
+      cube.rotation.y = Math.random() * Math.PI;
+      
+      cubeGroup.add(cube);
+    }
+    
+    // Animation function
+    const clock = new THREE.Clock();
+    
+    const animate = () => {
+      const elapsedTime = clock.getElapsedTime();
+      
+      // Animate cubes
+      cubeGroup.children.forEach((cube, i) => {
+        const speed = 0.2 + (i % 3) * 0.1;
+        cube.rotation.x += 0.01 * speed;
+        cube.rotation.y += 0.01 * speed;
+        
+        // Add subtle vertical oscillation
+        cube.position.y += Math.sin(elapsedTime * speed + i) * 0.003;
+      });
+      
+      // Rotate the entire group
+      cubeGroup.rotation.y = elapsedTime * 0.2;
+      
+      // Update controls
+      controls.update();
+      
+      // Render
+      renderer.render(scene, camera);
+      
+      // Call animate again on the next frame
+      requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    // Handle window resize
+    const handleResize = () => {
+      if (!containerRef.current) return;
+      
+      camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
+      // Dispose of resources
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry.dispose();
+          if (object.material instanceof THREE.Material) {
+            object.material.dispose();
+          } else if (Array.isArray(object.material)) {
+            object.material.forEach((material) => material.dispose());
+          }
+        }
+      });
+    };
+  }, [theme]);
+  
+  return <div ref={containerRef} className="w-full h-full absolute inset-0 pointer-events-none" />;
+}
