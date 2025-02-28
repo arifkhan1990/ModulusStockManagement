@@ -57,6 +57,14 @@ CategorySchema.pre('save', async function(next) {
   next();
 });
 
+// Indexes for faster lookups
+// Note: slug field index is already defined in the schema
+CategorySchema.index({ name: 1 });
+CategorySchema.index({ parentId: 1 });
+CategorySchema.index({ isActive: 1 });
+CategorySchema.index({ companyId: 1 }); // For tenant isolation
+CategorySchema.index({ companyId: 1, name: 1 }); // For searching by name within company
+
 const Category = mongoose.model<ICategory>('Category', CategorySchema);
 
 export default Category;
