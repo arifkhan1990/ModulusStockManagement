@@ -117,88 +117,69 @@ export const tenantMiddleware = async (
 };
 
 export default tenantMiddleware;
-import { Request, Response, NextFunction } from 'express';
-import Company from '../models/company.model';
-
-/**
- * Middleware to enforce tenant isolation
- * This ensures that users can only access data belonging to their company
- */
-export const tenantMiddleware = (req: any, res: Response, next: NextFunction) => {
-  // Skip for public routes or admin-only routes
-  if (!req.user) {
-    return next();
-  }
-  
-  // Add company ID to the request for use in controllers
-  req.tenantId = req.user.companyId;
-  
-  next();
-};
-
 /**
  * Middleware to check if operation is within company limits
  * @param resourceType The type of resource being checked (users, products, locations)
  */
-export const checkCompanyLimits = (resourceType: string) => {
-  return async (req: any, res: Response, next: NextFunction) => {
-    try {
-      // Skip for super admins
-      if (req.user.role === 'admin' && !req.user.companyId) {
-        return next();
-      }
-      
-      const company = await Company.findById(req.user.companyId);
-      
-      if (!company) {
-        return res.status(404).json({
-          success: false,
-          message: 'Company not found'
-        });
-      }
-      
-      // Check if company subscription is active
-      if (company.subscriptionStatus !== 'active') {
-        return res.status(403).json({
-          success: false,
-          message: 'Subscription is not active'
-        });
-      }
-      
-      // Get current counts
-      let currentCount = 0;
-      let maxAllowed = 0;
-      
-      switch (resourceType) {
-        case 'users':
-          // This would typically be a database query to count users
-          // currentCount = await User.countDocuments({ companyId: req.user.companyId });
-          maxAllowed = company.maxUsers;
-          break;
-        case 'products':
-          // currentCount = await Product.countDocuments({ companyId: req.user.companyId });
-          maxAllowed = company.maxProducts;
-          break;
-        case 'locations':
-          // currentCount = await Location.countDocuments({ companyId: req.user.companyId });
-          maxAllowed = company.maxLocations;
-          break;
-        default:
-          return next();
-      }
-      
-      // Check if operation would exceed limits
-      if (currentCount >= maxAllowed && req.method === 'POST') {
-        return res.status(403).json({
-          success: false,
-          message: `You have reached the maximum number of ${resourceType} allowed for your subscription plan`
-        });
-      }
-      
-      next();
-    } catch (error) {
-      console.error(`Error checking company limits:`, error);
-      next(error);
-    }
-  };
-};
+// export const checkCompanyLimits = (resourceType: string) => {
+//   return async (req: any, res: Response, next: NextFunction) => {
+//     try {
+//       // Skip for super admins
+//       if (req.user.role === "admin" && !req.user.companyId) {
+//         return next();
+//       }
+
+//       const company = await Company.findById(req.user.companyId);
+
+//       if (!company) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "Company not found",
+//         });
+//       }
+
+//       // Check if company subscription is active
+//       if (company.subscriptionStatus !== "active") {
+//         return res.status(403).json({
+//           success: false,
+//           message: "Subscription is not active",
+//         });
+//       }
+
+//       // Get current counts
+//       let currentCount = 0;
+//       let maxAllowed = 0;
+
+//       switch (resourceType) {
+//         case "users":
+//           // This would typically be a database query to count users
+//           // currentCount = await User.countDocuments({ companyId: req.user.companyId });
+//           maxAllowed = company.maxUsers;
+//           break;
+//         case "products":
+//           // currentCount = await Product.countDocuments({ companyId: req.user.companyId });
+//           maxAllowed = company.maxProducts;
+//           break;
+//         case "locations":
+//           // currentCount = await Location.countDocuments({ companyId: req.user.companyId });
+//           maxAllowed = company.maxLocations;
+//           break;
+//         default:
+//           return next();
+//       }
+
+//       // Check if operation would exceed limits
+//       if (currentCount >= maxAllowed && req.method === "POST") {
+//         return res.status(403).json({
+//           success: false,
+//           message: `You have reached the maximum number of ${resourceType} allowed for your subscription plan`,
+//         });
+//       }
+
+//       next();
+//     } catch (error) {
+//       console.error(`Error checking company limits:`, error);
+//       next(error);
+//     }
+//   };
+// };
