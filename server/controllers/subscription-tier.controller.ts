@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import SubscriptionTier from '../models/subscription-tier.model';
-import AppError from '../utils/appError';
+import { AppError } from '../utils/error';
 
 /**
  * Create a new subscription tier
