@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth, restrictTo } from "../middleware/auth";
-import { cacheResponse } from "../middleware/cache";
+import { cacheMiddleware } from "../middleware/cache";
 import * as locationController from "../controllers/location.controller";
 
 const router = Router();
@@ -14,8 +14,8 @@ router.post(
   restrictTo("admin", "manager"),
   locationController.createLocation,
 );
-router.get("/", cacheResponse(300), locationController.getLocations);
-router.get("/:id", cacheResponse(300), locationController.getLocation);
+router.get("/", cacheMiddleware(300), locationController.getLocations);
+router.get("/:id", cacheMiddleware(300), locationController.getLocation);
 router.put(
   "/:id",
   restrictTo("admin", "manager"),

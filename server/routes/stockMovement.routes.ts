@@ -1,8 +1,7 @@
-
 import { Router } from 'express';
 import * as stockMovementController from '../controllers/stockMovement.controller';
 import { requireAuth, restrictTo } from '../middleware/auth';
-import cacheResponse from '../middleware/cache';
+import { cacheMiddleware } from '../middleware/cache';
 
 const router = Router();
 
@@ -18,13 +17,13 @@ router.post(
 
 router.get(
   '/',
-  cacheResponse(60),
+  cacheMiddleware(60),
   stockMovementController.getStockMovements
 );
 
 router.get(
   '/:id',
-  cacheResponse(60),
+  cacheMiddleware(60),
   stockMovementController.getStockMovementById
 );
 
