@@ -333,3 +333,22 @@ export const importProducts = async (
     next(error);
   }
 };
+
+// Analytics
+export const getProductSalesAnalytics = async (req, res) => {
+  try {
+    // Placeholder implementation
+    res.json({ message: "Sales analytics endpoint" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get product sales analytics" });
+  }
+};
+
+export const getStockLevelAnalytics = async (req, res) => {
+  try {
+    // Placeholder implementation
+    res.json({ message: "Stock level analytics endpoint" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get stock level analytics" });
+  }
+};

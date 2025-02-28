@@ -7,7 +7,7 @@ import supplierRoutes from './supplier.routes';
 import productRoutes from './product.routes';
 import inventoryRoutes from './inventory.routes';
 import stockMovementRoutes from './stockMovement.routes';
-import paymentRoutes from './payment.routes'; // Added import for payment routes
+import paymentRoutes from './payment.routes';
 import { setupAuth } from '../auth';
 import { requireAuth } from '../middleware/auth';
 
@@ -22,10 +22,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Protected routes
   app.use('/api/locations', locationRoutes);
   app.use('/api/suppliers', supplierRoutes);
-  app.use('/api/products', productRoutes);
+  app.use('/api', productRoutes); 
   app.use('/api/inventory', requireAuth, inventoryRoutes);
   app.use('/api/stock-movements', stockMovementRoutes);
-  app.use('/api/payments', paymentRoutes); // Added route for payment
+  app.use('/api/payments', paymentRoutes);
 
   return createServer(app);
 }
@@ -40,29 +40,3 @@ paymentRouter.post('/', (req,res) => {
 })
 
 export default paymentRouter;
-
-//This is added based on the changes provided
-import { Router } from 'express';
-import authRoutes from './auth.routes';
-import demoRequestRoutes from './demoRequest.routes';
-import locationRoutes from './location.routes';
-import supplierRoutes from './supplier.routes';
-import productRoutes from './product.routes';
-import inventoryRoutes from './inventory.routes';
-import stockMovementRoutes from './stockMovement.routes';
-import paymentRoutes from './payment.routes';
-import permissionsRoutes from './permissions.routes';
-
-const router = Router();
-
-router.use('/auth', authRoutes);
-router.use('/demo-requests', demoRequestRoutes);
-router.use('/locations', locationRoutes);
-router.use('/suppliers', supplierRoutes);
-router.use('/products', productRoutes);
-router.use('/inventory', inventoryRoutes);
-router.use('/stock-movements', stockMovementRoutes);
-router.use('/payments', paymentRoutes);
-router.use('/permissions', permissionsRoutes);
-
-export default router;
