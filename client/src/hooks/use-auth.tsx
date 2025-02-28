@@ -1,22 +1,24 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/api";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext } from "react";
 
 // Auth type definitions
 type User = {
   id: string;
   name: string;
   email: string;
+  username: string;
+  role: string;
 };
 
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (name: string, email: string, username: string, password: string) => Promise<void>;
   logout: () => void;
   error: Error | null;
 };
@@ -26,102 +28,48 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Auth provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  // Check if user is already logged in on mount
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        // Simulate checking auth status
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+  // Use React Query to fetch the current user
+  const { 
+    data: user, 
+    isLoading,
+    error 
+  } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/user");
+      if (!response.ok) {
+        if (response.status === 401) {
+          return null; // Not authenticated
         }
-      } catch (err) {
-        console.error("Auth status check failed:", err);
-      } finally {
-        setIsLoading(false);
+        throw new Error("Failed to fetch user");
       }
-    };
+      return response.json();
+    },
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-    checkAuthStatus();
-  }, []);
+  // Login mutation
+  const loginMutation = useLoginMutation();
 
-  // Login function
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
+  // Register mutation
+  const registerMutation = useRegisterMutation();
 
-    try {
-      // Simulated API call
-      // In a real app, you would make an API request to your auth endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock successful login
-      if (email === "user@example.com" && password === "password") {
-        const userData = {
-          id: "1",
-          name: "Demo User",
-          email: "user@example.com",
-        };
-
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
-      } else {
-        throw new Error("Invalid credentials");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Login failed"));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Register function
-  const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Simulated API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Mock successful registration
-      const userData = {
-        id: Date.now().toString(),
-        name,
-        email,
-      };
-
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Registration failed"));
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-  };
+  // Logout mutation
+  const logoutMutation = useLogoutMutation();
 
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user || null,
         isLoading,
         isAuthenticated: !!user,
-        login,
-        register,
-        logout,
-        error,
+        login: loginMutation.mutate,
+        register: registerMutation.mutate,
+        logout: logoutMutation.mutate,
+        error: error instanceof Error ? error : null,
       }}
     >
       {children}
