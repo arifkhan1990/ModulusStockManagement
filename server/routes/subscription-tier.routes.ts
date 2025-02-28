@@ -7,6 +7,13 @@ import subscriptionTierValidator from '../validators/subscription-tier.validator
 // Import controller with named exports
 import * as subscriptionTierController from '../controllers/subscription-tier.controller';
 
+// Define routes below this line
+router.get('/', subscriptionTierController.getAllSubscriptionTiers);
+router.post('/', requireSystemAdmin, subscriptionTierValidator.validateCreate, subscriptionTierController.createSubscriptionTier);
+router.get('/:id', subscriptionTierController.getSubscriptionTier);
+router.put('/:id', requireSystemAdmin, subscriptionTierController.updateSubscriptionTier);
+router.delete('/:id', requireSystemAdmin, subscriptionTierController.deleteSubscriptionTier);
+
 const router = express.Router();
 
 // All routes require authentication
