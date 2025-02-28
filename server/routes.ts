@@ -38,6 +38,7 @@ import billingRoutes from './routes/billing.routes';
 import paymentWebhookRoutes from './routes/payment-webhook.routes';
 import { tenantMiddleware } from './middleware/tenant';
 import { authRateLimit } from './middleware/rate-limit';
+import stockMovementRoutes from './routes/stockMovement.routes';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -90,6 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/company-preferences', companyPreferenceRoutes);
   app.use('/api/analytics', analyticsRoutes);
   app.use('/api/billing', billingRoutes);
+  app.use('/api/stock-movements', stockMovementRoutes);
 
   // Webhook routes do not use tenant middleware
   app.use('/webhooks/payments', paymentWebhookRoutes);

@@ -1,104 +1,194 @@
 
-import { Request, Response } from 'express';
-import { storage } from '../storage';
-import { insertStockMovementSchema } from '@shared/schema';
-import { ZodError } from 'zod';
+import { Request, Response, NextFunction } from 'express';
+import { StockMovement, Inventory } from '../models';
+import { AppError } from '../utils/error';
 
-export const createStockMovement = async (req: Request, res: Response) => {
+// Create a new stock movement
+export const createStockMovement = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Handle adjustments specially (set toLocationId to null for adjustments)
-    let movementData = { ...req.body, createdBy: req.user!.id };
-    
-    if (movementData.type === 'adjustment') {
-      // For adjustments, we don't need a toLocationId
-      movementData.toLocationId = undefined;
-    }
-    
-    const movement = insertStockMovementSchema.parse(movementData);
-    
-    // Create the stock movement
-    const result = await storage.createStockMovement(movement);
-    
-    // Update inventory based on the movement type
-    if (movement.type === 'transfer') {
-      // For transfers, reduce from source and add to destination
-      await updateInventoryForTransfer(movement);
-    } else if (movement.type === 'adjustment') {
-      // For adjustments, just reduce from the source
-      await updateInventoryForAdjustment(movement);
-    }
-    
-    res.json(result);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      res.status(400).json({ message: "Invalid stock movement data", errors: err.errors });
-    } else {
-      console.error(err);
-      res.status(500).json({ message: "Failed to create stock movement" });
-    }
-  }
-};
+    const { productId, fromLocationId, toLocationId, quantity, type, reference, reason } = req.body;
 
-export const getStockMovements = async (req: Request, res: Response) => {
-  try {
-    const productId = req.query.productId ? String(req.query.productId) : undefined;
-    const movements = productId
-      ? await storage.getStockMovements(productId)
-      : await storage.getAllStockMovements();
-    res.json(movements);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to fetch stock movements" });
-  }
-};
+    // Validate inputs
+    if (!productId || !fromLocationId || !quantity || !type) {
+      return next(new AppError('Missing required fields', 400));
+    }
 
-// Helper function to update inventory for transfers
-async function updateInventoryForTransfer(movement: any) {
-  const { productId, fromLocationId, toLocationId, quantity } = movement;
-  
-  // Check if we have enough stock at the source location
-  const sourceInventory = await storage.getInventory(productId, fromLocationId);
-  
-  if (!sourceInventory || sourceInventory.quantity < quantity) {
-    throw new Error("Insufficient stock at source location");
-  }
-  
-  // Reduce from source location
-  await storage.updateInventory(sourceInventory.id, {
-    quantity: sourceInventory.quantity - quantity
-  });
-  
-  // Add to destination location
-  const destInventory = await storage.getInventory(productId, toLocationId);
-  
-  if (destInventory) {
-    // Update existing inventory
-    await storage.updateInventory(destInventory.id, {
-      quantity: destInventory.quantity + quantity
-    });
-  } else {
-    // Create new inventory record
-    await storage.createInventory({
+    // Check if quantity is valid
+    if (quantity <= 0) {
+      return next(new AppError('Quantity must be greater than 0', 400));
+    }
+
+    // Check inventory at source location
+    const sourceInventory = await Inventory.findOne({ productId, locationId: fromLocationId });
+    if (!sourceInventory || sourceInventory.quantity < quantity) {
+      return next(new AppError('Insufficient inventory at source location', 400));
+    }
+
+    // Create stock movement record
+    const stockMovement = await StockMovement.create({
       productId,
-      locationId: toLocationId,
-      quantity
+      fromLocationId,
+      toLocationId,
+      quantity,
+      type,
+      reference,
+      reason,
+      createdBy: req.user?._id,
+      createdAt: new Date(),
+      status: 'completed'
     });
-  }
-}
 
-// Helper function to update inventory for adjustments
-async function updateInventoryForAdjustment(movement: any) {
-  const { productId, fromLocationId, quantity } = movement;
-  
-  // Check if we have enough stock at the source location
-  const inventory = await storage.getInventory(productId, fromLocationId);
-  
-  if (!inventory) {
-    throw new Error("No inventory found for the product at the specified location");
+    // Update inventory at source location
+    sourceInventory.quantity -= quantity;
+    await sourceInventory.save();
+
+    // Update inventory at destination location if transfer
+    if (toLocationId && type === 'transfer') {
+      let destinationInventory = await Inventory.findOne({ productId, locationId: toLocationId });
+      
+      if (destinationInventory) {
+        destinationInventory.quantity += quantity;
+        await destinationInventory.save();
+      } else {
+        // Create new inventory entry at destination
+        await Inventory.create({
+          productId,
+          locationId: toLocationId,
+          quantity,
+          lowStockThreshold: sourceInventory.lowStockThreshold || 5
+        });
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      data: stockMovement
+    });
+  } catch (error) {
+    next(error);
   }
-  
-  // Update inventory
-  await storage.updateInventory(inventory.id, {
-    quantity: inventory.quantity - quantity
-  });
-}
+};
+
+// Get all stock movements with filtering and pagination
+export const getStockMovements = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 10, 
+      productId, 
+      locationId, 
+      type, 
+      startDate, 
+      endDate,
+      status
+    } = req.query;
+
+    // Build query object
+    const query: any = {};
+    
+    if (productId) query.productId = productId;
+    if (locationId) {
+      query.$or = [
+        { fromLocationId: locationId },
+        { toLocationId: locationId }
+      ];
+    }
+    if (type) query.type = type;
+    if (status) query.status = status;
+    
+    // Date filtering
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate as string);
+      if (endDate) query.createdAt.$lte = new Date(endDate as string);
+    }
+
+    // Calculate pagination
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Fetch stock movements with pagination
+    const stockMovements = await StockMovement.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('productId', 'name sku')
+      .populate('fromLocationId', 'name')
+      .populate('toLocationId', 'name')
+      .populate('createdBy', 'name');
+
+    // Get total count for pagination
+    const total = await StockMovement.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      data: stockMovements,
+      pagination: {
+        total,
+        page: pageNum,
+        pageSize: limitNum,
+        totalPages: Math.ceil(total / limitNum)
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get a single stock movement by ID
+export const getStockMovementById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    
+    const stockMovement = await StockMovement.findById(id)
+      .populate('productId', 'name sku')
+      .populate('fromLocationId', 'name')
+      .populate('toLocationId', 'name')
+      .populate('createdBy', 'name');
+    
+    if (!stockMovement) {
+      return next(new AppError('Stock movement not found', 404));
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: stockMovement
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Update stock movement status (e.g., cancel a pending movement)
+export const updateStockMovementStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!status || !['pending', 'completed', 'cancelled'].includes(status)) {
+      return next(new AppError('Invalid status', 400));
+    }
+    
+    const stockMovement = await StockMovement.findById(id);
+    
+    if (!stockMovement) {
+      return next(new AppError('Stock movement not found', 404));
+    }
+    
+    // Only pending movements can be updated
+    if (stockMovement.status !== 'pending') {
+      return next(new AppError('Only pending movements can be updated', 400));
+    }
+    
+    stockMovement.status = status;
+    await stockMovement.save();
+    
+    res.status(200).json({
+      success: true,
+      data: stockMovement
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -43,3 +43,20 @@ export { default as Analytics } from './analytics.model';
 export { default as AuditLog } from './audit-log.model';
 export { default as Role } from './role.model';
 export { default as Download } from './download.model';
+
+//stock-movement.model.ts
+import { Schema, model } from 'mongoose';
+
+
+const stockMovementSchema = new Schema({
+  productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+  locationId: { type: Schema.Types.ObjectId, ref: 'Location', required: true },
+  quantity: { type: Number, required: true },
+  type: { type: String, enum: ['in', 'out'], required: true },
+  timestamp: { type: Date, default: Date.now },
+  userId: { type: Schema.Types.ObjectId, ref: 'User' }, //optional user who made the movement
+  notes: { type: String }
+});
+
+
+export default model('StockMovement', stockMovementSchema);
