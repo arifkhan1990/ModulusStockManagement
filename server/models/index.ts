@@ -15,7 +15,7 @@ import Report from './report.model';
 import Alert from './alert.model';
 import Payment from './payment.model';
 import Company from './company.model';
-import LandingPage from './landing-page.model'; // Added based on thinking section
+import LandingPage from './landing-page.model';
 
 export {
   User,
@@ -35,5 +35,5 @@ export {
   Alert,
   Payment,
   Company,
-  LandingPage // Added based on thinking section
+  LandingPage
 };
