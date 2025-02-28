@@ -1,4 +1,3 @@
-
 import express from 'express';
 import analyticsController from '../controllers/analytics.controller';
 import { requireAuth } from '../middleware/auth';
