@@ -44,7 +44,7 @@ function PublicRoute({ component: Component, ...rest }) {
   return <Component {...rest} />;
 }
 
-function Router() {
+function AppRouter() {
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -84,12 +84,10 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <RootLayout>
-          <Router />
+          <AppRouter />
         </RootLayout>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
