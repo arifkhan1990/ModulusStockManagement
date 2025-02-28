@@ -1,19 +1,25 @@
 import mongoose from 'mongoose';
 import User from './user.model';
+import DemoRequest from './demo-request.model';
 import Location from './location.model';
 import Supplier from './supplier.model';
 import Product from './product.model';
 import Inventory from './inventory.model';
 import StockMovement from './stock-movement.model';
-import DemoRequest from './demoRequest.model';
+import Category from './category.model';
+import Customer from './customer.model';
+import Order from './order.model';
+import Warehouse from './warehouse.model';
+import PurchaseOrder from './purchase-order.model';
+import SalesChannel from './sales-channel.model';
+import Report from './report.model';
+import Alert from './alert.model';
+import Payment from './payment.model';
 import Company from './company.model';
 import SubscriptionTier from './subscription-tier.model';
 import CompanyPreference from './company-preference.model';
 import Feature from './feature.model';
 import FeatureToggle from './feature-toggle.model';
-import Order from './order.model';
-import Payment from './payment.model';
-import Customer from './customer.model';
 import Invoice from './invoice.model';
 import InvoiceTemplate from './invoice-template.model';
 import Page from './page.model';
@@ -32,20 +38,26 @@ import Download from './download.model';
 
 export {
   User,
+  DemoRequest,
   Location,
   Supplier,
   Product,
   Inventory,
   StockMovement,
-  DemoRequest,
+  Category,
+  Customer,
+  Order,
+  Warehouse,
+  PurchaseOrder,
+  SalesChannel,
+  Report,
+  Alert,
+  Payment,
   Company,
   SubscriptionTier,
   CompanyPreference,
   Feature,
   FeatureToggle,
-  Order,
-  Payment,
-  Customer,
   Invoice,
   InvoiceTemplate,
   Page,
