@@ -51,10 +51,11 @@ export function ThemeProvider({
     setThemeState(theme);
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
+  // Use createElement instead of JSX to avoid parsing issues
+  return React.createElement(
+    ThemeContext.Provider,
+    { value: { theme, setTheme } },
+    children
   );
 }
 
