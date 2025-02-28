@@ -2,6 +2,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICustomer extends Document {
+  companyId: Schema.Types.ObjectId; // Reference to the company this customer belongs to
   name: string;
   email?: string;
   phone?: string;
@@ -36,6 +37,7 @@ export interface ICustomer extends Document {
 }
 
 const CustomerSchema = new Schema<ICustomer>({
+  companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
   name: { type: String, required: true },
   email: { type: String },
   phone: { type: String },
@@ -74,6 +76,10 @@ CustomerSchema.index({ email: 1 });
 CustomerSchema.index({ name: 1 });
 CustomerSchema.index({ customerType: 1 });
 CustomerSchema.index({ 'billingAddress.country': 1 });
+CustomerSchema.index({ companyId: 1 }); // For tenant isolation
+CustomerSchema.index({ companyId: 1, name: 1 }); // Compound index for name search within company
+CustomerSchema.index({ companyId: 1, email: 1 }); // Compound index for email search within company
+CustomerSchema.index({ companyId: 1, customerType: 1 }); // For filtering by type within company
 
 const Customer = mongoose.model<ICustomer>('Customer', CustomerSchema);
 

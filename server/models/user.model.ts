@@ -9,6 +9,8 @@ export interface IUser extends Document {
   provider?: string;
   providerId?: string;
   role: string;
+  companyId: Schema.Types.ObjectId; // Reference to the company the user belongs to
+  isCompanyAdmin: boolean; // Is this user a company admin
   phone?: string;
   position?: string;
   department?: string;
@@ -71,6 +73,15 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ['admin', 'manager', 'staff', 'viewer', 'customer', 'supplier'],
       default: 'staff',
+    },
+    companyId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true,
+    },
+    isCompanyAdmin: {
+      type: Boolean,
+      default: false,
     },
     phone: {
       type: String,
@@ -136,6 +147,9 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ username: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ status: 1 });
+UserSchema.index({ companyId: 1 }); // Index for faster company-based queries
+UserSchema.index({ companyId: 1, role: 1 }); // Compound index for filtering users by company and role
+UserSchema.index({ email: 1, companyId: 1 }, { unique: true }); // Ensure email uniqueness within a company
 
 const User = mongoose.model<IUser>("User", UserSchema);
 

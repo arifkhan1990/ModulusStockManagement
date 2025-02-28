@@ -14,6 +14,7 @@ import SalesChannel from './salesChannel.model';
 import Report from './report.model';
 import Alert from './alert.model';
 import Payment from './payment.model';
+import Company from './company.model';
 
 export {
   User,
@@ -31,5 +32,6 @@ export {
   SalesChannel,
   Report,
   Alert,
-  Payment
+  Payment,
+  Company
 };
