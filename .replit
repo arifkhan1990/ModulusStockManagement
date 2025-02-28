@@ -18,7 +18,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Full Stack App"
+runButton = "Frontend Dev Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -75,3 +75,11 @@ author = 40104192
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "kill $(lsof -t -i:5000) 2>/dev/null || true && npm run dev & cd client && npx vite --host 0.0.0.0 --port 3000"
+
+[[workflows.workflow]]
+name = "Frontend Dev Server"
+author = 40104192
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm run dev"
