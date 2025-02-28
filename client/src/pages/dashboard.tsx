@@ -183,3 +183,85 @@ export default function Dashboard() {
     </div>
   );
 }
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+  
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      <p className="text-muted-foreground">
+        Welcome back, {user?.name}!
+      </p>
+      
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">120</div>
+            <p className="text-xs text-muted-foreground">+10% from last month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Active Locations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">8</div>
+            <p className="text-xs text-muted-foreground">No change from last month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+            <p className="text-xs text-muted-foreground">-25% from last month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Stock Movements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">142</div>
+            <p className="text-xs text-muted-foreground">+22% from last month</p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Recent Stock Movements</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="p-4">
+              <p className="text-muted-foreground">Loading stock movements...</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Low Stock Products</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="p-4">
+              <p className="text-muted-foreground">Loading low stock products...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

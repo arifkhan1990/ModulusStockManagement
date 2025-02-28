@@ -1,22 +1,40 @@
-import { useLocation } from "wouter";
-import { cn } from "@/lib/utils";
-import {
-  LayoutGrid,
-  Package,
-  LogOut,
-  Warehouse,
-  Users,
-  TrendingUp,
-  ArrowRightLeft,
-  BarChart3,
-  Store,
-  Truck,
-  MoveHorizontal,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { useLocation, Redirect } from "wouter";
+import { Navbar } from "@/components/navigation/navbar";
+import { DrawerMenu } from "@/components/navigation/drawer-menu";
+import { useSidebar } from "@/hooks/use-sidebar";
 import { useAuth } from "@/hooks/use-auth";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
-// Define sidebar items
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { isLoading, user } = useAuth();
+  const { isOpen, toggle } = useSidebar();
+  
+  // Redirect to login if not authenticated
+  if (!isLoading && !user) {
+    return <Redirect to="/auth" />;
+  }
+  
+  // Show skeleton loader while checking auth
+  if (isLoading) {
+    return <SkeletonPage />;
+  }
+  
+  return (
+    <ErrorBoundary>
+      <div className="flex min-h-screen flex-col">
+        <Navbar toggleSidebar={toggle} />
+        <div className="flex flex-1 flex-col md:flex-row">
+          <DrawerMenu isOpen={isOpen} toggleSidebar={toggle} />
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+        </div>
+      </div>
+    </ErrorBoundary>
+  );
+}
 const sidebarItems = [
   {
     href: "/dashboard",
