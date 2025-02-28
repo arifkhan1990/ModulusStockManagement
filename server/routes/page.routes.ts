@@ -2,7 +2,7 @@
 import express from 'express';
 import { requireAuth } from '../middleware/auth';
 import tenantMiddleware from '../middleware/tenant';
-import { validateRequest } from '../middleware/validator';
+import validateResource from '../middleware/validator';
 import { pageValidators } from '../validators/page.validator';
 import pageController from '../controllers/page.controller';
 
