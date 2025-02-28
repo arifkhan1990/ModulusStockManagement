@@ -1,6 +1,6 @@
 
 import express from 'express';
-import subscriptionTierController from '../controllers/subscription-tier.controller';
+import * as subscriptionTierController from '../controllers/subscription-tier.controller';
 import { requireAuth } from '../middleware/auth';
 import { requireSystemAdmin } from '../middleware/rbac';
 import subscriptionTierValidator from '../validators/subscription-tier.validator';
