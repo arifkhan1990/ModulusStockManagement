@@ -1,0 +1,1463 @@
+Error:   Failed to scan for dependencies from entries:
+  /home/runner/workspace/client/index.html
+
+  ✘ [ERROR] The symbol "badgeVariants" has already been declared
+
+    src/components/ui/badge.tsx:41:6:
+      41 │ const badgeVariants = cva(
+         ╵       ~~~~~~~~~~~~~
+
+  The symbol "badgeVariants" was originally declared here:
+
+    src/components/ui/badge.tsx:6:6:
+      6 │ const badgeVariants = cva(
+        ╵       ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Badge" has already been declared
+
+    src/components/ui/badge.tsx:65:9:
+      65 │ function Badge({ className, variant, ...props }: BadgeProps) {
+         ╵          ~~~~~
+
+  The symbol "Badge" was originally declared here:
+
+    src/components/ui/badge.tsx:30:9:
+      30 │ function Badge({ className, variant, ...props }: BadgeProps) {
+         ╵          ~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/components/ui/badge.tsx:71:0:
+      71 │ export { Badge, badgeVariants };
+         ╵ ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Badge"
+
+    src/components/ui/badge.tsx:71:9:
+      71 │ export { Badge, badgeVariants };
+         ╵          ~~~~~
+
+  The name "Badge" was originally exported here:
+
+    src/components/ui/badge.tsx:36:9:
+      36 │ export { Badge, badgeVariants }
+         ╵          ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "badgeVariants"
+
+    src/components/ui/badge.tsx:71:16:
+      71 │ export { Badge, badgeVariants };
+         ╵                 ~~~~~~~~~~~~~
+
+  The name "badgeVariants" was originally exported here:
+
+    src/components/ui/badge.tsx:36:16:
+      36 │ export { Badge, badgeVariants }
+         ╵                 ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Button" has already been declared
+
+    src/components/ui/button.tsx:59:6:
+      59 │ const Button = React.forwardRef<
+         ╵       ~~~~~~
+
+  The symbol "Button" was originally declared here:
+
+    src/components/ui/button.tsx:41:6:
+      41 │ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+         ╵       ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Button"
+
+    src/components/ui/button.tsx:91:9:
+      91 │ export { Button };
+         ╵          ~~~~~~
+
+  The name "Button" was originally exported here:
+
+    src/components/ui/button.tsx:55:9:
+      55 │ export { Button, buttonVariants };
+         ╵          ~~~~~~
+
+
+✘ [ERROR] The symbol "Card" has already been declared
+
+    src/components/ui/card.tsx:89:6:
+      89 │ const Card = React.forwardRef<
+         ╵       ~~~~
+
+  The symbol "Card" was originally declared here:
+
+    src/components/ui/card.tsx:4:6:
+      4 │ const Card = React.forwardRef<
+        ╵       ~~~~
+
+
+✘ [ERROR] The symbol "CardHeader" has already been declared
+
+    src/components/ui/card.tsx:104:6:
+      104 │ const CardHeader = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "CardHeader" was originally declared here:
+
+    src/components/ui/card.tsx:19:6:
+      19 │ const CardHeader = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardTitle" has already been declared
+
+    src/components/ui/card.tsx:116:6:
+      116 │ const CardTitle = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "CardTitle" was originally declared here:
+
+    src/components/ui/card.tsx:31:6:
+      31 │ const CardTitle = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardDescription" has already been declared
+
+    src/components/ui/card.tsx:128:6:
+      128 │ const CardDescription = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~~~
+
+  The symbol "CardDescription" was originally declared here:
+
+    src/components/ui/card.tsx:46:6:
+      46 │ const CardDescription = React.forwardRef<
+         ╵       ~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardContent" has already been declared
+
+    src/components/ui/card.tsx:140:6:
+      140 │ const CardContent = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "CardContent" was originally declared here:
+
+    src/components/ui/card.tsx:58:6:
+      58 │ const CardContent = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardFooter" has already been declared
+
+    src/components/ui/card.tsx:148:6:
+      148 │ const CardFooter = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "CardFooter" was originally declared here:
+
+    src/components/ui/card.tsx:66:6:
+      66 │ const CardFooter = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Card"
+
+    src/components/ui/card.tsx:160:9:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵          ~~~~
+
+  The name "Card" was originally exported here:
+
+    src/components/ui/card.tsx:79:2:
+      79 │   Card,
+         ╵   ~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardHeader"
+
+    src/components/ui/card.tsx:160:15:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵                ~~~~~~~~~~
+
+  The name "CardHeader" was originally exported here:
+
+    src/components/ui/card.tsx:80:2:
+      80 │   CardHeader,
+         ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardFooter"
+
+    src/components/ui/card.tsx:160:27:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵                            ~~~~~~~~~~
+
+  The name "CardFooter" was originally exported here:
+
+    src/components/ui/card.tsx:81:2:
+      81 │   CardFooter,
+         ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardTitle"
+
+    src/components/ui/card.tsx:160:39:
+      160 │ ...d, CardHeader, CardFooter, CardTitle, CardDescription, CardCon...
+          ╵                               ~~~~~~~~~
+
+  The name "CardTitle" was originally exported here:
+
+    src/components/ui/card.tsx:82:2:
+      82 │   CardTitle,
+         ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardDescription"
+
+    src/components/ui/card.tsx:160:50:
+      160 │ ...ardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+          ╵                                      ~~~~~~~~~~~~~~~
+
+  The name "CardDescription" was originally exported here:
+
+    src/components/ui/card.tsx:83:2:
+      83 │   CardDescription,
+         ╵   ~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardContent"
+
+    src/components/ui/card.tsx:160:67:
+      160 │ ...ardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+          ╵                                                       ~~~~~~~~~~~
+
+  The name "CardContent" was originally exported here:
+
+    src/components/ui/card.tsx:84:2:
+      84 │   CardContent,
+         ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Input" has already been declared
+
+    src/components/ui/input.tsx:29:6:
+      29 │ const Input = React.forwardRef<
+         ╵       ~~~~~
+
+  The symbol "Input" was originally declared here:
+
+    src/components/ui/input.tsx:8:6:
+      8 │ const Input = React.forwardRef<HTMLInputElement, InputProps>(
+        ╵       ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Input"
+
+    src/components/ui/input.tsx:47:9:
+      47 │ export { Input };
+         ╵          ~~~~~
+
+  The name "Input" was originally exported here:
+
+    src/components/ui/input.tsx:25:9:
+      25 │ export { Input };
+         ╵          ~~~~~
+
+
+✘ [ERROR] The symbol "Label" has already been declared
+
+    src/components/ui/label.tsx:29:6:
+      29 │ const Label = React.forwardRef<
+         ╵       ~~~~~
+
+  The symbol "Label" was originally declared here:
+
+    src/components/ui/label.tsx:11:6:
+      11 │ const Label = React.forwardRef<
+         ╵       ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Label"
+
+    src/components/ui/label.tsx:44:9:
+      44 │ export { Label };
+         ╵          ~~~~~
+
+  The name "Label" was originally exported here:
+
+    src/components/ui/label.tsx:24:9:
+      24 │ export { Label };
+         ╵          ~~~~~
+
+
+✘ [ERROR] The symbol "Switch" has already been declared
+
+    src/components/ui/switch.tsx:32:6:
+      32 │ const Switch = React.forwardRef<
+         ╵       ~~~~~~
+
+  The symbol "Switch" was originally declared here:
+
+    src/components/ui/switch.tsx:6:6:
+      6 │ const Switch = React.forwardRef<
+        ╵       ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Switch"
+
+    src/components/ui/switch.tsx:53:9:
+      53 │ export { Switch };
+         ╵          ~~~~~~
+
+  The name "Switch" was originally exported here:
+
+    src/components/ui/switch.tsx:27:9:
+      27 │ export { Switch };
+         ╵          ~~~~~~
+
+
+✘ [ERROR] The symbol "Table" has already been declared
+
+    src/components/ui/table.tsx:121:6:
+      121 │ const Table = React.forwardRef<
+          ╵       ~~~~~
+
+  The symbol "Table" was originally declared here:
+
+    src/components/ui/table.tsx:5:6:
+      5 │ const Table = React.forwardRef<
+        ╵       ~~~~~
+
+
+✘ [ERROR] The symbol "TableHeader" has already been declared
+
+    src/components/ui/table.tsx:135:6:
+      135 │ const TableHeader = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "TableHeader" was originally declared here:
+
+    src/components/ui/table.tsx:19:6:
+      19 │ const TableHeader = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableBody" has already been declared
+
+    src/components/ui/table.tsx:143:6:
+      143 │ const TableBody = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableBody" was originally declared here:
+
+    src/components/ui/table.tsx:27:6:
+      27 │ const TableBody = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableFooter" has already been declared
+
+    src/components/ui/table.tsx:155:6:
+      155 │ const TableFooter = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "TableFooter" was originally declared here:
+
+    src/components/ui/table.tsx:39:6:
+      39 │ const TableFooter = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableRow" has already been declared
+
+    src/components/ui/table.tsx:167:6:
+      167 │ const TableRow = React.forwardRef<
+          ╵       ~~~~~~~~
+
+  The symbol "TableRow" was originally declared here:
+
+    src/components/ui/table.tsx:54:6:
+      54 │ const TableRow = React.forwardRef<
+         ╵       ~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableHead" has already been declared
+
+    src/components/ui/table.tsx:182:6:
+      182 │ const TableHead = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableHead" was originally declared here:
+
+    src/components/ui/table.tsx:69:6:
+      69 │ const TableHead = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableCell" has already been declared
+
+    src/components/ui/table.tsx:197:6:
+      197 │ const TableCell = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableCell" was originally declared here:
+
+    src/components/ui/table.tsx:84:6:
+      84 │ const TableCell = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableCaption" has already been declared
+
+    src/components/ui/table.tsx:209:6:
+      209 │ const TableCaption = React.forwardRef<
+          ╵       ~~~~~~~~~~~~
+
+  The symbol "TableCaption" was originally declared here:
+
+    src/components/ui/table.tsx:96:6:
+      96 │ const TableCaption = React.forwardRef<
+         ╵       ~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Table"
+
+    src/components/ui/table.tsx:222:2:
+      222 │   Table,
+          ╵   ~~~~~
+
+  The name "Table" was originally exported here:
+
+    src/components/ui/table.tsx:109:2:
+      109 │   Table,
+          ╵   ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableHeader"
+
+    src/components/ui/table.tsx:223:2:
+      223 │   TableHeader,
+          ╵   ~~~~~~~~~~~
+
+  The name "TableHeader" was originally exported here:
+
+    src/components/ui/table.tsx:110:2:
+      110 │   TableHeader,
+          ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableBody"
+
+    src/components/ui/table.tsx:224:2:
+      224 │   TableBody,
+          ╵   ~~~~~~~~~
+
+  The name "TableBody" was originally exported here:
+
+    src/components/ui/table.tsx:111:2:
+      111 │   TableBody,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableFooter"
+
+    src/components/ui/table.tsx:225:2:
+      225 │   TableFooter,
+          ╵   ~~~~~~~~~~~
+
+  The name "TableFooter" was originally exported here:
+
+    src/components/ui/table.tsx:112:2:
+      112 │   TableFooter,
+          ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableHead"
+
+    src/components/ui/table.tsx:226:2:
+      226 │   TableHead,
+          ╵   ~~~~~~~~~
+
+  The name "TableHead" was originally exported here:
+
+    src/components/ui/table.tsx:113:2:
+      113 │   TableHead,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableRow"
+
+    src/components/ui/table.tsx:227:2:
+      227 │   TableRow,
+          ╵   ~~~~~~~~
+
+  The name "TableRow" was originally exported here:
+
+    src/components/ui/table.tsx:114:2:
+      114 │   TableRow,
+          ╵   ~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableCell"
+
+    src/components/ui/table.tsx:228:2:
+      228 │   TableCell,
+          ╵   ~~~~~~~~~
+
+  The name "TableCell" was originally exported here:
+
+    src/components/ui/table.tsx:115:2:
+      115 │   TableCell,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableCaption"
+
+    src/components/ui/table.tsx:229:2:
+      229 │   TableCaption,
+          ╵   ~~~~~~~~~~~~
+
+  The name "TableCaption" was originally exported here:
+
+    src/components/ui/table.tsx:116:2:
+      116 │   TableCaption,
+          ╵   ~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Toaster"
+
+    src/components/ui/toaster.tsx:37:16:
+      37 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  The name "Toaster" was originally exported here:
+
+    src/components/ui/toaster.tsx:11:16:
+      11 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+
+✘ [ERROR] The symbol "Toaster" has already been declared
+
+    src/components/ui/toaster.tsx:37:16:
+      37 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  The symbol "Toaster" was originally declared here:
+
+    src/components/ui/toaster.tsx:11:16:
+      11 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    src/components/ui/toaster.tsx:37:0:
+      37 │ export function Toaster() {
+         ╵ ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "useAuth"
+
+    src/hooks/use-auth.ts:170:13:
+      170 │ export const useAuth = () => {
+          ╵              ~~~~~~~
+
+  The name "useAuth" was originally exported here:
+
+    src/hooks/use-auth.ts:20:16:
+      20 │ export function useAuth() {
+         ╵                 ~~~~~~~
+
+
+✘ [ERROR] The symbol "useAuth" has already been declared
+
+    src/hooks/use-auth.ts:170:13:
+      170 │ export const useAuth = () => {
+          ╵              ~~~~~~~
+
+  The symbol "useAuth" was originally declared here:
+
+    src/hooks/use-auth.ts:20:16:
+      20 │ export function useAuth() {
+         ╵                 ~~~~~~~
+
+
+    at failureErrorWithLog (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+    at runOnEndCallbacks (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1315:45)
+    at buildResponseToResult (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:943:7)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:955:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:954:54)
+    at handleRequest (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:647:17)
+    at handleIncomingPacket (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:672:7)
+    at Socket.readFromStdout (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:600:7)
+MongoDB connected successfully
+Database initialized successfully
+9:42:47 PM [express] Server running on port 5000 in development mode
+Error:   Failed to scan for dependencies from entries:
+  /home/runner/workspace/client/index.html
+
+  ✘ [ERROR] The symbol "badgeVariants" has already been declared
+
+    client/src/components/ui/badge.tsx:41:6:
+      41 │ const badgeVariants = cva(
+         ╵       ~~~~~~~~~~~~~
+
+  The symbol "badgeVariants" was originally declared here:
+
+    client/src/components/ui/badge.tsx:6:6:
+      6 │ const badgeVariants = cva(
+        ╵       ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Badge" has already been declared
+
+    client/src/components/ui/badge.tsx:65:9:
+      65 │ function Badge({ className, variant, ...props }: BadgeProps) {
+         ╵          ~~~~~
+
+  The symbol "Badge" was originally declared here:
+
+    client/src/components/ui/badge.tsx:30:9:
+      30 │ function Badge({ className, variant, ...props }: BadgeProps) {
+         ╵          ~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    client/src/components/ui/badge.tsx:71:0:
+      71 │ export { Badge, badgeVariants };
+         ╵ ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Badge"
+
+    client/src/components/ui/badge.tsx:71:9:
+      71 │ export { Badge, badgeVariants };
+         ╵          ~~~~~
+
+  The name "Badge" was originally exported here:
+
+    client/src/components/ui/badge.tsx:36:9:
+      36 │ export { Badge, badgeVariants }
+         ╵          ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "badgeVariants"
+
+    client/src/components/ui/badge.tsx:71:16:
+      71 │ export { Badge, badgeVariants };
+         ╵                 ~~~~~~~~~~~~~
+
+  The name "badgeVariants" was originally exported here:
+
+    client/src/components/ui/badge.tsx:36:16:
+      36 │ export { Badge, badgeVariants }
+         ╵                 ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Button" has already been declared
+
+    client/src/components/ui/button.tsx:59:6:
+      59 │ const Button = React.forwardRef<
+         ╵       ~~~~~~
+
+  The symbol "Button" was originally declared here:
+
+    client/src/components/ui/button.tsx:41:6:
+      41 │ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+         ╵       ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Button"
+
+    client/src/components/ui/button.tsx:91:9:
+      91 │ export { Button };
+         ╵          ~~~~~~
+
+  The name "Button" was originally exported here:
+
+    client/src/components/ui/button.tsx:55:9:
+      55 │ export { Button, buttonVariants };
+         ╵          ~~~~~~
+
+
+✘ [ERROR] The symbol "Card" has already been declared
+
+    client/src/components/ui/card.tsx:89:6:
+      89 │ const Card = React.forwardRef<
+         ╵       ~~~~
+
+  The symbol "Card" was originally declared here:
+
+    client/src/components/ui/card.tsx:4:6:
+      4 │ const Card = React.forwardRef<
+        ╵       ~~~~
+
+
+✘ [ERROR] The symbol "CardHeader" has already been declared
+
+    client/src/components/ui/card.tsx:104:6:
+      104 │ const CardHeader = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "CardHeader" was originally declared here:
+
+    client/src/components/ui/card.tsx:19:6:
+      19 │ const CardHeader = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardTitle" has already been declared
+
+    client/src/components/ui/card.tsx:116:6:
+      116 │ const CardTitle = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "CardTitle" was originally declared here:
+
+    client/src/components/ui/card.tsx:31:6:
+      31 │ const CardTitle = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardDescription" has already been declared
+
+    client/src/components/ui/card.tsx:128:6:
+      128 │ const CardDescription = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~~~
+
+  The symbol "CardDescription" was originally declared here:
+
+    client/src/components/ui/card.tsx:46:6:
+      46 │ const CardDescription = React.forwardRef<
+         ╵       ~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardContent" has already been declared
+
+    client/src/components/ui/card.tsx:140:6:
+      140 │ const CardContent = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "CardContent" was originally declared here:
+
+    client/src/components/ui/card.tsx:58:6:
+      58 │ const CardContent = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "CardFooter" has already been declared
+
+    client/src/components/ui/card.tsx:148:6:
+      148 │ const CardFooter = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "CardFooter" was originally declared here:
+
+    client/src/components/ui/card.tsx:66:6:
+      66 │ const CardFooter = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Card"
+
+    client/src/components/ui/card.tsx:160:9:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵          ~~~~
+
+  The name "Card" was originally exported here:
+
+    client/src/components/ui/card.tsx:79:2:
+      79 │   Card,
+         ╵   ~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardHeader"
+
+    client/src/components/ui/card.tsx:160:15:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵                ~~~~~~~~~~
+
+  The name "CardHeader" was originally exported here:
+
+    client/src/components/ui/card.tsx:80:2:
+      80 │   CardHeader,
+         ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardFooter"
+
+    client/src/components/ui/card.tsx:160:27:
+      160 │ export { Card, CardHeader, CardFooter, CardTitle, CardDescription...
+          ╵                            ~~~~~~~~~~
+
+  The name "CardFooter" was originally exported here:
+
+    client/src/components/ui/card.tsx:81:2:
+      81 │   CardFooter,
+         ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardTitle"
+
+    client/src/components/ui/card.tsx:160:39:
+      160 │ ...d, CardHeader, CardFooter, CardTitle, CardDescription, CardCon...
+          ╵                               ~~~~~~~~~
+
+  The name "CardTitle" was originally exported here:
+
+    client/src/components/ui/card.tsx:82:2:
+      82 │   CardTitle,
+         ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardDescription"
+
+    client/src/components/ui/card.tsx:160:50:
+      160 │ ...ardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+          ╵                                      ~~~~~~~~~~~~~~~
+
+  The name "CardDescription" was originally exported here:
+
+    client/src/components/ui/card.tsx:83:2:
+      83 │   CardDescription,
+         ╵   ~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "CardContent"
+
+    client/src/components/ui/card.tsx:160:67:
+      160 │ ...ardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+          ╵                                                       ~~~~~~~~~~~
+
+  The name "CardContent" was originally exported here:
+
+    client/src/components/ui/card.tsx:84:2:
+      84 │   CardContent,
+         ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Input" has already been declared
+
+    client/src/components/ui/input.tsx:29:6:
+      29 │ const Input = React.forwardRef<
+         ╵       ~~~~~
+
+  The symbol "Input" was originally declared here:
+
+    client/src/components/ui/input.tsx:8:6:
+      8 │ const Input = React.forwardRef<HTMLInputElement, InputProps>(
+        ╵       ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Input"
+
+    client/src/components/ui/input.tsx:47:9:
+      47 │ export { Input };
+         ╵          ~~~~~
+
+  The name "Input" was originally exported here:
+
+    client/src/components/ui/input.tsx:25:9:
+      25 │ export { Input };
+         ╵          ~~~~~
+
+
+✘ [ERROR] The symbol "Label" has already been declared
+
+    client/src/components/ui/label.tsx:29:6:
+      29 │ const Label = React.forwardRef<
+         ╵       ~~~~~
+
+  The symbol "Label" was originally declared here:
+
+    client/src/components/ui/label.tsx:11:6:
+      11 │ const Label = React.forwardRef<
+         ╵       ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Label"
+
+    client/src/components/ui/label.tsx:44:9:
+      44 │ export { Label };
+         ╵          ~~~~~
+
+  The name "Label" was originally exported here:
+
+    client/src/components/ui/label.tsx:24:9:
+      24 │ export { Label };
+         ╵          ~~~~~
+
+
+✘ [ERROR] The symbol "Separator" has already been declared
+
+    client/src/components/ui/separator.tsx:34:6:
+      34 │ const Separator = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+  The symbol "Separator" was originally declared here:
+
+    client/src/components/ui/separator.tsx:6:6:
+      6 │ const Separator = React.forwardRef<
+        ╵       ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Separator"
+
+    client/src/components/ui/separator.tsx:52:9:
+      52 │ export { Separator };
+         ╵          ~~~~~~~~~
+
+  The name "Separator" was originally exported here:
+
+    client/src/components/ui/separator.tsx:29:9:
+      29 │ export { Separator }
+         ╵          ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Switch" has already been declared
+
+    client/src/components/ui/switch.tsx:32:6:
+      32 │ const Switch = React.forwardRef<
+         ╵       ~~~~~~
+
+  The symbol "Switch" was originally declared here:
+
+    client/src/components/ui/switch.tsx:6:6:
+      6 │ const Switch = React.forwardRef<
+        ╵       ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Switch"
+
+    client/src/components/ui/switch.tsx:53:9:
+      53 │ export { Switch };
+         ╵          ~~~~~~
+
+  The name "Switch" was originally exported here:
+
+    client/src/components/ui/switch.tsx:27:9:
+      27 │ export { Switch };
+         ╵          ~~~~~~
+
+
+✘ [ERROR] The symbol "Table" has already been declared
+
+    client/src/components/ui/table.tsx:121:6:
+      121 │ const Table = React.forwardRef<
+          ╵       ~~~~~
+
+  The symbol "Table" was originally declared here:
+
+    client/src/components/ui/table.tsx:5:6:
+      5 │ const Table = React.forwardRef<
+        ╵       ~~~~~
+
+
+✘ [ERROR] The symbol "TableHeader" has already been declared
+
+    client/src/components/ui/table.tsx:135:6:
+      135 │ const TableHeader = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "TableHeader" was originally declared here:
+
+    client/src/components/ui/table.tsx:19:6:
+      19 │ const TableHeader = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableBody" has already been declared
+
+    client/src/components/ui/table.tsx:143:6:
+      143 │ const TableBody = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableBody" was originally declared here:
+
+    client/src/components/ui/table.tsx:27:6:
+      27 │ const TableBody = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableFooter" has already been declared
+
+    client/src/components/ui/table.tsx:155:6:
+      155 │ const TableFooter = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "TableFooter" was originally declared here:
+
+    client/src/components/ui/table.tsx:39:6:
+      39 │ const TableFooter = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableRow" has already been declared
+
+    client/src/components/ui/table.tsx:167:6:
+      167 │ const TableRow = React.forwardRef<
+          ╵       ~~~~~~~~
+
+  The symbol "TableRow" was originally declared here:
+
+    client/src/components/ui/table.tsx:54:6:
+      54 │ const TableRow = React.forwardRef<
+         ╵       ~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableHead" has already been declared
+
+    client/src/components/ui/table.tsx:182:6:
+      182 │ const TableHead = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableHead" was originally declared here:
+
+    client/src/components/ui/table.tsx:69:6:
+      69 │ const TableHead = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableCell" has already been declared
+
+    client/src/components/ui/table.tsx:197:6:
+      197 │ const TableCell = React.forwardRef<
+          ╵       ~~~~~~~~~
+
+  The symbol "TableCell" was originally declared here:
+
+    client/src/components/ui/table.tsx:84:6:
+      84 │ const TableCell = React.forwardRef<
+         ╵       ~~~~~~~~~
+
+
+✘ [ERROR] The symbol "TableCaption" has already been declared
+
+    client/src/components/ui/table.tsx:209:6:
+      209 │ const TableCaption = React.forwardRef<
+          ╵       ~~~~~~~~~~~~
+
+  The symbol "TableCaption" was originally declared here:
+
+    client/src/components/ui/table.tsx:96:6:
+      96 │ const TableCaption = React.forwardRef<
+         ╵       ~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Table"
+
+    client/src/components/ui/table.tsx:222:2:
+      222 │   Table,
+          ╵   ~~~~~
+
+  The name "Table" was originally exported here:
+
+    client/src/components/ui/table.tsx:109:2:
+      109 │   Table,
+          ╵   ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableHeader"
+
+    client/src/components/ui/table.tsx:223:2:
+      223 │   TableHeader,
+          ╵   ~~~~~~~~~~~
+
+  The name "TableHeader" was originally exported here:
+
+    client/src/components/ui/table.tsx:110:2:
+      110 │   TableHeader,
+          ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableBody"
+
+    client/src/components/ui/table.tsx:224:2:
+      224 │   TableBody,
+          ╵   ~~~~~~~~~
+
+  The name "TableBody" was originally exported here:
+
+    client/src/components/ui/table.tsx:111:2:
+      111 │   TableBody,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableFooter"
+
+    client/src/components/ui/table.tsx:225:2:
+      225 │   TableFooter,
+          ╵   ~~~~~~~~~~~
+
+  The name "TableFooter" was originally exported here:
+
+    client/src/components/ui/table.tsx:112:2:
+      112 │   TableFooter,
+          ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableHead"
+
+    client/src/components/ui/table.tsx:226:2:
+      226 │   TableHead,
+          ╵   ~~~~~~~~~
+
+  The name "TableHead" was originally exported here:
+
+    client/src/components/ui/table.tsx:113:2:
+      113 │   TableHead,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableRow"
+
+    client/src/components/ui/table.tsx:227:2:
+      227 │   TableRow,
+          ╵   ~~~~~~~~
+
+  The name "TableRow" was originally exported here:
+
+    client/src/components/ui/table.tsx:114:2:
+      114 │   TableRow,
+          ╵   ~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableCell"
+
+    client/src/components/ui/table.tsx:228:2:
+      228 │   TableCell,
+          ╵   ~~~~~~~~~
+
+  The name "TableCell" was originally exported here:
+
+    client/src/components/ui/table.tsx:115:2:
+      115 │   TableCell,
+          ╵   ~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "TableCaption"
+
+    client/src/components/ui/table.tsx:229:2:
+      229 │   TableCaption,
+          ╵   ~~~~~~~~~~~~
+
+  The name "TableCaption" was originally exported here:
+
+    client/src/components/ui/table.tsx:116:2:
+      116 │   TableCaption,
+          ╵   ~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "ToastProvider" has already been declared
+
+    client/src/components/ui/toast.tsx:133:6:
+      133 │ const ToastProvider = ToastPrimitives.Provider;
+          ╵       ~~~~~~~~~~~~~
+
+  The symbol "ToastProvider" was originally declared here:
+
+    client/src/components/ui/toast.tsx:8:6:
+      8 │ const ToastProvider = ToastPrimitives.Provider
+        ╵       ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "ToastViewport" has already been declared
+
+    client/src/components/ui/toast.tsx:135:6:
+      135 │ const ToastViewport = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~
+
+  The symbol "ToastViewport" was originally declared here:
+
+    client/src/components/ui/toast.tsx:10:6:
+      10 │ const ToastViewport = React.forwardRef<
+         ╵       ~~~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "Toast" has already been declared
+
+    client/src/components/ui/toast.tsx:150:6:
+      150 │ const Toast = React.forwardRef<
+          ╵       ~~~~~
+
+  The symbol "Toast" was originally declared here:
+
+    client/src/components/ui/toast.tsx:41:6:
+      41 │ const Toast = React.forwardRef<
+         ╵       ~~~~~
+
+
+✘ [ERROR] The symbol "ToastAction" has already been declared
+
+    client/src/components/ui/toast.tsx:174:6:
+      174 │ const ToastAction = React.forwardRef<
+          ╵       ~~~~~~~~~~~
+
+  The symbol "ToastAction" was originally declared here:
+
+    client/src/components/ui/toast.tsx:56:6:
+      56 │ const ToastAction = React.forwardRef<
+         ╵       ~~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "ToastClose" has already been declared
+
+    client/src/components/ui/toast.tsx:189:6:
+      189 │ const ToastClose = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "ToastClose" was originally declared here:
+
+    client/src/components/ui/toast.tsx:71:6:
+      71 │ const ToastClose = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "ToastTitle" has already been declared
+
+    client/src/components/ui/toast.tsx:207:6:
+      207 │ const ToastTitle = React.forwardRef<
+          ╵       ~~~~~~~~~~
+
+  The symbol "ToastTitle" was originally declared here:
+
+    client/src/components/ui/toast.tsx:89:6:
+      89 │ const ToastTitle = React.forwardRef<
+         ╵       ~~~~~~~~~~
+
+
+✘ [ERROR] The symbol "ToastDescription" has already been declared
+
+    client/src/components/ui/toast.tsx:219:6:
+      219 │ const ToastDescription = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~~~~
+
+  The symbol "ToastDescription" was originally declared here:
+
+    client/src/components/ui/toast.tsx:101:6:
+      101 │ const ToastDescription = React.forwardRef<
+          ╵       ~~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Toast"
+
+    client/src/components/ui/toast.tsx:236:2:
+      236 │   Toast,
+          ╵   ~~~~~
+
+  The name "Toast" was originally exported here:
+
+    client/src/components/ui/toast.tsx:122:2:
+      122 │   Toast,
+          ╵   ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastAction"
+
+    client/src/components/ui/toast.tsx:237:2:
+      237 │   ToastAction,
+          ╵   ~~~~~~~~~~~
+
+  The name "ToastAction" was originally exported here:
+
+    client/src/components/ui/toast.tsx:126:2:
+      126 │   ToastAction,
+          ╵   ~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastClose"
+
+    client/src/components/ui/toast.tsx:238:2:
+      238 │   ToastClose,
+          ╵   ~~~~~~~~~~
+
+  The name "ToastClose" was originally exported here:
+
+    client/src/components/ui/toast.tsx:125:2:
+      125 │   ToastClose,
+          ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastDescription"
+
+    client/src/components/ui/toast.tsx:239:2:
+      239 │   ToastDescription,
+          ╵   ~~~~~~~~~~~~~~~~
+
+  The name "ToastDescription" was originally exported here:
+
+    client/src/components/ui/toast.tsx:124:2:
+      124 │   ToastDescription,
+          ╵   ~~~~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastProvider"
+
+    client/src/components/ui/toast.tsx:240:2:
+      240 │   ToastProvider,
+          ╵   ~~~~~~~~~~~~~
+
+  The name "ToastProvider" was originally exported here:
+
+    client/src/components/ui/toast.tsx:120:2:
+      120 │   ToastProvider,
+          ╵   ~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastTitle"
+
+    client/src/components/ui/toast.tsx:241:2:
+      241 │   ToastTitle,
+          ╵   ~~~~~~~~~~
+
+  The name "ToastTitle" was originally exported here:
+
+    client/src/components/ui/toast.tsx:123:2:
+      123 │   ToastTitle,
+          ╵   ~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "ToastViewport"
+
+    client/src/components/ui/toast.tsx:242:2:
+      242 │   ToastViewport,
+          ╵   ~~~~~~~~~~~~~
+
+  The name "ToastViewport" was originally exported here:
+
+    client/src/components/ui/toast.tsx:121:2:
+      121 │   ToastViewport,
+          ╵   ~~~~~~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "Toaster"
+
+    client/src/components/ui/toaster.tsx:37:16:
+      37 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  The name "Toaster" was originally exported here:
+
+    client/src/components/ui/toaster.tsx:11:16:
+      11 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+
+✘ [ERROR] The symbol "Toaster" has already been declared
+
+    client/src/components/ui/toaster.tsx:37:16:
+      37 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  The symbol "Toaster" was originally declared here:
+
+    client/src/components/ui/toaster.tsx:11:16:
+      11 │ export function Toaster() {
+         ╵                 ~~~~~~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    client/src/components/ui/toaster.tsx:37:0:
+      37 │ export function Toaster() {
+         ╵ ~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "useAuth"
+
+    client/src/hooks/use-auth.ts:170:13:
+      170 │ export const useAuth = () => {
+          ╵              ~~~~~~~
+
+  The name "useAuth" was originally exported here:
+
+    client/src/hooks/use-auth.ts:20:16:
+      20 │ export function useAuth() {
+         ╵                 ~~~~~~~
+
+
+✘ [ERROR] The symbol "useAuth" has already been declared
+
+    client/src/hooks/use-auth.ts:170:13:
+      170 │ export const useAuth = () => {
+          ╵              ~~~~~~~
+
+  The symbol "useAuth" was originally declared here:
+
+    client/src/hooks/use-auth.ts:20:16:
+      20 │ export function useAuth() {
+         ╵                 ~~~~~~~
+
+
+✘ [ERROR] The symbol "toast" has already been declared
+
+    client/src/hooks/use-toast.ts:192:9:
+      192 │ import { toast } from "../components/ui/toast";
+          ╵          ~~~~~
+
+  The symbol "toast" was originally declared here:
+
+    client/src/hooks/use-toast.ts:142:9:
+      142 │ function toast({ ...props }: Toast) {
+          ╵          ~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "useToast"
+
+    client/src/hooks/use-toast.ts:194:13:
+      194 │ export const useToast = () => {
+          ╵              ~~~~~~~~
+
+  The name "useToast" was originally exported here:
+
+    client/src/hooks/use-toast.ts:191:9:
+      191 │ export { useToast, toast }
+          ╵          ~~~~~~~~
+
+
+✘ [ERROR] The symbol "useToast" has already been declared
+
+    client/src/hooks/use-toast.ts:194:13:
+      194 │ export const useToast = () => {
+          ╵              ~~~~~~~~
+
+  The symbol "useToast" was originally declared here:
+
+    client/src/hooks/use-toast.ts:171:9:
+      171 │ function useToast() {
+          ╵          ~~~~~~~~
+
+
+✘ [ERROR] Multiple exports with the same name "cn"
+
+    client/src/lib/utils.ts:59:16:
+      59 │ export function cn(...inputs: ClassValue[]) {
+         ╵                 ~~
+
+  The name "cn" was originally exported here:
+
+    client/src/lib/utils.ts:5:16:
+      5 │ export function cn(...inputs: ClassValue[]) {
+        ╵                 ~~
+
+
+✘ [ERROR] The symbol "cn" has already been declared
+
+    client/src/lib/utils.ts:59:16:
+      59 │ export function cn(...inputs: ClassValue[]) {
+         ╵                 ~~
+
+  The symbol "cn" was originally declared here:
+
+    client/src/lib/utils.ts:5:16:
+      5 │ export function cn(...inputs: ClassValue[]) {
+        ╵                 ~~
+
+  Duplicate top-level function declarations are not allowed in an ECMAScript module. This file is considered to be an ECMAScript module because of the "export" keyword here:
+
+    client/src/lib/utils.ts:59:0:
+      59 │ export function cn(...inputs: ClassValue[]) {
